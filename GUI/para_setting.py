@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QPushButt
 from importlib.resources import path
 import GUI.qss
 import GUI.picture
+import GUI.data
 
 from .component import BannerWidget, ParaTable
 
@@ -36,3 +37,6 @@ class ParaSetting(ScrollArea):
         with path(GUI.qss, "para_setting.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
+    
+    
+                    

@@ -29,7 +29,7 @@ class MainWindow(FluentWindow):
     def initWindow(self):
         
         self.setWindowTitle("SWAT-UQ")
-        self.resize(1024, 768)
+        self.resize(1200, 768)
         
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
