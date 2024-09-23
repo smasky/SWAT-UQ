@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from importlib.resources import path
 import GUI.qss
 
-from .link_card import LinkCardView
-
 class BannerWidget(QWidget):
     """Banner widget of HomePage"""
 
@@ -17,12 +15,12 @@ class BannerWidget(QWidget):
         
         self.galleryLabel = QLabel(self);self.galleryLabel.setObjectName('galleryLabel')
         self.banner = QPixmap('')
-        self.linkCard=LinkCardView()
+        # self.linkCard=LinkCardView()
         
         self.vBoxLayout.addWidget(self.galleryLabel)
         self.vBoxLayout.addSpacing(10)
-        self.vBoxLayout.addWidget(self.linkCard)
-        self.vBoxLayout.addStretch(1)
+        # self.vBoxLayout.addWidget(self.linkCard)
+        # self.vBoxLayout.addStretch(1)
         
         self.vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -31,12 +29,18 @@ class BannerWidget(QWidget):
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
     
-    def addCard(self, icon, title, content, url):
-        self.linkCard.addCard(icon, title, content, url)
+    # def deleteLink(self):
+    #     self.vBoxLayout.removeWidget(self.linkCard)
+    
+    # def addCard(self, icon, title, content, url):
+    #     self.linkCard.addCard(icon, title, content, url)
     
     def addWidget(self,widget):
         self.vBoxLayout.addWidget(widget)
-        
+    
+    def insertWidget(self,index,widget):
+        self.vBoxLayout.insertWidget(index,widget)
+    
     def setTitle(self,text):
         self.galleryLabel.setText(text)
         

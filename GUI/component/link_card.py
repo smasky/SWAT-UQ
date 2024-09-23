@@ -20,7 +20,7 @@ class LinkCard(QFrame):
         self.contentLabel = QLabel(TextWrap.wrap(content, 28, False)[0], self)
 
         self.__initWidget()
-
+        
     def __initWidget(self):
         
         self.setCursor(Qt.PointingHandCursor)

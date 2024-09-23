@@ -4,3 +4,7 @@ BannerWidget > #galleryLabel {
     color: black;
     padding-left: 28px;
 }
+
+/* BannerWidget{
+    background-color: red;
+} */
