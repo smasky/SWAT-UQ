@@ -1,7 +1,6 @@
 .history
 .vscode
 build
-GUI
 result.json
 dist
 UQPyL.egg-info
