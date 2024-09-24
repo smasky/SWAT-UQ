@@ -65,6 +65,7 @@ class GetStart(ScrollArea):
             Project.projectName=newPro.projectName
             Project.projectPath=newPro.projectPath
             Project.swatPath=newPro.swatPath
+            self.activateBtn()
     
     def click_open_project(self):
         
@@ -74,7 +75,8 @@ class GetStart(ScrollArea):
         
         if res==Dialog.Accepted:
             Project.projectPath=openPro.projectPath
-    
+            self.activateBtn()
+            
     def click_examples(self):
         
         url=QUrl("https://github.com/smasky/SWAT-UQ")
@@ -85,7 +87,11 @@ class GetStart(ScrollArea):
         url=QUrl("https://github.com/smasky/SWAT-UQ/issues")
         QDesktopServices.openUrl(url)
         
+    def activateBtn(self):
         
+        btnSets=Project.btnSets
+        for btn in btnSets[1:]:
+            btn.setEnabled(True)
         
         
 

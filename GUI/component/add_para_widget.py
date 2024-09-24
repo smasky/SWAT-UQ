@@ -1,16 +1,14 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton
-from qfluentwidgets import TreeWidget
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
+from qfluentwidgets import BodyLabel, PushButton,  PrimaryPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 
 from .double_tree_widget import DoubleTreeWidget
 
+
 class AddParaWidget(FramelessDialog):
     
-    
-    
-    def __init__(self, options, parent=None):
+    def __init__(self, options, selected=None, parent=None):
         
         super().__init__(parent)
         self.selected={}
@@ -18,8 +16,7 @@ class AddParaWidget(FramelessDialog):
         label=BodyLabel(self.tr("Parameter Selection"), self)
         self.vBoxLayout.addWidget(label)
         
-        # options={"hru": ['1', '2', '3'], "rte": ['2', '3', '4']}
-        self.contentWidget=DoubleTreeWidget(options, self)
+        self.contentWidget=DoubleTreeWidget(options, selected, self)
         self.vBoxLayout.addWidget(self.contentWidget)
         
         self.buttonGroup=QWidget(self)

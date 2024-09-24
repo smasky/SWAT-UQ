@@ -1,14 +1,18 @@
 from qfluentwidgets import FluentWindow
 from qfluentwidgets import FluentIcon as FIF
 from PyQt5.QtWidgets import QApplication
-
+from PyQt5.QtCore import Qt
 from .get_start import GetStart
 from .para_setting import ParaSetting
 from .pro_define import ProDefine
-
+from .project import Project as Pro
 class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
+        ########data###########
+        Pro.loadParaList()
+        
+        
         
         self.initWindow()
 
@@ -22,13 +26,15 @@ class MainWindow(FluentWindow):
         self.pro_define.setObjectName("ProDefine")
         
         self.initNavigation()
-    
+
+
+        
     def initNavigation(self):
         
-        self.addSubInterface(self.get_start, FIF.HOME, self.tr('Get Start'))
+        btn=self.addSubInterface(self.get_start, FIF.HOME, self.tr('Get Start'));Pro.btnSets.append(btn)
         self.navigationInterface.addSeparator()
-        self.addSubInterface(self.para_setting, FIF.LABEL, self.tr('Parameter Setting'))
-        self.addSubInterface(self.pro_define, FIF.TILES, self.tr("Problem Define"))
+        btn=self.addSubInterface(self.para_setting, FIF.LABEL, self.tr('Parameter Setting'));Pro.btnSets.append(btn); btn.setEnabled(False)
+        btn=self.addSubInterface(self.pro_define, FIF.TILES, self.tr("Problem Define"));Pro.btnSets.append(btn); btn.setEnabled(False)
         self.navigationInterface.addSeparator()
         
     def initWindow(self):

@@ -2,7 +2,7 @@ from qframelesswindow import FramelessDialog
 from qfluentwidgets import BodyLabel, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-
+from ..project import Project as Pro
 class NewProject(FramelessDialog):
     projectName=None
     projectPath=None
@@ -65,9 +65,11 @@ class NewProject(FramelessDialog):
     
     def confirm_clicked(self):
         
-        self.projectName=self.nameEdit.text()
-        self.projectPath=self.pathEdit.text()
-        self.swatPath=self.swatPathEdit.text()
+        Pro.projectName=self.nameEdit.text()
+        Pro.projectPath=self.pathEdit.text()
+        Pro.swatPath=self.swatPathEdit.text()
+        
+        Pro.initialize()
         
         self.accept()
     

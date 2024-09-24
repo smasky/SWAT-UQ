@@ -5,11 +5,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
 class DoubleTreeWidget(QWidget):
-    def __init__(self, options, parent=None):
+    def __init__(self, options, selected, parent=None):
         super().__init__(parent)
         self.options=options
         self.initUI()
         
+        if selected is not None:
+            self.populateTree(self.targetTree, selected)
+            
         self.sourceTree.header().setStyleSheet("QHeaderView::section { color: black; }")
         self.targetTree.header().setStyleSheet("QHeaderView::section { color: black; }")
         
@@ -18,7 +21,7 @@ class DoubleTreeWidget(QWidget):
 
         self.sourceTree = TreeWidget()
         self.sourceTree.setHeaderLabel("Source Parameters")
-        self.populateSourceTree()
+        self.populateTree(self.sourceTree, self.options)
 
         self.targetTree = TreeWidget()
         self.targetTree.setHeaderLabel("Target Parameters")
@@ -41,19 +44,19 @@ class DoubleTreeWidget(QWidget):
         self.setLayout(layout)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-    def populateSourceTree(self):
+    def populateTree(self, widget, content):
         """为 Source 树结构添加参数项目"""
-        keys=list(self.options.keys())
+        keys=list(content.keys())
         rootItems={}
         for key in keys:
-            rootItem=QTreeWidgetItem(self.sourceTree, [key])
+            rootItem=QTreeWidgetItem(widget, [key])
             rootItems[key]=rootItem
 
         for rootItem in rootItems.values():
             rootItem.setFlags(rootItem.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             rootItem.setCheckState(0, Qt.Unchecked)
 
-        for key, value in self.options.items():
+        for key, value in content.items():
             self.addChildItems(rootItems[key], value)
     
     def addChildItems(self, parent, children):

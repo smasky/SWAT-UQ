@@ -9,6 +9,7 @@ class LineBox(LineEdit):
     def __init__(self, options, parent=None):
         super().__init__(parent)
         self.options = options
+        self.data=None
         self.isSelected = False
         self.setPlaceholderText("all or click to change")
         
@@ -17,10 +18,22 @@ class LineBox(LineEdit):
         # super().focusInEvent(event)
         if self.isSelected is False:
             self.isSelected=True
-            dialog=AddParaWidget(self.options, self)
-            dialog.exec()
-            text=self.generateText(dialog.selected)
-            self.setText(text)
+            
+            dialog=AddParaWidget(self.options, self.data, self)
+            res=dialog.exec()
+            
+            if res==Dialog.Accepted:
+                text=self.generateText(dialog.selected)
+                self.setText(text)
+                selected={}
+                text=self.text()
+                sets=text.split("|")
+                for set in sets:
+                    ele=set.split("(")
+                    selected[ele[0]]=ele[1].strip(")").split(",")
+                    
+                self.data=selected
+                
             self.isSelected=False
             self.clearFocus()
       
@@ -29,6 +42,6 @@ class LineBox(LineEdit):
         tmp=[]
         for key, values in selected.items():
             tmp.append(key+"("+",".join(values)+")")
-        text=",".join(tmp)
+        text="|".join(tmp)
         return text
 

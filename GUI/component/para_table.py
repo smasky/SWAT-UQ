@@ -1,6 +1,6 @@
 from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton
 
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame, QFileDialog
 from PyQt5.QtCore import Qt
 
 import GUI.qss
@@ -9,13 +9,12 @@ from importlib.resources import path
 
 from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
-
+from ..project import Project as Pro
 class ParaTable(QFrame):
     
     def __init__(self, parent=None):
         
         super().__init__(parent)
-        self.loadParaList()
         
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
@@ -25,7 +24,7 @@ class ParaTable(QFrame):
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
         importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(30); 
-        self.importButton=importButton
+        self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(30); 
         self.addButton=addButton; addButton.clicked.connect(self.addPara)
@@ -49,8 +48,8 @@ class ParaTable(QFrame):
             self.tr('Parameter Name'), self.tr('File Extension'), self.tr('Tuning Mode'),
             self.tr('Lower Bound'), self.tr('Upper Bound'), self.tr('   Position (SUB-HRU)   '), self.tr('Operation')])
         
-        self.generateButton=PrimaryPushButton("Generate Parameter File (.par)", self)
-        self.generateButton.setMaximumWidth(500)
+        self.generateButton=PrimaryPushButton("Save To Parameter File (.par)", self)
+        self.generateButton.setMaximumWidth(500); self.generateButton.clicked.connect(self.saveParFile)
         self.vBoxLayout.addWidget(self.generateButton)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
@@ -61,7 +60,7 @@ class ParaTable(QFrame):
         self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
         
     def addPara(self):
-        dialog=AddParaWidget(self.paraList, self)
+        dialog=AddParaWidget(Pro.paraList, parent=self)
         dialog.exec()
         
         selected=dialog.selected
@@ -72,14 +71,34 @@ class ParaTable(QFrame):
                 self.table.addRow(text)
         
         self.table.repaint()
-                
-    def loadParaList(self):
-        self.paraList={}
-        with path(GUI.data, "parameter_list.txt") as para_list_path:
-            with open(str(para_list_path), 'r') as f:
-                lines=f.readlines()
-                for line in lines:
-                    txt=line.split()
-                    self.paraList.setdefault(txt[0], []).append(txt[1])
+    
+    def importParaFile(self):
+        
+        path, success= QFileDialog.getOpenFileName(self, "Import Parameter File", "", "Parameter File (*.par)")
+        if success:
+            Infos=Pro.importParaFromFile(path)
+        
+            for paraInfo in Infos:
+                self.table.addRow(paraInfo)
+                self.table.repaint()
+    
+    def saveParFile(self):
+        Infos=[]
+        
+        rows=self.table.rowCount()
+        for i in range(rows):
+            paraName=self.table.item(i, 0).text()
+            # fileExtension=self.table.item(i, 1).text()
+            tuningMode=Pro.INVERSETUNEMODE[self.table.cellWidget(i, 2).core.currentIndex()]
+            lowerBound=str(self.table.cellWidget(i, 3).core.value())
+            upperBound=str(self.table.cellWidget(i, 4).core.value())
+            position=self.table.cellWidget(i, 5).core.text()
+            Infos.append([paraName, tuningMode, lowerBound, upperBound, position])
+
+        Pro.paraInfos=Infos
+        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.par)")
+        if success:
+            Pro.saveParaFile(path)
+    
         
         
