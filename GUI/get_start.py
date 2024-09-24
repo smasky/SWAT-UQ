@@ -1,17 +1,15 @@
 from qfluentwidgets import ScrollArea, FluentIcon, Dialog
-from qframelesswindow import FramelessWindow, FramelessDialog
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QPushButton
-from PyQt5.QtCore import Qt, pyqtSignal, QUrl
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
-
 from importlib.resources import path
+
 import GUI.qss
 import GUI.picture
-
 from .component import BannerWidget, NewProject, OpenProject, LinkCardView
-
+from .project import Project
 class GetStart(ScrollArea):
-    projectName=None; projectPath=None; swatPath=None
+    
     def __init__(self, parent=None):
         
         super().__init__(parent)
@@ -64,9 +62,9 @@ class GetStart(ScrollArea):
         res=newPro.exec()
         
         if res==Dialog.Accepted:
-            self.projectName=newPro.projectName
-            self.projectPath=newPro.projectPath
-            self.swatPath=newPro.swatPath
+            Project.projectName=newPro.projectName
+            Project.projectPath=newPro.projectPath
+            Project.swatPath=newPro.swatPath
     
     def click_open_project(self):
         
@@ -75,8 +73,7 @@ class GetStart(ScrollArea):
         res=openPro.exec()
         
         if res==Dialog.Accepted:
-            self.projectPath=openPro.projectPath
-            #trigger load project Path
+            Project.projectPath=openPro.projectPath
     
     def click_examples(self):
         

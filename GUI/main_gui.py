@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication
 
 from .get_start import GetStart
 from .para_setting import ParaSetting
+from .pro_define import ProDefine
 
 class MainWindow(FluentWindow):
     def __init__(self):
@@ -17,6 +18,8 @@ class MainWindow(FluentWindow):
         self.para_setting = ParaSetting(self)
         self.para_setting.setObjectName("ParaSetting")
         
+        self.pro_define = ProDefine(self)
+        self.pro_define.setObjectName("ProDefine")
         
         self.initNavigation()
     
@@ -24,8 +27,10 @@ class MainWindow(FluentWindow):
         
         self.addSubInterface(self.get_start, FIF.HOME, self.tr('Get Start'))
         self.navigationInterface.addSeparator()
-        self.addSubInterface(self.para_setting, FIF.LABEL, self.tr('Parameter Settings'))
-    
+        self.addSubInterface(self.para_setting, FIF.LABEL, self.tr('Parameter Setting'))
+        self.addSubInterface(self.pro_define, FIF.TILES, self.tr("Problem Define"))
+        self.navigationInterface.addSeparator()
+        
     def initWindow(self):
         
         self.setWindowTitle("SWAT-UQ")

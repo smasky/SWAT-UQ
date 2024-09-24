@@ -7,7 +7,7 @@ import GUI.qss
 import GUI.data
 from importlib.resources import path
 
-from .table_widget_pro import TableWidgetPro
+from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
 
 class ParaTable(QFrame):
@@ -20,14 +20,14 @@ class ParaTable(QFrame):
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
         
-        label=StrongBodyLabel("Parameter List")
+        label=StrongBodyLabel("Parameter Information List")
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(24); 
+        importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(30); 
         self.importButton=importButton
         
-        addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(24); 
+        addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(30); 
         self.addButton=addButton; addButton.clicked.connect(self.addPara)
         
         hBoxLayout=QHBoxLayout(); hBoxLayout.addWidget(importButton);hBoxLayout.addStretch(2)
@@ -35,21 +35,21 @@ class ParaTable(QFrame):
         
         self.vBoxLayout.addLayout(hBoxLayout)
         
-        self.table=TableWidgetPro(self); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table=TableWidgetPara(self); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.table.setObjectName("contentTable")
         self.vBoxLayout.addWidget(self.table)
         
-        self.table.verticalHeader()
+        # self.table.verticalHeader()
         self.table.setBorderRadius(8)
         self.table.setBorderVisible(True)
 
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
-            self.tr('Par. Name'), self.tr('File Ext.'), self.tr('Tuning Mode'),
+            self.tr('Parameter Name'), self.tr('File Extension'), self.tr('Tuning Mode'),
             self.tr('Lower Bound'), self.tr('Upper Bound'), self.tr('   Position (SUB-HRU)   '), self.tr('Operation')])
         
-        self.generateButton=PrimaryPushButton("Generate Para. File (.par)", self)
+        self.generateButton=PrimaryPushButton("Generate Parameter File (.par)", self)
         self.generateButton.setMaximumWidth(500)
         self.vBoxLayout.addWidget(self.generateButton)
         

@@ -10,7 +10,7 @@ class LineBox(LineEdit):
         super().__init__(parent)
         self.options = options
         self.isSelected = False
-        self.setPlaceholderText("Click to select id")
+        self.setPlaceholderText("all or click to change")
         
     def focusInEvent(self, event):
         """当 QLineEdit 获得焦点时显示 QComboBox 并展开"""

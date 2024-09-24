@@ -12,6 +12,7 @@ class DoubleTreeWidget(QWidget):
         
         self.sourceTree.header().setStyleSheet("QHeaderView::section { color: black; }")
         self.targetTree.header().setStyleSheet("QHeaderView::section { color: black; }")
+        
     def initUI(self):
         layout = QHBoxLayout()
 
@@ -74,6 +75,12 @@ class DoubleTreeWidget(QWidget):
         for i in range(sourceRoot.childCount()):
             sourceChild = sourceRoot.child(i)
 
+            if not self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0) and sourceChild.childCount()==0:
+                if sourceChild.checkState(0) == Qt.Checked:
+                    child = QTreeWidgetItem(self.targetTree, [sourceChild.text(0)])
+                    child.setFlags(child.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
+                    child.setCheckState(0, Qt.Unchecked)
+            
             for j in range(sourceChild.childCount()):
                 subChild = sourceChild.child(j)
                 if subChild.checkState(0) == Qt.Checked:
