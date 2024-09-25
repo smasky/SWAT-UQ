@@ -54,17 +54,19 @@ class ObjTable(QFrame):
             self.tr('Obj Type'), self.tr('Variable'), self.tr('Weight'), 
             self.tr('Operation')])
         
-        self.generateButton=PrimaryPushButton("Generate Objective File (.obj)", self)
+        self.generateButton=PrimaryPushButton("Save to Objective File (.obj)", self)
         self.generateButton.setMaximumWidth(500)
         self.vBoxLayout.addWidget(self.generateButton)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
         self.vBoxLayout.setContentsMargins(10, 10, 10, 10)
         
+        #qss
         with path(GUI.qss, "obj_table.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-                
+        self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
+        
     def addPro(self):
         
         dialog=AddProWidget(self.default, self)

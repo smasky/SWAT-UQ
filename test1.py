@@ -1,132 +1,135 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-                             QTreeWidget, QTreeWidgetItem, QPushButton)
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt5.QtGui import QPainter, QPen, QColor, QIcon
+from PyQt5.QtCore import Qt, QSize
 
+class StepButton(QPushButton):
+    def __init__(self, text, icon_path=None, parent=None):
+        super().__init__(text, parent)
+        self.setCheckable(True)
+        self.setMinimumSize(QSize(80, 80))
+        if icon_path:
+            self.setIcon(QIcon(icon_path))
+            self.setIconSize(QSize(40, 40))
+        self.setStyleSheet(self.default_style())
 
-class ParameterSelectionWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
+    def set_complete(self):
+        self.setStyleSheet(self.complete_style())
 
-    def initUI(self):
-        # 主布局
-        layout = QHBoxLayout()
+    def set_current(self):
+        self.setStyleSheet(self.current_style())
 
-        # 左侧树控件 (Source)
-        self.sourceTree = QTreeWidget()
-        self.sourceTree.setHeaderLabel("Source Parameters")
-        self.sourceTree.setColumnCount(1)
-        self.populateSourceTree()
-        # 设置左侧树表头字体颜色为黑色并添加黑色边框
-        self.sourceTree.header().setStyleSheet("QHeaderView::section { color: black; }")
-        self.sourceTree.setStyleSheet("QTreeWidget { border: 1px solid black; }")
+    def set_incomplete(self):
+        self.setStyleSheet(self.default_style())
 
-        # 右侧树控件 (Target)
-        self.targetTree = QTreeWidget()
-        self.targetTree.setHeaderLabel("Target Parameters")
-        self.targetTree.setColumnCount(1)
-        # 设置右侧树表头字体颜色为黑色并添加黑色边框
-        self.targetTree.header().setStyleSheet("QHeaderView::section { color: black; }")
-        self.targetTree.setStyleSheet("QTreeWidget { border: 1px solid black; }")
+    def default_style(self):
+        return """
+        QPushButton {
+            background-color: lightgrey;
+            border-radius: 40px;
+            border: 2px solid grey;
+        }
+        """
 
-        # 中间控制按钮
-        btnLayout = QVBoxLayout()
-        self.btnToRight = QPushButton(">")
-        self.btnToLeft = QPushButton("<")
-        btnLayout.addStretch()
-        btnLayout.addWidget(self.btnToRight)
-        btnLayout.addWidget(self.btnToLeft)
-        btnLayout.addStretch()
+    def complete_style(self):
+        return """
+        QPushButton {
+            background-color: green;
+            border-radius: 40px;
+            border: 2px solid green;
+        }
+        """
 
-        self.btnToRight.clicked.connect(self.moveToRight)
-        self.btnToLeft.clicked.connect(self.removeSelectedFromTarget)
+    def current_style(self):
+        return """
+        QPushButton {
+            background-color: blue;
+            border-radius: 40px;
+            border: 2px solid blue;
+        }
+        """
 
-        # 设置布局
-        layout.addWidget(self.sourceTree)
-        layout.addLayout(btnLayout)
-        layout.addWidget(self.targetTree)
+class StepProgressWidget(QWidget):
+    def __init__(self, steps, parent=None):
+        super().__init__(parent)
+        self.steps = steps
+        self.current_step = 0
+        self.init_ui()
 
-        self.setLayout(layout)
-        self.setWindowTitle('Parameter Selection with Tree and Checkboxes')
-        self.resize(800, 600)
+    def init_ui(self):
+        self.layout = QHBoxLayout(self)
+        
+        for i, step in enumerate(self.steps):
+            button = StepButton(step['name'], step['icon'])
+            button.clicked.connect(lambda checked, idx=i: self.on_step_clicked(idx))
+            self.layout.addWidget(button)
 
-    def populateSourceTree(self):
-        """Populate the source tree with some example data"""
-        parent1 = QTreeWidgetItem(self.sourceTree, ['Parent 1'])
-        parent1.setFlags(parent1.flags() | Qt.ItemIsUserCheckable)
-        parent1.setCheckState(0, Qt.Unchecked)
-        child1 = QTreeWidgetItem(parent1, ['Child 1'])
-        child1.setFlags(child1.flags() | Qt.ItemIsUserCheckable)
-        child1.setCheckState(0, Qt.Unchecked)
-        child2 = QTreeWidgetItem(parent1, ['Child 2'])
-        child2.setFlags(child2.flags() | Qt.ItemIsUserCheckable)
-        child2.setCheckState(0, Qt.Unchecked)
-
-        parent2 = QTreeWidgetItem(self.sourceTree, ['Parent 2'])
-        parent2.setFlags(parent2.flags() | Qt.ItemIsUserCheckable)
-        parent2.setCheckState(0, Qt.Unchecked)
-        child3 = QTreeWidgetItem(parent2, ['Child 3'])
-        child3.setFlags(child3.flags() | Qt.ItemIsUserCheckable)
-        child3.setCheckState(0, Qt.Unchecked)
-
-        self.sourceTree.expandAll()
-
-    def moveToRight(self):
-        """Move selected items from source tree to target tree"""
-        selectedItems = self.sourceTree.selectedItems()
-
-        for item in selectedItems:
-            if item.parent() is None:
-                # 这是一级标题
-                parentText = item.text(0)
-                existingItems = self.targetTree.findItems(parentText, Qt.MatchExactly, 0)
-
-                if not existingItems:
-                    # 如果目标树没有这个一级标题，则创建
-                    parentClone = QTreeWidgetItem(self.targetTree, [parentText])
-                    parentClone.setFlags(parentClone.flags() | Qt.ItemIsUserCheckable)
-                    parentClone.setCheckState(0, item.checkState(0))
-                    self.copyChildren(item, parentClone)
-                else:
-                    # 如果已存在，则将子项加入现有的一级标题
-                    existingParent = existingItems[0]
-                    self.copyChildren(item, existingParent)
+            if i < self.current_step:
+                button.set_complete()
+            elif i == self.current_step:
+                button.set_current()
+                button.setChecked(True)
             else:
-                # 子项需要找到对应的父项进行添加
-                parentItem = item.parent()
-                parentText = parentItem.text(0)
-                existingParents = self.targetTree.findItems(parentText, Qt.MatchExactly, 0)
+                button.set_incomplete()
 
-                if existingParents:
-                    parentClone = existingParents[0]
-                    childClone = QTreeWidgetItem(parentClone, [item.text(0)])
-                    childClone.setFlags(childClone.flags() | Qt.ItemIsUserCheckable)
-                    childClone.setCheckState(0, item.checkState(0))
+        self.setLayout(self.layout)
 
-    def copyChildren(self, sourceItem, targetItem):
-        """递归复制子项"""
-        for i in range(sourceItem.childCount()):
-            sourceChild = sourceItem.child(i)
-            existingChildren = [targetItem.child(j).text(0) for j in range(targetItem.childCount())]
-            if sourceChild.text(0) not in existingChildren:
-                childClone = QTreeWidgetItem(targetItem, [sourceChild.text(0)])
-                childClone.setFlags(childClone.flags() | Qt.ItemIsUserCheckable)
-                childClone.setCheckState(0, sourceChild.checkState(0))
-                self.copyChildren(sourceChild, childClone)
+    def on_step_clicked(self, index):
+        self.current_step = index
+        self.update_lines_and_buttons()
 
-    def removeSelectedFromTarget(self):
-        """Remove selected items from target tree"""
-        selectedItems = self.targetTree.selectedItems()
-        for item in selectedItems:
-            index = self.targetTree.indexOfTopLevelItem(item)
-            if index != -1:
-                self.targetTree.takeTopLevelItem(index)
+    def update_lines_and_buttons(self):
+        for i in range(len(self.steps)):
+            button = self.layout.itemAt(i).widget()
+            if i < self.current_step:
+                button.set_complete()
+            elif i == self.current_step:
+                button.set_current()
+                button.setChecked(True)
             else:
-                item.parent().removeChild(item)
+                button.set_incomplete()
+        self.update()
 
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        pen = QPen()
+        pen.setWidth(4)
+
+        button_positions = []
+        for i in range(self.layout.count()):
+            widget = self.layout.itemAt(i).widget()
+            if widget:
+                rect = widget.geometry()
+                button_positions.append(rect.center().x())
+
+        for i in range(1, len(button_positions)):
+            if i <= self.current_step:
+                pen.setColor(QColor('green'))
+            else:
+                pen.setColor(QColor('lightgrey'))
+            painter.setPen(pen)
+            painter.drawLine(button_positions[i-1], self.height()/2, button_positions[i], self.height()/2)
 
 if __name__ == '__main__':
-    app = QApplication([])
-    window = ParameterSelectionWindow()
+    import sys
+    app = QApplication(sys.argv)
+
+    steps = [
+        {'name': '订单', 'icon': None},
+        {'name': '购物车', 'icon': None},
+        {'name': '账户信息', 'icon': None},
+        {'name': '配送', 'icon': None},
+        {'name': '支付', 'icon': None},
+    ]
+
+    window = QWidget()
+    layout = QVBoxLayout(window)
+
+    step_widget = StepProgressWidget(steps)
+    layout.addWidget(step_widget)
+
+    window.setLayout(layout)
+    window.setWindowTitle('步骤进度条')
     window.show()
-    app.exec_()
+
+    sys.exit(app.exec_())

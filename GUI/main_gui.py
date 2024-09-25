@@ -2,9 +2,12 @@ from qfluentwidgets import FluentWindow
 from qfluentwidgets import FluentIcon as FIF
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
+
 from .get_start import GetStart
 from .para_setting import ParaSetting
 from .pro_define import ProDefine
+from .sensitivity_analysis import SenAnalysis
+
 from .project import Project as Pro
 class MainWindow(FluentWindow):
     def __init__(self):
@@ -25,9 +28,10 @@ class MainWindow(FluentWindow):
         self.pro_define = ProDefine(self)
         self.pro_define.setObjectName("ProDefine")
         
+        self.sen_analysis = SenAnalysis(self)
+        self.sen_analysis.setObjectName("SenAnalysis")
+        
         self.initNavigation()
-
-
         
     def initNavigation(self):
         
@@ -36,6 +40,9 @@ class MainWindow(FluentWindow):
         btn=self.addSubInterface(self.para_setting, FIF.LABEL, self.tr('Parameter Setting'));Pro.btnSets.append(btn); btn.setEnabled(False)
         btn=self.addSubInterface(self.pro_define, FIF.TILES, self.tr("Problem Define"));Pro.btnSets.append(btn); btn.setEnabled(False)
         self.navigationInterface.addSeparator()
+        btn=self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr("Sensitivity Analysis"));Pro.btnSets.append(btn); btn.setEnabled(False)
+        
+        
         
     def initWindow(self):
         

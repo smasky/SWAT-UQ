@@ -1,0 +1,14 @@
+SAWidget{
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius:15px;
+    background-color: rgba(249, 249, 249, 0.75);
+}
+
+#contentWidget{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    padding-top: 10px;
+}
+
+#hyperStack{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
