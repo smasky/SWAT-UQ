@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QStackedWidget, QWidget, QButtonGroup
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, 
+                             QStackedWidget, QWidget, QButtonGroup, QSplitter)
 from PyQt5.QtCore import Qt
 from qfluentwidgets import BodyLabel, RadioButton, SpinBox, DoubleSpinBox, CheckBox, PrimaryPushButton, LineEdit
 
@@ -82,7 +83,8 @@ class SetupWidget(QWidget):
         hyperStack.addWidget(hyperWidget({'Z-score':{'type':'bool', 'default': 0}, 'M':{'type':'int', 'default': 4}}))
         hyperStack.addWidget(hyperWidget({'Z-score':{'type':'bool', 'default': 0}, 'numLevels':{'type':'int', 'default': 4}}))
         hyperStack.addWidget(hyperWidget({'Z-score':{'type':'bool', 'default': 0}, 'nRegion':{'type':'int', 'default': 20}}))
-        hyperStack.setCurrentIndex(0)
+        hyperStack.addWidget(QWidget())
+        hyperStack.setCurrentIndex(6)
         self.hyperStack=hyperStack
         self.btnGroup1.group.idClicked.connect(self.displayPage1)
         self.btnGroup1.group.idClicked.connect(self.enableSampling)
@@ -128,21 +130,26 @@ class FFDWidget(QWidget):
         h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(self.line1); h1.addStretch(1)
         ##################################
         
-        h2=QHBoxLayout()
-        label2=BodyLabel("Number of Sampling Points: "); self.line2=LineEdit(self); self.line2.setEnabled(False)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
         
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
+        ######
         vBoxLayout.addLayout(h1)
-        vBoxLayout.addLayout(h2)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['numFactors']=self.line1.value()
-        self.line2.setText(str(self.line1.value())) #TODO
+        self.lC.setText(str(self.line1.value())) #TODO
 
 class LHSWidget(QWidget):
     
@@ -160,21 +167,26 @@ class LHSWidget(QWidget):
         self.line1.setProperty('Name', 'numSampling')
         h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(self.line1); h1.addStretch(1)
 
-        h2=QHBoxLayout()
-        label2=BodyLabel("Number of Sampling Points: "); self.line2=LineEdit(self); self.line2.setEnabled(False)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
+        
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         
         vBoxLayout.addLayout(h1)
-        vBoxLayout.addLayout(h2)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['numSampling']=self.line1.value()
-        self.line2.setText(str(self.line1.value())) #TODO
+        self.lC.setText(str(self.line1.value())) #TODO
 
 class RandomWidget(QWidget):
     
@@ -192,21 +204,26 @@ class RandomWidget(QWidget):
         self.line1.setProperty('Name', 'numSampling')
         h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(self.line1); h1.addStretch(1)
 
-        h2=QHBoxLayout()
-        label2=BodyLabel("Number of Sampling Points: "); self.line2=LineEdit(self); self.line2.setEnabled(False)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
+        
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         
         vBoxLayout.addLayout(h1)
-        vBoxLayout.addLayout(h2)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['numSampling']=self.line1.value()
-        self.line2.setText(str(self.line1.value())) #TODO
+        self.lC.setText(str(self.line1.value())) #TODO
 
 class  FastSamplingWidget(QWidget):
     
@@ -230,24 +247,29 @@ class  FastSamplingWidget(QWidget):
         self.line2.setProperty('Name', 'N')
         h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
         
-        h3=QHBoxLayout()
-        label3=BodyLabel("Number of Sampling Points: "); self.line3=LineEdit(self); self.line3.setEnabled(False)
-        h3.addSpacing(50); h3.addWidget(label3); h3.addWidget(self.line3); h3.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
+        
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         
         vBoxLayout.addLayout(h1)
         vBoxLayout.addLayout(h2)
-        vBoxLayout.addLayout(h3)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
         self.line2.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['N']=self.line1.value()
         
-        self.line3.setText(str(self.HYPER['N'])) #TODO
+        self.lC.setText(str(self.HYPER['N'])) #TODO
 
 class MorrisWidget(QWidget):
         
@@ -265,21 +287,26 @@ class MorrisWidget(QWidget):
         self.line1.setProperty('Name', 'N')
         h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(self.line1); h1.addStretch(1)
 
-        h2=QHBoxLayout()
-        label2=BodyLabel("Number of Sampling Points: "); self.line2=LineEdit(self); self.line2.setEnabled(False)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
+        
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         
         vBoxLayout.addLayout(h1)
-        vBoxLayout.addLayout(h2)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['N']=self.line1.value()
-        self.line2.setText(str(self.HYPER['N'])) #TODO
+        self.lC.setText(str(self.HYPER['N'])) #TODO
 
 class SobolWidget(QWidget):
     
@@ -303,22 +330,27 @@ class SobolWidget(QWidget):
         self.line2.setProperty('Name', 'SkipValues')
         h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(self.line2); h2.addStretch(1)
 
-        h3=QHBoxLayout()
-        label3=BodyLabel("Number of Sampling Points: "); self.line3=LineEdit(self); self.line3.setEnabled(False)
-        h3.addSpacing(50); h3.addWidget(label3); h3.addWidget(self.line3); h3.addStretch(1)
+        conclusionWidget=QFrame(self); conclusionWidget.setObjectName("conclusionWidget")
+        hC=QHBoxLayout(conclusionWidget); hC.setContentsMargins(0, 20, 0, 0)
+        lC=BodyLabel("Number of Sampling Points: "); self.lC=LineEdit(self); self.lC.setEnabled(False)
+        hC.addSpacing(50); hC.addWidget(lC); hC.addWidget(self.lC); hC.addStretch(1)
+        
+        conclusionWidget.setStyleSheet("#conclusionWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         
         vBoxLayout.addLayout(h1)
         vBoxLayout.addLayout(h2)
-        vBoxLayout.addLayout(h3)
+        vBoxLayout.addWidget(conclusionWidget)
         vBoxLayout.addStretch(1)
 
         #########connect#########
         self.line1.valueChanged.connect(self.recordNumFactors)
+        self.recordNumFactors()
         
     def recordNumFactors(self):
         
         self.HYPER['N']=self.line1.value()
-        self.line3.setText(str(self.HYPER['N'])) #TODO
+        self.lC.setText(str(self.HYPER['N'])) #TODO
 
 class ButtonGroup(QWidget):
     def __init__(self, contents, bool, parent=None):
