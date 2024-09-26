@@ -5,7 +5,7 @@ result.json
 dist
 UQPyL.egg-info
 
-TxtInOut
+TxtInOut/
 
 Test/*.pickle
 Test/*.pdf
