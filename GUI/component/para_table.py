@@ -75,13 +75,14 @@ class ParaTable(QFrame):
     def importParaFile(self):
         
         path, success= QFileDialog.getOpenFileName(self, "Import Parameter File", "", "Parameter File (*.par)")
+        
         if success:
             Infos=Pro.importParaFromFile(path)
         
             for paraInfo in Infos:
                 self.table.addRow(paraInfo)
                 self.table.repaint()
-    
+
     def saveParFile(self):
         Infos=[]
         
@@ -98,7 +99,9 @@ class ParaTable(QFrame):
         Pro.paraInfos=Infos
         path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.par)")
         if success:
+            
             Pro.saveParaFile(path)
+            
     
         
         

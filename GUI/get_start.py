@@ -62,9 +62,9 @@ class GetStart(ScrollArea):
         res=newPro.exec()
         
         if res==Dialog.Accepted:
-            Project.projectName=newPro.projectName
-            Project.projectPath=newPro.projectPath
-            Project.swatPath=newPro.swatPath
+            # Project.projectName=newPro.projectName
+            # Project.projectPath=newPro.projectPath
+            # Project.swatPath=newPro.swatPath
             self.activateBtn()
     
     def click_open_project(self):

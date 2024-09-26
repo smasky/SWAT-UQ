@@ -15,8 +15,6 @@ class MainWindow(FluentWindow):
         ########data###########
         Pro.loadParaList()
         
-        
-        
         self.initWindow()
 
         self.get_start = GetStart(self)
@@ -41,8 +39,7 @@ class MainWindow(FluentWindow):
         btn=self.addSubInterface(self.pro_define, FIF.TILES, self.tr("Problem Define"));Pro.btnSets.append(btn); btn.setEnabled(False)
         self.navigationInterface.addSeparator()
         btn=self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr("Sensitivity Analysis"));Pro.btnSets.append(btn); btn.setEnabled(False)
-        
-        
+        btn.clicked.connect(self.sen_analysis.updateUI)
         
     def initWindow(self):
         

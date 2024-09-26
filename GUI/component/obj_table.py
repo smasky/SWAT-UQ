@@ -1,8 +1,8 @@
 from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton
 
-from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, 
-                             QHeaderView, QFrame, QTableWidgetItem, QWidget)
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog,
+                             QHeaderView, QFrame, QTableWidgetItem, QWidget, QDialog)
+from PyQt5.QtCore import Qt, QDate
 
 import GUI.qss
 import GUI.data
@@ -10,8 +10,8 @@ from importlib.resources import path
 
 from .table_widget_pro import TableWidgetPro
 from .add_pro_widget import AddProWidget
-
-OBJ_TYPE={ "NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4 }
+from ..project import Project as Pro
+OBJTYPE={ "NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4 }
 VARIABLE={ "Flow":0 }
 class ObjTable(QFrame):
     
@@ -20,7 +20,7 @@ class ObjTable(QFrame):
         super().__init__(parent)
         #########Data###########
         self.objs=[]
-        self.default={'objID':1, 'seriesID':1,'reachID':1, "objType": 0, "variable": 0, "weight":1.0}
+        self.default={'objID':1, 'serID':1,'reachID':1, "objType": "NSE", "varType": "Flow", "weight":1.0}
         #########################
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
@@ -30,7 +30,7 @@ class ObjTable(QFrame):
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
         importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(24); 
-        self.importButton=importButton
+        self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(24); 
         self.addButton=addButton; addButton.clicked.connect(self.addPro)
@@ -56,6 +56,7 @@ class ObjTable(QFrame):
         
         self.generateButton=PrimaryPushButton("Save to Objective File (.obj)", self)
         self.generateButton.setMaximumWidth(500)
+        self.generateButton.clicked.connect(self.saveProFile)
         self.vBoxLayout.addWidget(self.generateButton)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
@@ -66,28 +67,85 @@ class ObjTable(QFrame):
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
         self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
+    
+    def importProFile(self):
+        
+        path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectPath, "Parameter File (*.pro)")
+        
+        if not success:
+            return
+        
+        infos=Pro.importProFromFile(path)
+        for key, values in infos.items():
+            for value in values:
+                self.objs.append(value)
+        
+        for obj in self.objs:
+            self.addRow(list(obj.values()))
+        
+    def saveProFile(self):
+        
+        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.pro)")
+        
+        if not success:
+            return
+        
+        lines=[]
+        
+        numObj=len(self.objs)
+        numSer=self.table.rowCount()
+        lines.append(f"{numSer:d}     : Number of observed variables series\n")
+        lines.append(f"{numObj:d}     : The numbers of objective functions\n")
+        lines.append("\n")
+        
+        for i in range(numSer):
+            obj=self.objs[i]
+            
+            objID=obj['objID']
+            serID=obj['serID']
+            reachID=obj['reachID']
+            objType=obj['objType']
+            varType=obj['varType']
+            weight=obj['weight']
+            observedDate=obj['observeData']
+            
+            lines.append(f"OBJ_{objID} : ID of objective function\n")
+            lines.append(f"SER_{serID} : ID of series data\n")
+            lines.append(f"REACH_{reachID} : ID of reach\n")
+            lines.append(f"TYPE_{OBJTYPE[objType]} : Type of objective function\n")
+            lines.append(f"VAR_{VARIABLE[varType]} : Type of variable\n")
+            lines.append(f"{float(weight):.2f} : Weight of objective function\n")
+            lines.append(f"{observedDate.shape[0]:d} : Number of data points for this variable as it follows below\n")
+            lines.append("\n")
+            
+            for row in observedDate:
+                lines.append(f"{int(row[0]):d} {int(row[1]):d} {float(row[2]):.4f}\n")
+            lines.append("\n")
+        
+            Pro.saveProFile(path, lines)
         
     def addPro(self):
         
         dialog=AddProWidget(self.default, self)
-        dialog.exec()
+        res=dialog.exec()
         
-        data=dialog.data
-        objID=int(dialog.line1.text())
-        seriesID=int(dialog.line2.text())
-        reachID=int(dialog.line3.text())
-        objType=dialog.line4.currentText()
-        variable=dialog.line5.currentText()
-        weight=float(dialog.line6.text())
+        if res:
+            data=dialog.data
+            objID=int(data['objID'])
+            seriesID=int(data['serID'])
+            reachID=int(data['reachID'])
+            objType=data['objType']
+            variable=data['varType']
+            weight=float(data['weight'])
 
-        obj={"objID":objID, "seriesID":seriesID, "reachID":reachID, "objType":OBJ_TYPE[objType], "variable":VARIABLE[variable], "weight":weight, "data": data}
-        self.objs.append(obj)
-        self.default['objID']=objID
-        self.default['seriesID']=seriesID+1
-        self.default['reachID']=reachID
-        
-        text=[objID, seriesID, reachID, objType, variable, weight]
-        self.addRow(text)
+            self.objs.append(data)
+            
+            self.default['objID']=objID
+            self.default['seriesID']=seriesID+1
+            self.default['reachID']=reachID
+            
+            text=[objID, seriesID, reachID, objType, variable, weight]
+            self.addRow(text)
         
     def addRow(self, text):
         
@@ -109,7 +167,7 @@ class ObjTable(QFrame):
         item=QTableWidgetItem(text[4]); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 4, item)
         
-        item=QTableWidgetItem(f"{text[5]:f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text[5]:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 5, item)
         self.table.setCellWidget(row, 6, self.addOperation(row))
     
@@ -160,22 +218,26 @@ class ObjTable(QFrame):
         obj=self.objs[row]
         
         dialog=AddProWidget(obj, self)
-        dialog.exec()
+        res=dialog.exec()
         
-        data=dialog.data
-        objID=int(dialog.line1.text())
-        seriesID=int(dialog.line2.text())
-        reachID=int(dialog.line3.text())
-        objType=dialog.line4.currentText()
-        variable=dialog.line5.currentText()
-        weight=float(dialog.line6.text())
+        if res:
+            data=dialog.data
+            objID=int(data['objID'])
+            seriesID=int(data['serID'])
+            reachID=int(data['reachID'])
+            objType=data['objType']
+            variable=data['varType']
+            weight=float(data['weight'])
+
+            self.objs[row]=data
+            
+            self.default['objID']=objID
+            self.default['seriesID']=seriesID+1
+            self.default['reachID']=reachID
+            
+            text=[objID, seriesID, reachID, objType, variable, weight]
         
-        obj={"objID":objID, "seriesID":seriesID, "reachID":reachID, "objType":OBJ_TYPE[objType], "variable":VARIABLE[variable], "weight":weight, "data": data}
-        self.objs[row]=obj
-        
-        text=[objID, seriesID, reachID, objType, variable, weight]
-        
-        self.changeRow(row, text)
+            self.changeRow(row, text)
         
         
         

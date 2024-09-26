@@ -26,8 +26,8 @@ class SenAnalysis(ScrollArea):
         banner.setTitle("Sensitivity Analysis")
         vBoxLayout.addWidget(banner)
         
-        saWidget=SAWidget()
-        banner.vBoxLayout.addWidget(saWidget)
+        self.saWidget=SAWidget()
+        banner.vBoxLayout.addWidget(self.saWidget)
         
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
         
@@ -36,3 +36,7 @@ class SenAnalysis(ScrollArea):
         with path(GUI.qss, "sensitivity_analysis.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
+    
+    def updateUI(self):
+        
+        self.saWidget.updateUI()

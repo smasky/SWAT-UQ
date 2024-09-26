@@ -101,3 +101,26 @@ class TableWidgetPara(TableWidget):
             if widget:
                 widget.btn.setProperty('row', row)
     
+    def recordAll(self):
+        rows=self.rowCount()
+        data=[]
+        for row in range(rows):
+            #name
+            name=self.item(row, 0).text()
+            
+            #Tuning Mode
+            tuneType=Pro.INVERSETUNEMODE[self.cellWidget(row, 2).core.currentIndex()]
+            
+            #Lower Bound
+            lb=str(self.cellWidget(row, 3).core.value())
+            
+            #Upper Bound    
+            ub=str(self.cellWidget(row, 4).core.value())
+            
+            #Position
+            position=self.cellWidget(row, 5).core.text()
+            
+            data.append([name, tuneType, lb, ub, position])
+
+        Pro.paraInfos=data
+    
