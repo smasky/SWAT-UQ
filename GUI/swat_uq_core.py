@@ -6,14 +6,15 @@ import tempfile
 import itertools
 import subprocess
 from datetime import datetime, timedelta
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
 from UQPyL.utility.metrics import r_square
-from UQPyL.problems import ProblemABC
 
+from .problemObj import ProblemABC
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 
@@ -43,7 +44,6 @@ OBJ_TYPE={0: "func_NSE_inverse", 1: "func_RMSE", 2: "func_PCC_inverse", 3: "func
 VARNAME={0: "FLOW_OUT", 47: "TOT_N", 48: "TOT_P" }
 OBJ_TYPENAME={0: "NSE", 1:"RMSE", 2:"PCC", 3:"Pbias", 4:"KGE"}
 
-
 class SWAT_UQ_Flow(ProblemABC):
     hru_suffix=["chm", "gw", "hru", "mgt", "sdr", "sep", "sol"]
     watershed_suffix=["pnd", "rte", "sub", "swq", "wgn", "wus"]
@@ -52,12 +52,15 @@ class SWAT_UQ_Flow(ProblemABC):
     n_hru=0
     n_rch=0
     n_sub=0
+    project=None
+    progress = pyqtSignal(int)  # 定义用于更新进度条的信号
+    finished = pyqtSignal()     # 定义任务完成的信号
     def __init__(self, work_path: str, paras_file_name: str, 
                  observed_file_name: str, swat_exe_name: str, temp_path:str=None, 
                  max_threads: int=12, num_parallel: int=5, verbose=False):
         
         self.verbose=[]
-        
+    
         #create the space for running multiple instance of SWAT
         if temp_path is None:
             #if dont set the temp_path, create a temp dir
@@ -78,7 +81,7 @@ class SWAT_UQ_Flow(ProblemABC):
         self.max_workers=max_threads
         self.num_parallel=num_parallel
         
-        self.verbose.append("="*25+"basic setting"+"="*25)
+        self.verbose.append("="*25+"Basic setting"+"="*25)
         self.verbose.append(f"The path of SWAT project is: {self.work_path}")
         self.verbose.append(f"The file name of optimizing parameters is: {self.paras_file_name}")
         self.verbose.append(f"The file name of observed data is: {self.observed_file_name}")
@@ -102,7 +105,8 @@ class SWAT_UQ_Flow(ProblemABC):
             futures = [executor.submit(copy_origin_to_tmp, self.work_path, work_temp) for work_temp in self.work_temp_dirs]
         for future in futures:
             future.result()
-                       
+        
+        # QObject.__init__()            
         super().__init__(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
     #------------------------interface function-----------------------#
     def _subprocess(self, input_x, id):
@@ -142,7 +146,9 @@ class SWAT_UQ_Flow(ProblemABC):
                 for lines in read_lines:
                     startline=int(lines[0])
                     endline=lines[1]
-                    sub_value=np.array(read_simulation(os.path.join(work_path, "output.rch"), var_col+1, rch_id, self.n_rch, startline, endline))
+                    spilt_path=os.path.join(work_path, "output.rch").split('/')
+                    path='\\'.join(spilt_path)
+                    sub_value=np.array(read_simulation(path, var_col+7, rch_id, self.n_rch, startline, int(endline)))
                     sim_value_list.append(sub_value)
                 sim_value=np.concatenate(sim_value_list, axis=0)
                 obj_value=eval(OBJ_TYPE[obj_type])(observed_value, sim_value)
@@ -152,15 +158,11 @@ class SWAT_UQ_Flow(ProblemABC):
         self.work_path_queue.put(work_path)
         return (id, obj_array)
     
-    def evaluate(self, X):
+    def evaluate(self):
+        X=self.X
         n=X.shape[0]
         n_out=self.n_output
         Y=np.zeros((n,n_out))
-        
-        # for i in range(n):
-        #     id, obj_value=self._subprocess(X[i,:], i)
-        #     Y[id, :]=obj_value
-        
         
         if n<self.num_parallel:
             for i in range(n):
@@ -170,10 +172,15 @@ class SWAT_UQ_Flow(ProblemABC):
             with ThreadPoolExecutor(max_workers=self.num_parallel) as executor:
                 futures=[executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
             
-            for i, future in enumerate(futures):
-                 id, obj_value=future.result()
-                 Y[id, :]=obj_value
-                  
+                count=0
+                for future in as_completed(futures):  # 使用 as_completed() 获取每个任务完成的顺序
+                    id, obj_value = future.result()
+                    Y[id, :] = obj_value
+
+                    count += 1
+                    progress_value = int((count / n) * 100)  # 逐步更新进度条
+                    self.progress.emit(progress_value)
+                    
         return Y
     #---------------------private function------------------------------#
     def _initial(self): 

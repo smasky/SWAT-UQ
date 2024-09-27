@@ -7,7 +7,7 @@ REACH_15   : ID of subbasin to be included in the objective function
 TYPE_0     : Type of objective function (e.g., 1: NSE, 2: RMSE. 3:PCC, 4:Pbias, 5:KGE)
 VAR_0 : Column ID of variables in output.rch (e.g., 6 : FLOW_OUT, 47: TOT_N, 48:TOT_P )
 1.00   : Weight of the variable in the objective function
-2922   : Number of data points for this variable as it follows below.
+10   : Number of data points for this variable as it follows below.
 
 
 2012	1	38.6

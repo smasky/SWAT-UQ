@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 from .swat_uq_core import SWAT_UQ_Flow
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
+from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
+from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
+from PyQt5.QtCore import QThread
 class Project:
     swatPath=""
     projectPath=""
@@ -21,10 +24,18 @@ class Project:
     paraList={}
     inverseParaList={}
     
+    processBar=None
+    
     TUNEMODE={"r": 0, "v": 1, "a":2}; INVERSETUNEMODE={0: "r", 1: "v", 2: "a"}
     OBJTYPE={ 0: "NSE", 1: "RMSE", 2: "PCC", 3: "Pbias", 4: "KGE" }
     VARIABLE={ 0 : "Flow" }
     paraInfos=[];bsnInfos={};bsnFile={};modelInfos={}
+    
+    SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBF-FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
+    SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Sobol Sequence': 'Sobol_Sequence'}
+    SAInfos={}
+    hyper={}
+    samplingHyper={}
     
     btnSets=[]
     @classmethod
@@ -282,4 +293,45 @@ class Project:
                     max_threads=10, num_parallel=3,
                     verbose=True)
         
+        cls.model=swat_cup
+        
         return swat_cup.verbose
+    
+    @classmethod
+    def sampling(cls):
+        
+        problem=cls.model
+        hyper=cls.samplingHyper
+        initHyper=hyper['__init__']
+        sampleHyper=hyper['sample']
+        sampler=eval(cls.SAMPLE_METHOD[cls.SAInfos['sampling']])(problem=problem, **initHyper)
+        x=sampler.sample(**sampleHyper, nx=problem.nInput)
+        # y=problem.evaluate(x)
+        return x
+    
+    @classmethod
+    def simulation(cls, x):
+        
+        problem=cls.model
+        problem.project=cls
+        problem.X=x
+        
+        # problem.evaluate(x)
+        cls.qThread=QThread()
+        problem.moveToThread(cls.qThread)
+        
+        # 连接信号和槽
+        cls.qThread.started.connect(problem.evaluate)  # 当线程开始时，运行任务
+        problem.progress.connect(cls.update_progress)  # 更新进度条
+        # problem.finished.connect(cls.task_finished)  # 当任务完成时
+        problem.finished.connect(cls.qThread.quit)  # 任务完成后退出线程
+        problem.finished.connect(problem.deleteLater)  # 清理 worker
+        cls.qThread.finished.connect(cls.qThread.deleteLater)  # 清理线程
+
+        # 启动线程
+        cls.qThread.start()
+        
+    @classmethod
+    def update_progress(cls, value):
+        """更新进度条"""
+        cls.processBar.setValue(value)
