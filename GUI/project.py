@@ -217,8 +217,6 @@ class Project:
     @classmethod
     def checkProFile(cls):
         
-        
-        # pro_files = glob.glob(os.path.join(cls.projectPath, "**", "*.pro"), recursive=True)
         pro_files=glob.glob(os.path.join(cls.projectPath, "*.pro"))
         files=[os.path.basename(file_path) for file_path in pro_files]
         
@@ -228,7 +226,6 @@ class Project:
     def checkSwatExe(cls):
         
         if cls.swatPath!='':
-            # exe_name = glob.glob(os.path.join(cls.swatPath, "**", "*.exe"), recursive=True)
             exe_name= glob.glob(os.path.join(cls.swatPath, "*.exe"))
             name=[os.path.basename(file_path) for file_path in exe_name]
             return name
@@ -292,6 +289,12 @@ class Project:
                     temp_path=temp_path,
                     max_threads=10, num_parallel=3,
                     verbose=True)
+        
+        cls.qThread=QThread()
+        swat_cup.moveToThread(cls.qThread)
+        cls.qThread.started.connect(swat_cup.initialize)
+        
+        cls.qThread.start()
         
         cls.model=swat_cup
         

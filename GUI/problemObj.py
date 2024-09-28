@@ -32,7 +32,32 @@ class ProblemABC(QObject):
             self.y_labels=['y_'+str(i) for i in range(1,nOutput+1)]
         else:
             self.y_labels
+    
+    def refine(self, nInput, nOutput, ub, lb, var_type=None, var_set=None, x_labels=None, y_labels=None):
         
+        self.nInput=nInput
+        self.nOutput=nOutput
+        self._set_ub_lb(ub,lb)
+        if var_type is None:
+            self.var_type=np.array([0]*nInput)
+        else:
+            self.var_type=np.array(var_type)
+        
+        if var_set is None:
+            self.var_set={}
+        else:
+            self.var_set=var_set
+        
+        if x_labels is None:
+            self.x_labels=['x_'+str(i) for i in range(1,nInput+1)]
+        else:
+            self.x_labels=x_labels
+
+        if y_labels is None:
+            self.y_labels=['y_'+str(i) for i in range(1,nOutput+1)]
+        else:
+            self.y_labels
+    
     def evaluate(self,X):
         pass
     

@@ -6,6 +6,7 @@ dist
 UQPyL.egg-info
 
 TxtInOut/
+temp/
 
 Test/*.pickle
 Test/*.pdf

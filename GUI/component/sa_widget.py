@@ -23,7 +23,6 @@ class SAWidget(QFrame):
         processWidget.addStep(0, "Setup")
         processWidget.addStep(1, "Simulation")
         processWidget.addStep(2, "Analysis")
-        processWidget.addStep(3, "Report")
         self.processWidget=processWidget
         vBoxLayout.addWidget(processWidget)
         #################################################################

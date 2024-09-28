@@ -1,7 +1,6 @@
 import os
 import re
 import queue
-import shutil
 import tempfile
 import itertools
 import subprocess
@@ -81,33 +80,34 @@ class SWAT_UQ_Flow(ProblemABC):
         self.max_workers=max_threads
         self.num_parallel=num_parallel
         
-        self.verbose.append("="*25+"Basic setting"+"="*25)
-        self.verbose.append(f"The path of SWAT project is: {self.work_path}")
-        self.verbose.append(f"The file name of optimizing parameters is: {self.paras_file_name}")
-        self.verbose.append(f"The file name of observed data is: {self.observed_file_name}")
-        self.verbose.append(f"The name of SWAT executable is: {self.swat_exe_name}")
-        self.verbose.append(f"Temporary directory has been created in: {self.work_temp_dir}")
-        self.verbose.append("="*50)
-        self.verbose.append("\n")
+        super().__init__(nInput=1, nOutput=1, ub=1, lb=-1, var_type=None, var_set=None)
         
-        self._initial()
-        self._record_default_values()
-        self._get_observed_data()
+        # self.verbose.append("="*25+"Basic setting"+"="*25)
+        # self.verbose.append(f"The path of SWAT project is: {self.work_path}")
+        # self.verbose.append(f"The file name of optimizing parameters is: {self.paras_file_name}")
+        # self.verbose.append(f"The file name of observed data is: {self.observed_file_name}")
+        # self.verbose.append(f"The name of SWAT executable is: {self.swat_exe_name}")
+        # self.verbose.append(f"Temporary directory has been created in: {self.work_temp_dir}")
+        # self.verbose.append("="*50)
+        # self.verbose.append("\n")
         
-        self.work_path_queue=queue.Queue()
-        self.work_temp_dirs=[]
-        for i in range(num_parallel):
-            path=os.path.join(self.work_temp_dir, "instance{}".format(i))
-            self.work_temp_dirs.append(path)
-            self.work_path_queue.put(path)
+        # self._initial()
+        # self._record_default_values()
+        # self._get_observed_data()
+        
+        # self.work_path_queue=queue.Queue()
+        # self.work_temp_dirs=[]
+        # for i in range(num_parallel):
+        #     path=os.path.join(self.work_temp_dir, "instance{}".format(i))
+        #     self.work_temp_dirs.append(path)
+        #     self.work_path_queue.put(path)
                 
-        with ThreadPoolExecutor(max_workers=self.num_parallel) as executor:
-            futures = [executor.submit(copy_origin_to_tmp, self.work_path, work_temp) for work_temp in self.work_temp_dirs]
-        for future in futures:
-            future.result()
-        
-        # QObject.__init__()            
-        super().__init__(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
+        # with ThreadPoolExecutor(max_workers=self.num_parallel) as executor:
+        #     futures = [executor.submit(copy_origin_to_tmp, self.work_path, work_temp) for work_temp in self.work_temp_dirs]
+        # for future in futures:
+        #     future.result()
+       
+        # super().__init__(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
     #------------------------interface function-----------------------#
     def _subprocess(self, input_x, id):
         
@@ -183,6 +183,35 @@ class SWAT_UQ_Flow(ProblemABC):
                     
         return Y
     #---------------------private function------------------------------#
+    def initialize(self):
+        
+        self.verbose.append("="*25+"Basic setting"+"="*25)
+        self.verbose.append(f"The path of SWAT project is: {self.work_path}")
+        self.verbose.append(f"The file name of optimizing parameters is: {self.paras_file_name}")
+        self.verbose.append(f"The file name of observed data is: {self.observed_file_name}")
+        self.verbose.append(f"The name of SWAT executable is: {self.swat_exe_name}")
+        self.verbose.append(f"Temporary directory has been created in: {self.work_temp_dir}")
+        self.verbose.append("="*50)
+        self.verbose.append("\n")
+        
+        self._initial()
+        self._record_default_values()
+        self._get_observed_data()
+        
+        self.work_path_queue=queue.Queue()
+        self.work_temp_dirs=[]
+        for i in range(self.num_parallel):
+            path=os.path.join(self.work_temp_dir, "instance{}".format(i))
+            self.work_temp_dirs.append(path)
+            self.work_path_queue.put(path)
+                
+        with ThreadPoolExecutor(max_workers=self.num_parallel) as executor:
+            futures = [executor.submit(copy_origin_to_tmp, self.work_path, work_temp) for work_temp in self.work_temp_dirs]
+        for future in futures:
+            future.result()
+        
+        self.refine(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
+        # super().__init__(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
     def _initial(self): 
         
         paras=["IPRINT", "NBYR", "IYR", "IDAF", "IDAL", "NYSKIP"]
