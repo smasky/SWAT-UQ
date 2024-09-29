@@ -157,9 +157,7 @@ class SWAT_UQ_Flow(ProblemABC):
             
         self.work_path_queue.put(work_path)
         return (id, obj_array)
-    
 
-    
     def evaluate(self):
         X=self.X
         n=X.shape[0]

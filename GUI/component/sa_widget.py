@@ -656,8 +656,10 @@ class SimulationWidget(QWidget):
     
     def initialize(self):
         
-        lines=Pro.createSwatUQ()
-        self.verbose.setText("\n".join(lines))
+        Pro.test()
+        
+        # lines=Pro.createSwatUQ()
+        # self.verbose.setText("\n".join(lines))
     
     def sampling(self):
         
@@ -665,5 +667,5 @@ class SimulationWidget(QWidget):
         self.x=x
     
     def simulation(self):
-        x=1
+        # x=1
         Pro.simulation(self.x)

@@ -8,12 +8,14 @@ from importlib.resources import path
 from datetime import datetime, timedelta
 from .swat_uq_core import SWAT_UQ_Flow
 from PyQt5.QtWidgets import QApplication
+from .woker import InitWorker
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
 from PyQt5.QtCore import QThread
 class Project:
+    
     swatPath=""
     projectPath=""
     projectName=""
@@ -369,9 +371,46 @@ class Project:
     def on_thread_finished(cls):
         pass
     
-    
-    
     @classmethod
     def update_progress(cls, value):
         """更新进度条"""
         cls.processBar.setValue(value)
+        
+    
+    @classmethod
+    def test(cls):
+        
+        worker=InitWorker(cls)
+        
+        qThread=QThread()
+        
+        worker.moveToThread(qThread)
+        
+        cls.work_path=cls.swatPath
+        cls.temp_path=os.path.join(cls.projectPath, "temp")
+        cls.swat_exe_name=cls.swatExe
+        cls.max_threads=12
+        cls.num_parallel=5
+        cls.work_temp_dir='temp'
+        
+        qThread.started.connect(worker.initProject)
+        worker.result.connect(cls.record_result)
+        worker.result.connect(qThread.quit)
+        qThread.finished.connect(qThread.deleteLater)
+        qThread.finished.connect(worker.deleteLater)
+        
+        qThread.start()
+        
+        # qThread.wait()
+        
+        a=1
+    
+    @classmethod
+    def start_worker(cls):
+        print('begin')
+        cls.worker.initProject(cls.work_path, cls.temp_path, cls.swat_exe_name, 12, 5)
+    
+    @classmethod
+    def record_result(cls, result):
+        print("result")
+        cls.ProjectInfoss=result
