@@ -13,7 +13,7 @@ from scipy.stats import pearsonr
 from UQPyL.utility.metrics import r_square
 
 from .problemObj import ProblemABC
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThread
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 
@@ -51,7 +51,7 @@ class SWAT_UQ_Flow(ProblemABC):
     n_hru=0
     n_rch=0
     n_sub=0
-    project=None
+    # project=None
     progress = pyqtSignal(int)  # 定义用于更新进度条的信号
     finished = pyqtSignal()     # 定义任务完成的信号
     def __init__(self, work_path: str, paras_file_name: str, 
@@ -158,11 +158,17 @@ class SWAT_UQ_Flow(ProblemABC):
         self.work_path_queue.put(work_path)
         return (id, obj_array)
     
+
+    
     def evaluate(self):
         X=self.X
         n=X.shape[0]
         n_out=self.n_output
         Y=np.zeros((n,n_out))
+        
+        # for i in range(n):
+        #     id, obj_value=self._subprocess(X[i,:], i)
+        #     Y[id, :]=obj_value
         
         if n<self.num_parallel:
             for i in range(n):
@@ -207,11 +213,27 @@ class SWAT_UQ_Flow(ProblemABC):
                 
         with ThreadPoolExecutor(max_workers=self.num_parallel) as executor:
             futures = [executor.submit(copy_origin_to_tmp, self.work_path, work_temp) for work_temp in self.work_temp_dirs]
-        for future in futures:
-            future.result()
+            for future in futures:
+                future.result()
         
         self.refine(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
+        self.finished.emit()
+        # QThread.currentThread().quit()
         # super().__init__(nInput=len(self.paras_list), nOutput=self.n_output, lb=self.lb, ub=self.ub, var_type=[0]*len(self.paras_list), var_set=None)
+    def test(self):
+        self.verbose.append("="*25+"Basic setting"+"="*25)
+        self.verbose.append(f"The path of SWAT project is: {self.work_path}")
+        self.verbose.append(f"The file name of optimizing parameters is: {self.paras_file_name}")
+        self.verbose.append(f"The file name of observed data is: {self.observed_file_name}")
+        self.verbose.append(f"The name of SWAT executable is: {self.swat_exe_name}")
+        self.verbose.append(f"Temporary directory has been created in: {self.work_temp_dir}")
+        self.verbose.append("="*50)
+        self.verbose.append("\n")
+        
+        # self._initial()
+        self.finished.emit()
+        
+    
     def _initial(self): 
         
         paras=["IPRINT", "NBYR", "IYR", "IDAF", "IDAL", "NYSKIP"]

@@ -7,6 +7,7 @@ import itertools
 from importlib.resources import path
 from datetime import datetime, timedelta
 from .swat_uq_core import SWAT_UQ_Flow
+from PyQt5.QtWidgets import QApplication
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
@@ -290,15 +291,40 @@ class Project:
                     max_threads=10, num_parallel=3,
                     verbose=True)
         
-        cls.qThread=QThread()
-        swat_cup.moveToThread(cls.qThread)
-        cls.qThread.started.connect(swat_cup.initialize)
+        # swat_cup.initialize()
+        qThread1=QThread()
+        swat_cup.moveToThread(qThread1)
+        cls.swat_cup=swat_cup
+        qThread1.started.connect(swat_cup.test)
+        swat_cup.finished.connect(cls.move_back_to_main_thread)  # 任务完成后退出线程
+        swat_cup.finished.connect(qThread1.quit)
+        # swat_cup.finished.connect(swat_cup.deleteLater)  # 清理 worker
+        # cls.qThread.finished.connect(cls.on_thread_finished)
         
-        cls.qThread.start()
+        qThread1.start()
         
+        qThread1.wait()
+        
+        # swat_cup.moveToThread(QApplication.instance().thread())
+        
+        qThread2=QThread()
+        swat_cup.moveToThread(qThread2)
+        # cls.qThread.started.disconnect(swat_cup.initialize)
+        qThread2.started.connect(swat_cup.evaluate)
+        qThread2.start()
+        qThread2.wait()
+        # cls.qThread.quit()
+        # problem.moveToThread(None)
+        # swat_cup.moveToThread(cls.qThread)
         cls.model=swat_cup
-        
+        # cls.qThread=qThread2
         return swat_cup.verbose
+    
+    @classmethod
+    def move_back_to_main_thread(cls):
+        print("正在将对象迁移回主线程")
+        cls.swat_cup.moveToThread(QApplication.instance().thread())
+    
     
     @classmethod
     def sampling(cls):
@@ -316,24 +342,35 @@ class Project:
     def simulation(cls, x):
         
         problem=cls.model
-        problem.project=cls
+        # problem.project=cls
         problem.X=x
-        
+        # problem.evaluate()
         # problem.evaluate(x)
-        cls.qThread=QThread()
-        problem.moveToThread(cls.qThread)
-        
+        # cls.qThread=QThread()
+        # problem.moveToThread(None)
+        # problem.moveToThread(cls.qThread)
+        qThread2=QThread()
+        problem.moveToThread(qThread2)
         # 连接信号和槽
-        cls.qThread.started.connect(problem.evaluate)  # 当线程开始时，运行任务
+        qThread2.started.connect(problem.evaluate)  # 当线程开始时，运行任务
         problem.progress.connect(cls.update_progress)  # 更新进度条
         # problem.finished.connect(cls.task_finished)  # 当任务完成时
-        problem.finished.connect(cls.qThread.quit)  # 任务完成后退出线程
+        problem.finished.connect(qThread2.quit)  # 任务完成后退出线程
         problem.finished.connect(problem.deleteLater)  # 清理 worker
-        cls.qThread.finished.connect(cls.qThread.deleteLater)  # 清理线程
+        qThread2.finished.connect(qThread2.deleteLater)  # 清理线程
 
         # 启动线程
-        cls.qThread.start()
         
+        qThread2.start()
+        
+        qThread2.quit()
+    
+    @classmethod
+    def on_thread_finished(cls):
+        pass
+    
+    
+    
     @classmethod
     def update_progress(cls, value):
         """更新进度条"""

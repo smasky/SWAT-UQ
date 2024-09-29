@@ -665,4 +665,5 @@ class SimulationWidget(QWidget):
         self.x=x
     
     def simulation(self):
+        x=1
         Pro.simulation(self.x)
