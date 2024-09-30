@@ -1,4 +1,5 @@
-from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton
+from qfluentwidgets import (StrongBodyLabel, PrimaryToolButton, FluentIcon, 
+                            PrimaryPushButton, InfoBar, InfoBarPosition, IndeterminateProgressRing)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame, QFileDialog
 from PyQt5.QtCore import Qt
@@ -60,7 +61,8 @@ class ParaTable(QFrame):
         self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
         
     def addPara(self):
-        dialog=AddParaWidget(Pro.paraList, parent=self)
+        modelInfos=Pro.modelInfos
+        dialog=AddParaWidget(modelInfos['para_file'], [], parent=self)
         dialog.exec()
         
         selected=dialog.selected
@@ -78,30 +80,34 @@ class ParaTable(QFrame):
         
         if success:
             Infos=Pro.importParaFromFile(path)
-        
             for paraInfo in Infos:
                 self.table.addRow(paraInfo)
-                self.table.repaint()
+            self.table.repaint()
 
     def saveParFile(self):
-        Infos=[]
         
+        infos=[]
         rows=self.table.rowCount()
+        
         for i in range(rows):
             paraName=self.table.item(i, 0).text()
-            # fileExtension=self.table.item(i, 1).text()
-            tuningMode=Pro.INVERSETUNEMODE[self.table.cellWidget(i, 2).core.currentIndex()]
+            tuningMode=Pro.INT_MODE[self.table.cellWidget(i, 2).core.currentIndex()]
             lowerBound=str(self.table.cellWidget(i, 3).core.value())
             upperBound=str(self.table.cellWidget(i, 4).core.value())
             position=self.table.cellWidget(i, 5).core.text()
-            Infos.append([paraName, tuningMode, lowerBound, upperBound, position])
+            infos.append([paraName, tuningMode, lowerBound, upperBound, position])
 
-        Pro.paraInfos=Infos
-        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.par)")
+        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos["projectPath"], "Parameter File (*.par)")
         if success:
+            Pro.saveParaFile(infos, path)
+            self.saveSuccess(path)
             
-            Pro.saveParaFile(path)
-            
-    
+    def saveSuccess(self, path):
         
-        
+        InfoBar.success(
+            title=f"Save Success",
+            content=f"the parameter setting have been save to {path}",
+            position=InfoBarPosition.TOP_RIGHT,
+            duration=5000,
+            parent=self.parent()
+        )

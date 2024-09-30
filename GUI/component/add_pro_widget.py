@@ -79,7 +79,7 @@ class AddProWidget(FramelessDialog):
         beginDataEdit=DatePicker(self, isMonthTight=True)
         self.beginDataEdit=beginDataEdit
         if 'beginDate' not in default:
-            beginDate=Pro.modelInfos['recordDate']
+            beginDate=Pro.modelInfos['beginRecord']
             time=QDate(beginDate.year, beginDate.month, beginDate.day)
         else:
             beginDate=default['beginDate']
@@ -195,7 +195,7 @@ class AddProWidget(FramelessDialog):
         
     def calDeltaNum(self, begin, end):
         
-        IPRINT=Pro.modelInfos["print_flag"]
+        IPRINT=Pro.modelInfos["printFlag"]
         
         if IPRINT==1:
             return begin.daysTo(end)+1

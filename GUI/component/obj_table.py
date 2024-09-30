@@ -19,6 +19,7 @@ class ObjTable(QFrame):
         
         super().__init__(parent)
         #########Data###########
+        self.observedData={}
         self.objs=[]
         self.default={'objID':1, 'serID':1,'reachID':1, "objType": "NSE", "varType": "Flow", "weight":1.0}
         #########################
@@ -75,13 +76,11 @@ class ObjTable(QFrame):
         if not success:
             return
         
+        # objs={}
         infos=Pro.importProFromFile(path)
-        for key, values in infos.items():
-            for value in values:
-                self.objs.append(value)
-        
-        for obj in self.objs:
-            self.addRow(list(obj.values()))
+        for _, series in infos.items():
+            for s in series:
+                self.addRow(s)
         
     def saveProFile(self):
         
@@ -130,47 +129,39 @@ class ObjTable(QFrame):
         res=dialog.exec()
         
         if res:
-            data=dialog.data
-            objID=int(data['objID'])
-            seriesID=int(data['serID'])
-            reachID=int(data['reachID'])
-            objType=data['objType']
-            variable=data['varType']
-            weight=float(data['weight'])
-
-            self.objs.append(data)
+            data=dialog.data            
+            self.default['objID']=data['objID']
+            self.default['seriesID']=data['serID']+1
+            self.default['reachID']=data['reachID']
             
-            self.default['objID']=objID
-            self.default['seriesID']=seriesID+1
-            self.default['reachID']=reachID
-            
-            text=[objID, seriesID, reachID, objType, variable, weight]
-            self.addRow(text)
+            self.addRow(data)
         
     def addRow(self, text):
         
         row=self.table.rowCount()
         self.table.insertRow(row)
         
-        item=QTableWidgetItem(f"{text[0]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['objID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 0, item)
         
-        item=QTableWidgetItem(f"{text[1]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['serID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 1, item)
         
-        item=QTableWidgetItem(f"{text[2]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['reachID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 2, item)
         
-        item=QTableWidgetItem(text[3]); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{Pro.INT_OBJTYPE[text['objType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 3, item)
         
-        item=QTableWidgetItem(text[4]); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{Pro.INT_VAR[text['varType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 4, item)
         
-        item=QTableWidgetItem(f"{text[5]:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['weight']:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 5, item)
         self.table.setCellWidget(row, 6, self.addOperation(row))
-    
+
+        self.observedData[text['serID']]=text['data']
+        
     def changeRow(self, row, text):
         item=QTableWidgetItem(f"{text[0]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 0, item)

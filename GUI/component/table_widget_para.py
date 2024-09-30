@@ -3,7 +3,6 @@ from qfluentwidgets import TableWidget, PrimaryToolButton, FluentIcon, DoubleSpi
 from PyQt5.QtWidgets import QTableWidgetItem, QSizePolicy, QHBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 
-from .checkable_combo_box import CheckableComboBox
 from .line_box import LineBox
 from ..project import Project as Pro
 
@@ -58,7 +57,32 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         
-        line2 = LineBox(Pro.bsnInfos, self)
+        hruSuffix=["chm", "gw", "hru", "mgt", "sdr", "sep", "sol"]
+        subBasinSuffix=["pnd", "rte", "sub", "swq", "wgn", "wus"]
+        
+        if len(content)>2:
+            options={}
+            items=content[5].split()
+            for item in items:
+                t=item.split("(")
+                if len(t)==1:
+                    options[t[0]]=[]
+                else:
+                    options[t[0]]=t[1][:-1].split(",")
+        else:
+            options=[]
+        
+        if content[1] in hruSuffix:
+            line2 = LineBox(Pro.modelInfos["sub_hru_simply"], options, self)
+            
+        elif content[1] in subBasinSuffix:
+            sub={}
+            for key in Pro.modelInfos["sub_hru_simply"].keys():
+                sub[key]=[]
+            line2 = LineBox(sub, self)
+        else:
+            line2 = LineBox({'bsn':[]}, self)
+        
         line2.setFixedHeight(30)
         line2.setMinimumWidth(50)
         line2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -86,12 +110,13 @@ class TableWidgetPara(TableWidget):
             line2.setText("all")
 
     def delete_row(self):
+        
         button = self.sender() 
         row = button.property('row') 
+        
         if row is not None:
-            del Pro.paraInfos[row]
+    
             self.removeRow(row)  
-            
             self.update_button_row_properties()
 
     def update_button_row_properties(self):
@@ -100,27 +125,3 @@ class TableWidgetPara(TableWidget):
             widget = self.cellWidget(row, 6)  
             if widget:
                 widget.btn.setProperty('row', row)
-    
-    def recordAll(self):
-        rows=self.rowCount()
-        data=[]
-        for row in range(rows):
-            #name
-            name=self.item(row, 0).text()
-            
-            #Tuning Mode
-            tuneType=Pro.INVERSETUNEMODE[self.cellWidget(row, 2).core.currentIndex()]
-            
-            #Lower Bound
-            lb=str(self.cellWidget(row, 3).core.value())
-            
-            #Upper Bound    
-            ub=str(self.cellWidget(row, 4).core.value())
-            
-            #Position
-            position=self.cellWidget(row, 5).core.text()
-            
-            data.append([name, tuneType, lb, ub, position])
-
-        Pro.paraInfos=data
-    

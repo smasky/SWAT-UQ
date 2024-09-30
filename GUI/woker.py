@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import itertools
 import pandas as pd
 import tempfile
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 class VerboseWorker(QObject):
     
     finished = pyqtSignal()
@@ -120,15 +120,9 @@ class VerboseWorker(QObject):
     
 class ReadWorker(QObject):
     
-    finished = pyqtSignal()
-    result = pyqtSignal(dict)
-    
-    
-    paraList=None
-    
     def readObjFile(self, path):
         
-        paraInfos={}
+        proInfos={}
         with open(path, 'r') as f:
             lines=f.readlines()
         
@@ -151,7 +145,7 @@ class ReadWorker(QObject):
             if match:
                 
                 objID=int(match.group(1))
-                paraInfos.setdefault(objID, {})
+                proInfos.setdefault(objID, [])
                 
                 serID=int(patternSer.match(lines[i+1]).group(1))
                 reachID=int(patternRch.match(lines[i+2]).group(1))
@@ -179,9 +173,9 @@ class ReadWorker(QObject):
                     else:
                         i+=1
                 
-                paraInfos[objID]={"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "data": data}
-        
-        self.result.emit(paraInfos)
+                proInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "data": data})
+            i+=1
+        return proInfos
     
     def readParaFile(self, path):
         
@@ -210,39 +204,30 @@ class ReadWorker(QObject):
 class InitWorker(QObject):
     
     result = pyqtSignal(dict)
-    Pro=None
-    def __init__(self, project):
-        super().__init__()
-        self.Pro=project
-    
-    def initProject(self):
-        
-        
-        ProjectInfos={}
-        ProjectInfos["work_path"]=self.Pro.work_path
-        if self.Pro.temp_path is None:
-            work_temp_dir=tempfile.mkdtemp()
-        
-        ProjectInfos["temp_path"]=self.Pro.work_temp_dir
-        ProjectInfos["swat_exe_name"]=self.Pro.swat_exe_name
 
-        ProjectInfos["max_threads"]=self.Pro.max_threads
-        ProjectInfos["num_parallel"]=self.Pro.num_parallel
-        # print('111')
-        # self.result.emit(ProjectInfos)
-        # print('222')
-        self.Pro.Projectss=ProjectInfos
-        return
+    def __init__(self):
+        super().__init__()
+
+    def initQThread(self, max_threads, num_parallel, projectInfos, paraInfos):
+
+        modelInfos=self.initModel(projectInfos)
         
+        defaultVar=self.recordDefault(projectInfos, paraInfos, modelInfos)
+        
+        problemInfos=self.initProblem(paraInfos)
+        
+        problemInfos['defaultVar']=defaultVar
+        
+        self.result.emit({"projectInfos": projectInfos, "modelInfos": modelInfos, "problemInfos": problemInfos})
     
     def initModel(self, projectInfos):
         
         modelInfos={}
-        work_path=projectInfos["work_path"]
+        work_path=projectInfos["swatPath"]
         
         paras=["IPRINT", "NBYR", "IYR", "IDAF", "IDAL", "NYSKIP"]
         pos=["default"]*len(paras)
-        dict_values=read_value_swat(self.work_path, "file.cio", paras, pos, 0)
+        dict_values=read_value_swat(work_path, "file.cio", paras, pos, 0)
         begin_date=datetime(int(dict_values["IYR"][0]), 1, 1)+timedelta(int(dict_values['IDAF'][0])-1)
         end_date=datetime(int(dict_values["IYR"][0])+int(dict_values['NBYR'][0])-1, 1, 1)+timedelta(int(dict_values['IDAL'][0])-1)
         simulation_days=(end_date-begin_date).days+1
@@ -258,12 +243,14 @@ class InitWorker(QObject):
         modelInfos["beginRecord"]=begin_record
         
         subBasin_Hru={}
+        sub_hru_simply={}
         with open(os.path.join(work_path, "fig.fig"), "r") as f:
             lines=f.readlines()
             for line in lines:
                 match = re.search(r'(\d+)\.sub', line)
                 if match:
                     subBasin_Hru[match.group(1)]=[]
+                    sub_hru_simply[match.group(1)[:5].lstrip('0')]=[]
         
         for sub in list(subBasin_Hru.keys()):
             file_name=sub+".sub"
@@ -273,44 +260,149 @@ class InitWorker(QObject):
                     match = re.search(r'(\d+)\.hru', line)
                     if match:
                         subBasin_Hru[sub].append(match.group(1))
-        
+                        sub_hru_simply[sub[:5].lstrip('0')].append(match.group(1)[-4:].lstrip('0'))
+                        
+        modelInfos["sub_hru_simply"]=sub_hru_simply
         modelInfos["sub_hru"]=subBasin_Hru
         modelInfos["subList"]=list(subBasin_Hru.keys())
-        modelInfos["nSub"]=len(modelInfos["subBasinList"])
+        modelInfos["nSub"]=len(modelInfos["subList"])
         modelInfos['hruList']=list(itertools.chain.from_iterable(subBasin_Hru.values()))
         modelInfos["nHru"]=len(modelInfos["hruList"])
         modelInfos["nRch"]=len(modelInfos["hruList"])
-        modelInfos["totalParaList"]=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
+        
+        totalParaList=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
+        modelInfos["totalParaList"]=totalParaList
+        
+        para_file={}
+        for index, row in totalParaList.iterrows():
+            para_name=index
+            file_name=row['file_name']
+            para_file.setdefault(file_name, [])
+            para_file[file_name].append(para_name)
+        
+        modelInfos['para_file']=para_file
         
         self.result.emit(modelInfos)
-        
      
-    def initProblem(self, projectInfos, modelInfos, paraInfos, objInfos):
+    def initProblem(self, paraInfos):
+        
+        problemInfos={}
         
         lb=[]
         ub=[]
-        mode=[]
-        position=[]
         xLabels=[]
         
         for paraInfo in paraInfos:
-            name=paraInfo[0]
-            mode=paraInfo[2]
-            lb=paraInfo[3]
-            ub=paraInfo[4]
-            position=paraInfo[5]
+            xLabels.append(paraInfo[0])
+            lb.append(paraInfo[3])
+            ub.append(paraInfo[4])
         
         lb=np.array(lb).reshape(1, -1)
         ub=np.array(ub).reshape(1, -1)
-        nInput=len(xLabels)
         
-        sub_hru=modelInfos["sub_hru"]
-    
-    def recordDefault(self, paraInfos):
+        problemInfos["xLabels"]=xLabels
+        problemInfos["lb"]=lb
+        problemInfos['ub']=ub
         
-        for paraInfo in paraInfos:
+        return problemInfos
+        
+    def recordDefault(self, projectInfos, paraInfos, modelInfos):
+        totalParaInfos=modelInfos["totalParaList"]
+        hruSuffix=["chm", "gw", "hru", "mgt", "sdr", "sep", "sol"]
+        subBasinSuffix=["pnd", "rte", "sub", "swq", "wgn", "wus"]
+        hruList=modelInfos["hruList"]
+        sub_hruList=modelInfos["sub_hru"]
+        subList=modelInfos["subList"]
+        
+        file_var={}
+        
+        for i, paraInfo in enumerate(paraInfos):
             
             name=paraInfo[0]
+            suffix=paraInfo[1]
+            mode=paraInfo[2]
+            position="default"
+            
+            if(totalParaInfos.query('para_name==@name')['type'].values[0]=="int"):
+                data_type_=0
+            else:
+                data_type_=1
+            
+            suffix=suffix.lower()
+            
+            if suffix in hruSuffix:
+                if paraInfo[5]=='all':
+                    files=[e+".{}".format(suffix) for e in hruList]
+                else:
+                    files=[]
+                    for comb in paraInfo[5].split(" "):
+                        if "(" not in comb:
+                            code=f"{'0' * (9 - 4 - len(comb))}{comb}{'0'*4}"
+                            for hru in sub_hruList[comb]:
+                                files.append(f"{hru}.{suffix}")
+                        else:
+                            sub=comb.split("(")[0]
+                            hru=comb.split("(")[1].strip(")").split(',')
+                            
+                            for e in hru:
+                                code=f"{'0' * (9 - 4 - len(sub))}{sub}{'0'*(4-len(e))}{e}"
+                                files.append(f"{code}.{suffix}")
+            elif suffix in subBasinSuffix:
+                if paraInfo[5]=='all':
+                    files=[e+".{}".format(suffix) for e in subList]
+                else:
+                    comb=paraInfo[5].spilt()
+                    files=[f"{sub}.{suffix}" for sub in comb]
+            elif suffix=="bsn":
+                files=["basins.bsn"]
+            
+            for file in files:
+                file_var.setdefault(file, {})
+                file_var[file].setdefault("index", [])
+                file_var[file].setdefault("mode", [])
+                file_var[file].setdefault("name", [])
+                file_var[file].setdefault("position", [])
+                file_var[file].setdefault("type", [])
+                file_var[file]['index'].append(i)
+                
+                if mode=="v":
+                    file_var[file]["mode"].append(0)
+                elif mode=="r":
+                    file_var[file]["mode"].append(1)
+                elif mode=="a":
+                    file_var[file]["mode"].append(2)
+                
+                file_var[file]["name"].append(name)
+                file_var[file]["position"].append(position)
+                file_var[file]["type"].append(data_type_)
+        
+        for file_name, infos in file_var.items():
+            print(projectInfos["work_path"], file_name)
+            read_value_swat(projectInfos["work_path"], file_name, infos["name"], infos["position"], 1)
+        
+        with ThreadPoolExecutor(max_workers=projectInfos["max_threads"]) as executor:
+            futures=[]
+            for file_name, infos in file_var.items():
+                futures.append(executor.submit(read_value_swat, projectInfos["work_path"], file_name, infos["name"], infos["position"], 1))
+        
+        for future in as_completed(futures):
+            res=future.result()
+            for key, items in res.items():
+                values=' '.join(str(e) for e in items)
+                _, file_name=key.split("|")
+                file_var[file_name].setdefault("default", [])
+                file_var[file_name]["default"].append(values)
+        return file_var
+
+                
+                
+                
+                
+                
+                        
+                        
+                
+            
             
             
                   

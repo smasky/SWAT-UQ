@@ -8,7 +8,7 @@ from .double_tree_widget import DoubleTreeWidget
 
 class AddParaWidget(FramelessDialog):
     
-    def __init__(self, options, selected=None, parent=None):
+    def __init__(self, leftOptions, rightOptions, selected=None, parent=None):
         
         super().__init__(parent)
         self.selected={}
@@ -16,7 +16,7 @@ class AddParaWidget(FramelessDialog):
         label=BodyLabel(self.tr("Parameter Selection"), self)
         self.vBoxLayout.addWidget(label)
         
-        self.contentWidget=DoubleTreeWidget(options, selected, self)
+        self.contentWidget=DoubleTreeWidget(leftOptions, rightOptions, selected, self)
         self.vBoxLayout.addWidget(self.contentWidget)
         
         self.buttonGroup=QWidget(self)
@@ -37,10 +37,12 @@ class AddParaWidget(FramelessDialog):
         for i in range(targetRoot.childCount()):
             topChild=targetRoot.child(i)
             topName=topChild.text(0)
+            self.selected.setdefault(topName, [])
             for j in range(topChild.childCount()):
                 child=topChild.child(j)
                 paraName=child.text(0)
-                self.selected.setdefault(topName, []).append(paraName)
+                self.selected[topName].append(paraName)
+                
                         
         self.accept()
     

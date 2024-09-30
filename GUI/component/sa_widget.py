@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, 
                              QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QThread
 from PyQt5.QtGui import QFont
 from qfluentwidgets import (BodyLabel, ComboBox, 
                             RadioButton, SpinBox, DoubleSpinBox, TextEdit,
@@ -11,6 +11,7 @@ import GUI.data
 from importlib.resources import path
 from .process_widget import ProcessWidget
 from ..project import Project as Pro
+from ..woker import InitWorker
 class SAWidget(QFrame):
     INDEX=0
     def __init__(self, parent=None):
@@ -655,16 +656,21 @@ class SimulationWidget(QWidget):
         Pro.swatExe=self.swatEdit.currentText()
     
     def initialize(self):
+        Pro.initProject()
         
-        Pro.test()
-        
-        # lines=Pro.createSwatUQ()
-        # self.verbose.setText("\n".join(lines))
+    def run(self):
+        self.worker.initProject('1', '2', '3', '4', '5')
+    
+    # 槽函数，处理数据
+    def handle_data(self, data):
+        print("接收到的数据：", data)
+        # self.label.setText(f"接收到：{data}")
     
     def sampling(self):
         
-        x=Pro.sampling()
-        self.x=x
+        Pro.initModel()
+        # x=Pro.sampling()
+        # self.x=x
     
     def simulation(self):
         # x=1

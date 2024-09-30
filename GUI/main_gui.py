@@ -12,8 +12,6 @@ from .project import Project as Pro
 class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
-        ########data###########
-        Pro.loadParaList()
         
         self.initWindow()
 

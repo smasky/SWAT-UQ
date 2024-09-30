@@ -1,4 +1,4 @@
-from qfluentwidgets import ScrollArea, FluentIcon, Dialog
+from qfluentwidgets import ScrollArea, FluentIcon, Dialog, IndeterminateProgressRing
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
@@ -62,9 +62,6 @@ class GetStart(ScrollArea):
         res=newPro.exec()
         
         if res==Dialog.Accepted:
-            # Project.projectName=newPro.projectName
-            # Project.projectPath=newPro.projectPath
-            # Project.swatPath=newPro.swatPath
             self.activateBtn()
     
     def click_open_project(self):

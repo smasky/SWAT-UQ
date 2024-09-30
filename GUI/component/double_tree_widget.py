@@ -5,9 +5,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
 class DoubleTreeWidget(QWidget):
-    def __init__(self, options, selected, parent=None):
+    def __init__(self, leftOptions, rightOptions, selected, parent=None):
         super().__init__(parent)
-        self.options=options
+        self.leftOptions=leftOptions
+        self.rightOptions=rightOptions
         self.initUI()
         
         if selected is not None:
@@ -21,10 +22,12 @@ class DoubleTreeWidget(QWidget):
 
         self.sourceTree = TreeWidget()
         self.sourceTree.setHeaderLabel("Source Parameters")
-        self.populateTree(self.sourceTree, self.options)
-
+        
         self.targetTree = TreeWidget()
         self.targetTree.setHeaderLabel("Target Parameters")
+        
+        self.populateTree(self.sourceTree, self.leftOptions)
+        self.populateTree(self.targetTree, self.rightOptions)
 
         btnLayout = QVBoxLayout()
         self.btnToRight = PrimaryToolButton(FluentIcon.RIGHT_ARROW, self)
@@ -46,18 +49,19 @@ class DoubleTreeWidget(QWidget):
 
     def populateTree(self, widget, content):
         """为 Source 树结构添加参数项目"""
-        keys=list(content.keys())
-        rootItems={}
-        for key in keys:
-            rootItem=QTreeWidgetItem(widget, [key])
-            rootItems[key]=rootItem
+        if isinstance(content, dict):
+            keys=list(content.keys())
+            rootItems={}
+            for key in keys:
+                rootItem=QTreeWidgetItem(widget, [key])
+                rootItems[key]=rootItem
 
-        for rootItem in rootItems.values():
-            rootItem.setFlags(rootItem.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
-            rootItem.setCheckState(0, Qt.Unchecked)
+            for rootItem in rootItems.values():
+                rootItem.setFlags(rootItem.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
+                rootItem.setCheckState(0, Qt.Unchecked)
 
-        for key, value in content.items():
-            self.addChildItems(rootItems[key], value)
+            for key, value in content.items():
+                self.addChildItems(rootItems[key], value)
     
     def addChildItems(self, parent, children):
         
