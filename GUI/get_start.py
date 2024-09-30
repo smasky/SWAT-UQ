@@ -48,7 +48,7 @@ class GetStart(ScrollArea):
         
         vBoxLayout.addWidget(banner)
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        
+        # vBoxLayout.addStretch(1)
         with path(GUI.qss, "get_start.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())

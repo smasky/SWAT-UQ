@@ -14,12 +14,13 @@ from .woker import InitWorker, ReadWorker
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
-from PyQt5.QtCore import QThread, Qt
+from PyQt5.QtCore import QThread, Qt, QDate
 class Project:
     
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
     INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
     INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
+    
     
     swatPath=""
     projectPath=""
@@ -75,29 +76,40 @@ class Project:
         cls.worker.result.connect(accept, Qt.QueuedConnection)
         cls.thread.started.connect(run)
         cls.thread.start()
-       
-        # cls.thread = QThread()
-        # cls.worker = InitWorker()
-        # def run():
-        #     work_path=cls.swatPath
-        #     temp_path=os.path.join(cls.projectPath, "temp")
-        #     swat_exe_name=cls.swatExe
-        #     cls.worker.initQThread(work_path, temp_path, swat_exe_name, 12, 5, cls.paraInfos)
-            
-        # def accept(infos):
-        #     cls.projectInfos=infos["projectInfos"]
-        #     cls.modelInfos=infos["modelInfos"]
-        #     cls.problemInfos=infos["problemInfos"]
-        #     cls.thread.quit()
-        #     cls.thread.deleteLater()
-        #     cls.worker.deleteLater()
-        #     cls.thread.wait()
-        #     print("completed")
-        # cls.worker.moveToThread(cls.thread)
-        # cls.worker.result.connect(accept, Qt.QueuedConnection)
-        # cls.thread.started.connect(run)
-        # cls.thread.start()
         
+    @classmethod
+    def calDate(cls, observeDate):
+        
+        beginY, beginI, _ = observeDate[0]
+        endY, endI, _ = observeDate[-1]
+        printFlag=cls.modelInfos["printFlag"]
+        
+        if printFlag==1:
+            startDate=datetime(beginY, 1, 1)+timedelta(days=beginI-1)
+            endDate=datetime(endY, 1, 1)+timedelta(days=endI-1)
+        else:
+            startDate=datetime(beginY, beginI, 1)
+            endDate=datetime(endY, endI, 1)
+        
+        return startDate, endDate
+    
+    @classmethod
+    def calDateIndex(cls, beginDate, delta):
+        
+        printFlag=cls.modelInfos["printFlag"]
+        baseDate=QDate(beginDate.year(), 1, 1)
+        
+        if printFlag==1:
+            nowDate=beginDate.addDays(delta)
+            index=baseDate.daysTo(nowDate)
+            return nowDate.year(), index
+        else:
+            nowDate=beginDate.addMonths(delta)
+            return nowDate.year(), nowDate.month()-baseDate.month+1
+
+                
+    
+    
     @classmethod #TODO
     def initialize(cls):
         

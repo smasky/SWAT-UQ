@@ -19,9 +19,8 @@ class ObjTable(QFrame):
         
         super().__init__(parent)
         #########Data###########
-        self.observedData={}
-        self.objs=[]
-        self.default={'objID':1, 'serID':1,'reachID':1, "objType": "NSE", "varType": "Flow", "weight":1.0}
+        self.objInfos=[]
+        self.default={'objID':1, 'serID':1,'reachID':1, "objType": 0, "varType": 0, "weight":1.0}
         #########################
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
@@ -76,12 +75,11 @@ class ObjTable(QFrame):
         if not success:
             return
         
-        # objs={}
         infos=Pro.importProFromFile(path)
         for _, series in infos.items():
             for s in series:
                 self.addRow(s)
-        
+                self.objInfos.append(s)
     def saveProFile(self):
         
         path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.pro)")
@@ -133,8 +131,8 @@ class ObjTable(QFrame):
             self.default['objID']=data['objID']
             self.default['seriesID']=data['serID']+1
             self.default['reachID']=data['reachID']
-            
             self.addRow(data)
+            self.objInfos.append(data)
         
     def addRow(self, text):
         
@@ -159,26 +157,24 @@ class ObjTable(QFrame):
         item=QTableWidgetItem(f"{text['weight']:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 5, item)
         self.table.setCellWidget(row, 6, self.addOperation(row))
-
-        self.observedData[text['serID']]=text['data']
         
     def changeRow(self, row, text):
-        item=QTableWidgetItem(f"{text[0]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['objID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 0, item)
         
-        item=QTableWidgetItem(f"{text[1]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['serID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 1, item)
         
-        item=QTableWidgetItem(f"{text[2]:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['reachID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 2, item)
         
-        item=QTableWidgetItem(text[3]); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{Pro.INT_OBJTYPE[text['objType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 3, item)
         
-        item=QTableWidgetItem(text[4]); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{Pro.INT_VAR[text['varType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 4, item)
         
-        item=QTableWidgetItem(f"{text[5]:f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item=QTableWidgetItem(f"{text['weight']:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 5, item)
         self.table.setCellWidget(row, 6, self.addOperation(row))
 
@@ -199,40 +195,43 @@ class ObjTable(QFrame):
         delButton.setFixedSize(24,24)
         delButton.setProperty('row', row)
         hBoxLayout.addWidget(delButton)
-        
+        operation.delBtn=delButton
+        delButton.clicked.connect(self.delete_row)
         return operation
     
     def editPro(self):
         
         btn=self.sender()
         row=btn.property('row')
-        obj=self.objs[row]
+        obj=self.objInfos[row]
         
         dialog=AddProWidget(obj, self)
         res=dialog.exec()
         
         if res:
             data=dialog.data
-            objID=int(data['objID'])
-            seriesID=int(data['serID'])
-            reachID=int(data['reachID'])
-            objType=data['objType']
-            variable=data['varType']
-            weight=float(data['weight'])
+        
+            self.objInfos[row]=data
+            
+            self.default['objID']=data['objID']
+            self.default['seriesID']=data['serID']+1
+            self.default['reachID']=data['reachID']
+            
+            self.changeRow(row, data)
+    def delete_row(self):
+        
+        button = self.sender() 
+        row = button.property('row') 
+        
+        if row is not None:
+    
+            self.table.removeRow(row)
+            del self.objInfos[row]
+            self.update_button_row_properties()
 
-            self.objs[row]=data
-            
-            self.default['objID']=objID
-            self.default['seriesID']=seriesID+1
-            self.default['reachID']=reachID
-            
-            text=[objID, seriesID, reachID, objType, variable, weight]
+    def update_button_row_properties(self):
         
-            self.changeRow(row, text)
-        
-        
-        
-        
-        
-        
-        
+        for row in range(self.table.rowCount()):
+            widget = self.table.cellWidget(row, 6)  
+            if widget:
+                widget.delBtn.setProperty('row', row)

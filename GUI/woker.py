@@ -173,7 +173,7 @@ class ReadWorker(QObject):
                     else:
                         i+=1
                 
-                proInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "data": data})
+                proInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "observeData": data})
             i+=1
         return proInfos
     
