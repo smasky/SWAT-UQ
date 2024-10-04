@@ -499,6 +499,9 @@ class AnalysisWidget(QWidget):
         vBoxLayout=QVBoxLayout(self)
         
         self.textWidget=TextEdit(self); self.textWidget.setReadOnly(True)
+        font = QFont("Consolas")  # 或者使用 "Courier New"
+        font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
+        self.textWidget.setFont(font)
         vBoxLayout.addWidget(self.textWidget)
         
         self.btnWidget=QWidget(self); self.btnWidget.setObjectName("btnWidget")
@@ -523,6 +526,6 @@ class AnalysisWidget(QWidget):
         self.textWidget.append(f"The used data set is sampled by {smName}\n")
         self.textWidget.append(f"The size of the data set is {result['Y'].size}")
         
-        Pro.sensibility_analysis()
+        Pro.sensibility_analysis(self.textWidget)
         
         

@@ -1,10 +1,7 @@
 import os
-import re
 import glob
-import GUI.data
 import numpy as np
-import itertools
-import time
+import sys
 from importlib.resources import path
 from datetime import datetime, timedelta
 from PyQt5.QtWidgets import QApplication
@@ -16,7 +13,7 @@ from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, 
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
 from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
-from PyQt5.QtCore import QThread, Qt, QDate, QThreadPool
+from PyQt5.QtCore import QThread, Qt, QDate
 class Project:
     
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
@@ -265,7 +262,7 @@ class Project:
         cls.thread.start()
     
     @classmethod
-    def sensibility_analysis(cls):
+    def sensibility_analysis(cls, verboseWidget):
         SAInfos=cls.SAInfos
         initHyper={}
         analyzeHyper={}
@@ -290,6 +287,7 @@ class Project:
             else:
                 analyzeHyper[name]=value
         
+        initHyper['verbose']=True
         sa=eval(saClass)(**initHyper)
         
         analyzeHyper['X']=cls.SAResult['X']
@@ -300,7 +298,22 @@ class Project:
         nInput=cls.problemInfos['nInput']
         problem=PracticalProblem(None, nInput, 1, ub, lb)
         
+        verbose=[]
+        def write_verbose(text):
+            verbose.append(text)
+        
+        def flush():
+            pass
+        
+        origin=sys.stdout
+        sys.stdout.write = write_verbose
+        sys.stdout.flush = flush
+        
         sa.analyze(problem=problem, **analyzeHyper)
+        
+        sys.stdout=origin
+        
+        verboseWidget.append("".join(verbose))
         
         
         

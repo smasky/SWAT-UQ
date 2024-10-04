@@ -314,7 +314,6 @@ class InitWorker(QObject):
             tempSwatDirs.append(path)
         
         projectInfos['tempSwatDirs']=tempSwatDirs
-        
         with ThreadPoolExecutor(max_workers=projectInfos['numParallel']) as executor:
             futures = [executor.submit(copy_origin_to_tmp, swatPath, work_temp) for work_temp in tempSwatDirs]
         for future in as_completed(futures):
@@ -459,6 +458,7 @@ class InitWorker(QObject):
         ub=np.array(ub).reshape(1, -1)
         
         problemInfos["xLabels"]=xLabels
+        problemInfos["nInput"]=len(xLabels)
         problemInfos["lb"]=lb
         problemInfos['ub']=ub
         
