@@ -34,7 +34,7 @@ class AddProWidget(FramelessDialog):
         
         h2=QHBoxLayout()
         label2=BodyLabel(str("Series ID:").rjust(OFFSET+1), self); serIDEdit=LineEdit(self); serIDEdit.setReadOnly(True)
-        self.serIDEdit=serIDEdit; self.serIDEdit.setText(int(default['serID']));serIDEdit.setMinimumWidth(150)
+        self.serIDEdit=serIDEdit; self.serIDEdit.setText(str(default['serID']));serIDEdit.setMinimumWidth(150)
         h2.addWidget(label2); h2.addWidget(serIDEdit); h2.addStretch(1)
         vBoxLayout.addLayout(h2)
         
@@ -128,7 +128,7 @@ class AddProWidget(FramelessDialog):
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(800, 400)
+        self.setFixedSize(1000, 400)
         self.titleBar.hide()
     
     def initDataWidget(self, layout):
@@ -136,9 +136,9 @@ class AddProWidget(FramelessDialog):
         vBoxLayout=QVBoxLayout()
         self.dataTable=TableWidget(self); 
         self.dataTable.setBorderRadius(8); self.dataTable.setBorderVisible(True)
-        self.dataTable.setColumnCount(3)
-        self.dataTable.setHorizontalHeaderLabels([self.tr('Year'), 
-                                                  self.tr('Index'), self.tr('Value')])
+        self.dataTable.setColumnCount(5)
+        self.dataTable.setHorizontalHeaderLabels([self.tr('Index'), self.tr('Year'), self.tr('Month'), 
+                                                  self.tr('Day'), self.tr('Value')])
         
         vBoxLayout.addWidget(self.dataTable)
         
@@ -179,27 +179,39 @@ class AddProWidget(FramelessDialog):
             
         else:
             for i in range(n):
-                year, index=Pro.calDateIndex(self.beginDataEdit.date, i)
-                observeData.append([int(year), int(index), float(data[i])])
+                index, year, month, day=Pro.calDateIndex(self.beginDataEdit.date, i)
+                observeData.append([int(index), int(year), int(month), int(day), float(data[i])])
+                
+            for i in range(self.dataTable.rowCount()):
+                self.dataTable.removeRow(0)
             self.inputData(observeData)
-       
+
     def inputData(self, data):
+        
         m = len(data)
         
         for i in range(m):
-            year, index, value = data[i]
+            index, year, month, day, value = data[i]
             self.dataTable.insertRow(i)
-            item=QTableWidgetItem(f"{year:d}")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            self.dataTable.setItem(i, 0, item)
             item=QTableWidgetItem(f"{index:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            self.dataTable.setItem(i, 1, item)
-            item=QTableWidgetItem(f"{value:f}")
+            self.dataTable.setItem(i, 0, item)
+            item=QTableWidgetItem(f"{year:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.dataTable.setItem(i, 2, item) 
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            self.dataTable.setItem(i, 1, item)
+            item=QTableWidgetItem(f"{month:d}")
+            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            self.dataTable.setItem(i, 2, item)
+            item=QTableWidgetItem(f"{day:d}")
+            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            self.dataTable.setItem(i, 3, item)
+            item=QTableWidgetItem(f"{value:.2f}")
+            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.dataTable.setItem(i, 4, item) 
         self.observeData=data
         
     def calDeltaNum(self, begin, end):
@@ -251,7 +263,7 @@ class AddProWidget(FramelessDialog):
         data=[]
         
         for i in range(rows):
-            data.append((int(self.dataTable.item(i, 0).text()),int(self.dataTable.item(i, 1).text()), float(self.dataTable.item(i, 2).text())))
+            data.append((int(self.dataTable.item(i, 0).text()),int(self.dataTable.item(i, 1).text()), int(self.dataTable.item(i, 2).text()),int(self.dataTable.item(i, 3).text()),float(self.dataTable.item(i, 4).text())))
 
         return data
         

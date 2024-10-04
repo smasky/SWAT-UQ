@@ -25,30 +25,25 @@ class StepWidget(QFrame):
         
 class ProcessWidget(QFrame):
     
-    # buttonClicked=pyqtSignal(int)
-    
     def __init__(self, parent=None):
         super().__init__(parent)
         
         self.widgets=[]
         self.btns=[]
         self.hBoxLayout=QHBoxLayout(self)
-
+        self.setMaximumHeight(80)
     def addStep(self, i, content):
         
         btnWidget=StepWidget(content, self)
         self.hBoxLayout.addWidget(btnWidget)
         self.widgets.append(btnWidget)
         self.btns.append(btnWidget.btn)
-        # btnWidget.btn.clicked.connect(self.on_button_clicked)
         btnWidget.btn.setEnabled(False)
         if len(self.widgets)==1:
             btnWidget.btn.setChecked(True)
            
-    
     def on_button_clicked(self, index):
     
-        # self.buttonClicked.emit(index)
         self.btns[index].setChecked(True)
         self.update()
         

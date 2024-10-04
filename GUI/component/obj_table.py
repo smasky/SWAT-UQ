@@ -70,7 +70,7 @@ class ObjTable(QFrame):
     
     def importProFile(self):
         
-        path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectPath, "Parameter File (*.pro)")
+        path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
         
         if not success:
             return
@@ -80,46 +80,17 @@ class ObjTable(QFrame):
             for s in series:
                 self.addRow(s)
                 self.objInfos.append(s)
+
+        self.default['serID']=self.default['serID']+len(series)
+        
     def saveProFile(self):
         
-        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectPath, "Parameter File (*.pro)")
+        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
         
         if not success:
             return
         
-        lines=[]
-        
-        numObj=len(self.objs)
-        numSer=self.table.rowCount()
-        lines.append(f"{numSer:d}     : Number of observed variables series\n")
-        lines.append(f"{numObj:d}     : The numbers of objective functions\n")
-        lines.append("\n")
-        
-        for i in range(numSer):
-            obj=self.objs[i]
-            
-            objID=obj['objID']
-            serID=obj['serID']
-            reachID=obj['reachID']
-            objType=obj['objType']
-            varType=obj['varType']
-            weight=obj['weight']
-            observedDate=obj['observeData']
-            
-            lines.append(f"OBJ_{objID} : ID of objective function\n")
-            lines.append(f"SER_{serID} : ID of series data\n")
-            lines.append(f"REACH_{reachID} : ID of reach\n")
-            lines.append(f"TYPE_{OBJTYPE[objType]} : Type of objective function\n")
-            lines.append(f"VAR_{VARIABLE[varType]} : Type of variable\n")
-            lines.append(f"{float(weight):.2f} : Weight of objective function\n")
-            lines.append(f"{observedDate.shape[0]:d} : Number of data points for this variable as it follows below\n")
-            lines.append("\n")
-            
-            for row in observedDate:
-                lines.append(f"{int(row[0]):d} {int(row[1]):d} {float(row[2]):.4f}\n")
-            lines.append("\n")
-        
-            Pro.saveProFile(path, lines)
+        Pro.saveProFile(path, self.objInfos)
         
     def addPro(self):
         
@@ -218,6 +189,7 @@ class ObjTable(QFrame):
             self.default['reachID']=data['reachID']
             
             self.changeRow(row, data)
+            
     def delete_row(self):
         
         button = self.sender() 

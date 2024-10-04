@@ -1,31 +1,38 @@
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 import re
 import os
+import queue
 import numpy as np
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from datetime import datetime, timedelta
 import itertools
 import pandas as pd
+import subprocess
 import tempfile
+import time
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 class VerboseWorker(QObject):
     
-    finished = pyqtSignal()
-    modelInfos=None
-    paraInfos=None
-    projectInfos=None
-    objInfos=None
+    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos):
+        self.projectInfos=projectInfos
+        self.modelInfos=modelInfos
+        self.paraInfos=paraInfos
+        self.objInfos=objInfos
+    
     def outputVerbose(self):
         
         ####################Project Information######################
         verboseInfos=[]
         title="="*25+"Project setting"+"="*25
-        verboseInfos.append(f"The path of SWAT project is: {self.projectInfos['work_path']}")
-        self.verbose.append(f"The file name of optimizing parameters is: {self.projectInfos['paras_file_name']}")
-        self.verbose.append(f"The file name of observed data is: {self.projectInfos['observed_file_name']}")
-        self.verbose.append(f"The name of SWAT executable is: {self.projectInfos['swat_exe_name']}")
-        self.verbose.append(f"Temporary directory has been created in: {self.projectInfos['work_temp_dir']}")
-        self.verbose.append("="*len(title))
+        verboseInfos.append(f"The path of SWAT project is: {self.projectInfos['swatPath']}")
+        verboseInfos.append(f"The path of UQ project is {self.projectInfos['projectPath']}") 
+        verboseInfos.append(f"The file name of optimizing parameters is: {self.projectInfos['paraPath']}") #TODO
+        verboseInfos.append(f"The file name of observed data is: {self.projectInfos['objPath']}") #TODO
+        verboseInfos.append(f"The name of SWAT executable is: {self.projectInfos['swatExe']}")
+        verboseInfos.append(f"Temporary directory has been created in: {self.projectInfos['tempPath']}")
+        verboseInfos.append(f"The number of thread to run SWAT: {self.projectInfos['numParallel']}")
+        verboseInfos.append("="*len(title))
         
         ####################Model Information#############################
         title="="*25+"Model Information"+"="*25
@@ -40,7 +47,7 @@ class VerboseWorker(QObject):
         verboseInfos.append(f"The number of HRUs is: {self.modelInfos['nHru']}")
         verboseInfos.append(f"The number of Reaches is: {self.modelInfos['nRch']}")
         
-        if self.modelInfos["print_flag"]==0:
+        if self.modelInfos["printFlag"]==0:
             verboseInfos.append("The output flag of SWAT is: "+"monthly")
         else:
             verboseInfos.append("The output flag of SWAT is: "+"daily")
@@ -50,6 +57,9 @@ class VerboseWorker(QObject):
         ########################Parameter Information###################
         verboseInfos+=self.outputParaInfo()
         
+        verboseInfos+=self.outputObjInfo()
+        
+        return verboseInfos
         ########################
     def outputObjInfo(self):
         
@@ -58,37 +68,42 @@ class VerboseWorker(QObject):
         title="="*25+"Observed Information"+"="*25
         
         verboseInfos.append(title)
-        verboseInfos.append(f"The number of observed data series is: {self.objInfos['nSeries']}")
-        verboseInfos.append(f"The number of observed data points is: {self.objInfos['nObjs']}")
         
-        objFormatted=f"{'Objective ID':^10}"
-        serIDFormatted=f"{'Series ID':^10}"
-        rchFormatted=f"{'Reach ID':^10}"
-        objTypeFormatted=f"{'Objective Type':^10}"
-        varFormatted=f"{'Variable':^10}"
-        weightFormatted=f"{'Weight':^10}"
+        objFormatted=f"{'Objective ID':^15}"
+        serIDFormatted=f"{'Series ID':^15}"
+        rchFormatted=f"{'Reach ID':^15}"
+        objTypeFormatted=f"{'Objective Type':^15}"
+        varFormatted=f"{'Variable':^15}"
+        weightFormatted=f"{'Weight':^15}"
         readLineFormatted=f"{'Read Line':<30}"
         
         verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
         
-        for obj, series in self.objInfos['objComb'].items():
-            for id in series:
-                objFormatted=f"{obj:^10}"
-                serIDFormatted=f"{id:^10}"
-                rchFormatted=f"{self.objInfos['rch'][id]:^10}"
-                objTypeFormatted=f"{self.objInfos['objType'][id]:^10}"
-                varFormatted=f"{self.objInfos['var'][id]:^10}"
-                weightFormatted=f"{self.objInfos['weight'][id]:^10.2f}"
-                
-                readLines=self.objInfos['readLines'][id]
-                lineStr=""
-                for line in readLines:
-                    lineStr+=str(line[0])+"-"+str(line[1])+" "
-                readLineFormatted=f"{lineStr:<30}"
-                
-                verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
+        for series in self.objInfos:
+            objID=series['objID']
+            serID=series['serID']
+            reachID=series['reachID']
+            objType=series['objType']
+            varType=series['varType']
+            weight=series['weight']
+            readLines=series['readLines']
+            
+            objFormatted=f"{objID:^15}"
+            serIDFormatted=f"{serID:^15}"
+            rchFormatted=f"{reachID:^15}"
+            objTypeFormatted=f"{objType:^15}"
+            varFormatted=f"{varType:^15}"
+            weightFormatted=f"{weight:^15.2f}"
+            
+            lineStr=""
+            for line in readLines:
+                lineStr+=str(line[0])+"-"+str(line[1])+" "
+            readLineFormatted=f"{lineStr:<30}"
+            
+            verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
         
         verboseInfos.append("="*len(title))
+        return verboseInfos
         
     def outputParaInfo(self):
         
@@ -99,7 +114,7 @@ class VerboseWorker(QObject):
         title="="*25+"Model Information"+"="*25
         verboseInfos.append(title)
         nameFormatted=f"{'Parameter name':^20}"
-        modeFormatted=f"{'Mode':^7}"
+        modeFormatted=f"{'Mode':^10}"
         lbFormatted=f"{'Lower Bound':^15}"
         ubFormatted=f"{'Upper Bound':^15}"
         sub_hruFormatted=f"{'HRU ID or Sub_HRU ID':^20}"
@@ -109,9 +124,9 @@ class VerboseWorker(QObject):
         
         for param in self.paraInfos:
             nameFormatted=f"{param[0]:^20}"
-            modeFormatted=f"{TUNEMODE[param[2]]:^7}"
-            lbFormatted=f"{param[3]:^15.2f}"
-            ubFormatted=f"{param[4]:^15.2f}"
+            modeFormatted=f"{TUNEMODE[param[2]]:^10}"
+            lbFormatted=f"{float(param[3]):^15.2f}"
+            ubFormatted=f"{float(param[4]):^15.2f}"
             sub_hruFormatted=f"{param[5]:^20}"
             verboseInfos.append(f"{nameFormatted}||{modeFormatted}||{lbFormatted}||{ubFormatted}||{sub_hruFormatted}")
         
@@ -119,10 +134,12 @@ class VerboseWorker(QObject):
     
     
 class ReadWorker(QObject):
-    
+    INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
+    INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
+    INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
     def readObjFile(self, path):
         
-        proInfos={}
+        objInfos={}
         with open(path, 'r') as f:
             lines=f.readlines()
         
@@ -134,7 +151,7 @@ class ReadWorker(QObject):
         patternWeight=re.compile(r'(\d+\.?\d*)')
         patternNum=re.compile(r'(\d+)')
         
-        patternValue=re.compile(r'(\d+)\s+(\d+)\s+(\d+\.?\d*)')
+        patternValue=re.compile(r'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.?\d*)')
         
         i=2
         
@@ -145,7 +162,7 @@ class ReadWorker(QObject):
             if match:
                 
                 objID=int(match.group(1))
-                proInfos.setdefault(objID, [])
+                objInfos.setdefault(objID, [])
                 
                 serID=int(patternSer.match(lines[i+1]).group(1))
                 reachID=int(patternRch.match(lines[i+2]).group(1))
@@ -165,21 +182,20 @@ class ReadWorker(QObject):
                 while True:
                     line=lines[i];n+=1
                     match=patternValue.match(line)
-                    year, index, value=int(match.group(1)), int(match.group(2)), float(match.group(3))
-                    data.append((year, index, value))
+                    index, year, month ,day, value=int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4)), float(match.group(3))
+                    data.append((index, year, month, day, value))
                     
                     if n==num:
                         break
                     else:
                         i+=1
                 
-                proInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "observeData": data})
+                objInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "observeData": data})
             i+=1
-        return proInfos
+        return objInfos
     
-    def readParaFile(self, path):
+    def readParaFile(self, path, modelInfos):
         
-        MODE={'r': 'Relative', 'v': 'Value', 'a': 'Add'}
         paraInfos=[]
         
         with open(path, 'r') as f:
@@ -190,17 +206,71 @@ class ReadWorker(QObject):
                 content=line.split()
                 
                 name=content[0]
-                ext=self.paraList[name]
-                mode=MODE[content[1]]
                 
-                lb=float(content[2]); ub=float(content[3])
+                ext=modelInfos['totalParaList'].loc[name, 'file_name']
                 
+                mode=self.MODE_INT[content[1]]
+                
+                lb=content[2]; ub=content[3]
                 position=" ".join(content[4:])
-                
-                paraInfos=[name, ext, mode, lb, ub, position]
+                paraInfo=[name, ext, mode, lb, ub, position]
+
+                paraInfos.append(paraInfo)
         
         return paraInfos
 
+class SaveWorker(QObject):
+        
+    def saveProFile(self, objInfos):
+        
+        objDict={}
+        
+        for objInfo in objInfos:
+            objID=objInfo['objID']
+            objDict.setdefault(objID, [])
+            
+            series={}
+            series['objID']=objInfo['objID']
+            series['serID']=objInfo['serID']
+            series['reachID']=objInfo['reachID']
+            series['objType']=objInfo['objType']
+            series['varType']=objInfo['varType']
+            series['weight']=objInfo['weight']
+            series['observeData']=objInfo['observeData']
+            objDict[objID].append(series)
+        
+        numObj=len(list(objDict.keys()))
+        numSer=len(objInfos)
+        
+        lines=[]
+        
+        lines.append(f"{numSer:d}     : Number of observed variables series\n")
+        lines.append(f"{numObj:d}     : The numbers of objective functions\n")
+        lines.append("\n")
+        
+        for objID, series in objDict.items():
+            for ser in series:
+                serID=ser['serID']
+                reachID=ser['reachID']
+                objType=ser['objType']
+                varType=ser['varType']
+                weight=ser['weight']
+                observedDate=ser['observeData']
+                
+                lines.append(f"OBJ_{objID} : ID of objective function\n")
+                lines.append(f"SER_{serID} : ID of series data\n")
+                lines.append(f"REACH_{reachID} : ID of reach\n")
+                lines.append(f"TYPE_{objType} : Type of objective function\n")
+                lines.append(f"VAR_{varType} : Type of variable\n")
+                lines.append(f"{float(weight):.2f} : Weight of objective function\n")
+                lines.append(f"{len(observedDate):d} : Number of data points for this variable as it follows below\n")
+                lines.append("\n")
+                
+                for row in observedDate:
+                    lines.append(f"{int(row[0]):d} {int(row[1]):d} {int(row[2]):d} {int(row[3]):d} {float(row[4]):.4f}\n")
+                lines.append('\n')
+        return lines
+            
 class InitWorker(QObject):
     
     result = pyqtSignal(dict)
@@ -208,9 +278,7 @@ class InitWorker(QObject):
     def __init__(self):
         super().__init__()
 
-    def initQThread(self, max_threads, num_parallel, projectInfos, paraInfos):
-
-        modelInfos=self.initModel(projectInfos)
+    def initQThread(self, projectInfos,  modelInfos, paraInfos, objInfos):
         
         defaultVar=self.recordDefault(projectInfos, paraInfos, modelInfos)
         
@@ -218,8 +286,42 @@ class InitWorker(QObject):
         
         problemInfos['defaultVar']=defaultVar
         
-        self.result.emit({"projectInfos": projectInfos, "modelInfos": modelInfos, "problemInfos": problemInfos})
+        projectInfos=self.generateTempPath(projectInfos)
+        
+        objInfos=self.initObj(objInfos, modelInfos)
+        
+        self.result.emit({"problemInfos": problemInfos, 'projectInfos': projectInfos, 'objInfos': objInfos})
+
+    def generateTempPath(self, projectInfos):
+        
+        # projectPath=projectInfos['projectPath']
+        swatPath=projectInfos['swatPath']
+        numParallel=projectInfos['numParallel']
+        tempPath=projectInfos['tempPath']
     
+        tempSwatDirs=[]
+        
+        if not os.path.exists(tempPath):
+            os.makedirs(tempPath)
+        
+        now_time=datetime.now().strftime("%m%d_%H%M%S")
+        tempPath=os.path.join(tempPath, now_time)
+        os.makedirs(tempPath)
+        projectInfos['tempPath']=tempPath
+        
+        for i in range(numParallel):
+            path=os.path.join(tempPath, f"instance_{i}")
+            tempSwatDirs.append(path)
+        
+        projectInfos['tempSwatDirs']=tempSwatDirs
+        
+        with ThreadPoolExecutor(max_workers=projectInfos['numParallel']) as executor:
+            futures = [executor.submit(copy_origin_to_tmp, swatPath, work_temp) for work_temp in tempSwatDirs]
+        for future in as_completed(futures):
+            future.result()    
+        
+        return projectInfos
+        
     def initModel(self, projectInfos):
         
         modelInfos={}
@@ -268,7 +370,7 @@ class InitWorker(QObject):
         modelInfos["nSub"]=len(modelInfos["subList"])
         modelInfos['hruList']=list(itertools.chain.from_iterable(subBasin_Hru.values()))
         modelInfos["nHru"]=len(modelInfos["hruList"])
-        modelInfos["nRch"]=len(modelInfos["hruList"])
+        modelInfos["nRch"]=len(modelInfos["subList"])
         
         totalParaList=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
         modelInfos["totalParaList"]=totalParaList
@@ -283,7 +385,63 @@ class InitWorker(QObject):
         modelInfos['para_file']=para_file
         
         self.result.emit(modelInfos)
-     
+    
+    def initObj(self, objInfos, modelInfos):
+        
+        for ser in objInfos:
+            
+            observeData=ser['observeData']
+            
+            beginIndex=observeData[0][0]
+            endIndex=observeData[-1][0]
+            
+            readLines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
+            
+            ser['readLines']=readLines
+            ser['dataList']=np.array(ser['observeData'])[:, 4]
+            
+        return objInfos
+            
+    def _generate_data_lines(self, start, end, modelInfos):
+        
+        printFlag=modelInfos["printFlag"]
+        nRch=modelInfos["nRch"]
+
+        lines=[]
+        if printFlag==0:
+            begin_month=modelInfos["beginRecord"].month
+            first_period=12-begin_month
+            if start<=first_period:
+                if end<=first_period:
+                    end_in_year=end
+                    lines.append([10+nRch*start, 9+nRch*(end_in_year+1)])
+                    return lines
+                else:
+                    end_in_year=first_period
+                lines.append([10+nRch*start, 9+nRch*(end_in_year+1)])
+            else:
+                years=start//12
+                start_in_year=start
+                end_in_year=years*12+11
+                if end<end_in_year:
+                    lines.append([10+nRch*start_in_year+nRch*years, 9+nRch*(end+1)+nRch*years])
+                    return lines
+                else:
+                    lines.append([10+nRch*start_in_year, 9+nRch*(end_in_year+1)+nRch*years])
+            while True:
+                start_in_year=end_in_year+1
+                end_in_year=start_in_year+11
+                years=(start_in_year-first_period)//12+1
+                if end_in_year>=end:
+                    lines.append([10+nRch*start_in_year+nRch*years, 9+nRch*(end+1)+nRch*years])
+                    break
+                else:
+                    lines.append([10+nRch*start_in_year, 9+nRch*(end_in_year+1)+nRch*years])
+            return lines 
+        elif printFlag==1:
+            lines=[[10+nRch*start, 9+nRch*(end+1)]]
+            return lines
+    
     def initProblem(self, paraInfos):
         
         problemInfos={}
@@ -294,9 +452,9 @@ class InitWorker(QObject):
         
         for paraInfo in paraInfos:
             xLabels.append(paraInfo[0])
-            lb.append(paraInfo[3])
-            ub.append(paraInfo[4])
-        
+            lb.append(float(paraInfo[3]))
+            ub.append(float(paraInfo[4]))
+                    
         lb=np.array(lb).reshape(1, -1)
         ub=np.array(ub).reshape(1, -1)
         
@@ -365,25 +523,21 @@ class InitWorker(QObject):
                 file_var[file].setdefault("type", [])
                 file_var[file]['index'].append(i)
                 
-                if mode=="v":
+                if mode==1:
                     file_var[file]["mode"].append(0)
-                elif mode=="r":
+                elif mode==0:
                     file_var[file]["mode"].append(1)
-                elif mode=="a":
+                elif mode==2:
                     file_var[file]["mode"].append(2)
                 
                 file_var[file]["name"].append(name)
                 file_var[file]["position"].append(position)
                 file_var[file]["type"].append(data_type_)
-        
-        for file_name, infos in file_var.items():
-            print(projectInfos["work_path"], file_name)
-            read_value_swat(projectInfos["work_path"], file_name, infos["name"], infos["position"], 1)
-        
-        with ThreadPoolExecutor(max_workers=projectInfos["max_threads"]) as executor:
+         
+        with ThreadPoolExecutor(max_workers=projectInfos["numThreads"]) as executor:
             futures=[]
             for file_name, infos in file_var.items():
-                futures.append(executor.submit(read_value_swat, projectInfos["work_path"], file_name, infos["name"], infos["position"], 1))
+                futures.append(executor.submit(read_value_swat, projectInfos["swatPath"], file_name, infos["name"], infos["position"], 1))
         
         for future in as_completed(futures):
             res=future.result()
@@ -394,16 +548,174 @@ class InitWorker(QObject):
                 file_var[file_name]["default"].append(values)
         return file_var
 
-                
-                
-                
-                
-                
-                        
-                        
-                
-            
-            
-            
-                  
+from UQPyL.utility.metrics import r_square
+from scipy.stats import pearsonr
+
+def func_NSE_inverse(true_values, sim_values):
+    return -1*r_square(true_values.reshape(-1,1), sim_values.reshape(-1,1))
+
+def func_RMSE(true_values, sim_values):
+    return np.sqrt(np.mean(np.square(true_values-sim_values)))
+
+def func_PCC_inverse(true_values, sim_values):
+    return -1*np.corrcoef(true_values.ravel(), sim_values.ravel())[0,1]
+
+def func_Pbias(true_values, sim_values):
+    return np.sum(np.abs(true_values-sim_values)/true_values)*100
+
+def func_KGE_inverse(true_values, sim_values):
+    true_values=true_values.ravel()
+    sim_values=sim_values.ravel()
+    r, _ = pearsonr(true_values, sim_values)
+    beta = np.std(sim_values) / np.std(true_values)
+    gamma = np.mean(sim_values) / np.mean(true_values)
+    kge = 1 - np.sqrt((r - 1)**2 + (beta - 1)**2 + (gamma - 1)**2)
+    return -1*kge
+
+class RunWorker(QObject):
+    
+    VAR_COL={0 : 7}
+    OBJTYPE_FUNC={0 : func_NSE_inverse}
+    
+    updateProcess=pyqtSignal(float)
+    result=pyqtSignal(object)
+    start=pyqtSignal(object)
+    
+    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, problemInfos):
         
+        self.projectInfos=projectInfos
+        self.modelInfos=modelInfos
+        self.paraInfos=paraInfos
+        self.objInfos=objInfos
+        
+        self.numParallel=projectInfos['numParallel']
+        self.numThreads=projectInfos['numThreads']
+        swatDirs=projectInfos['tempSwatDirs']
+        self.file_var=problemInfos['defaultVar']
+        self.swatExe=projectInfos['swatExe']
+        self.objInfos=objInfos
+        self.nRch=modelInfos['nRch']
+        
+        self.workPath=queue.Queue()
+        for dir in swatDirs:
+            self.workPath.put(dir)
+        
+        super().__init__()
+        
+        self.start.connect(self.evaluate)
+        
+    # def evaluate(self, X):
+        
+    #     n=X.shape[0]
+    #     Y=np.zeros((n,1))
+
+    #     count=0
+    
+    #     with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
+    #         futures=[executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+        
+    #     for future in futures:
+    #         id, obj_value=future.result()
+    #         Y[id, :]=obj_value
+            
+    #         count+=1
+    #         percent=(count+1)/n*100
+    #         self.updateProcess.emit(percent)
+                  
+    #     self.result.emit(Y)
+    
+    def _subprocess(self, x, id):
+        
+        workPath=self.workPath.get()
+        
+        self.setValues(workPath, x)
+        
+        process= subprocess.Popen(
+            os.path.join(workPath, self.swatExe),
+            cwd=workPath,
+            stdin=subprocess.PIPE, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE,
+            text=True)
+        process.wait()
+
+        obj=0.0
+        for series in self.objInfos:
+            
+            reachID=series['reachID']
+            readLines=series['readLines']
+            # observeData=series['observeData']
+            varType=series['varType']
+            objType=series['objType']
+            weight=series['weight']
+            
+            simValueList=[]
+            for line in readLines:
+                
+                startLine, endLine=line[0], line[1]
+                subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
+                simValueList.append(subValue)
+                
+            simValue=np.concatenate(simValueList, axis=0)
+            obValue=series['dataList']
+            obj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+            
+        self.workPath.put(workPath)
+        return id, obj
+        
+    def setValues(self, path, x):
+                
+        with ThreadPoolExecutor(max_workers=self.numThreads) as executor:
+            futures=[]
+            for file_name, infos in self.file_var.items():
+                future = executor.submit(write_value_to_file, path, file_name, 
+                                            infos["name"], infos["default"], 
+                                            infos["index"], infos["mode"],  infos["position"], infos["type"],
+                                            x.ravel())
+                futures.append(future)
+            
+            for future in as_completed(futures):
+                res=future.result()
+    
+    def evaluate(self, X):
+    
+        n = X.shape[0]
+        Y = np.zeros((n, 1))
+        count = 0
+        
+   
+        with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
+            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+            
+            for future in as_completed(futures):
+                idx, obj_value = future.result()  
+                Y[idx, :] = obj_value  
+                
+                count += 1
+                percent = (count / n) * 100
+                self.updateProcess.emit(percent) 
+
+        self.result.emit(Y) 
+class EvaluateThread(QThread):
+    
+    def __init__(self, worker, X):
+        super().__init__()
+        self.worker = worker
+        self.X = X
+
+    def run(self):
+        self.worker.evaluate(self.X)
+
+class InitThread(QThread):
+    
+    def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos):
+        super().__init__()
+        self.worker=worker
+        self.projectInfos=projectInfos
+        self.modelInfos=modelInfos
+        self.paraInfos=paraInfos
+        self.objInfos=objInfos
+    
+    def run(self):
+        
+        self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos)

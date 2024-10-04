@@ -1,89 +1,101 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore import QThread, QObject, pyqtSignal
 import sys
 import time
+import numpy as np
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QMainWindow, QProgressBar, QPushButton, QVBoxLayout, QWidget
 
-# 定义一个 Project 类来保存共享的数据
-class Project:
-    def __init__(self):
-        self.name = "My Shared Project"
-        self.data = "Some shared data"
-
-    def set_data(self, new_data):
-        self.data = new_data
-
-
-# 定义一个工作线程类
 class Worker(QObject):
-    # 定义信号，用来通知主线程工作完成
-    finished = pyqtSignal()
+    updateProcess = pyqtSignal(float)  # 进度信号
+    result = pyqtSignal(object)        # 结果信号
+
+    def __init__(self, numParallel):
+        super(Worker, self).__init__()
+        self.numParallel = numParallel  # 并行数
+
+    def _subprocess(self, data, idx):
+        # 模拟耗时操作
+        time.sleep(1)
+        # 返回子线程的计算结果
+        return idx, np.random.rand(1)[0]
+
+    def test(self, X):
+        print("Running in thread:", threading.current_thread().name)  # 打印当前线程名称
+        n = X.shape[0]
+        Y = np.zeros((n, 1))  # 用于存储结果
+        count = 0
+        
+        # 使用 ThreadPoolExecutor 执行子任务
+        with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
+            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+            
+            # 等待每个任务完成并更新进度
+            for future in as_completed(futures):
+                idx, obj_value = future.result()  # 获取结果
+                Y[idx, :] = obj_value  # 存储结果
+                
+                count += 1
+                percent = (count / n) * 100
+                self.updateProcess.emit(percent)  # 发射进度信号
+
+        self.result.emit(Y)  # 最后发射结果信号
+
+class WorkerThread(QThread):
+    def __init__(self, worker, X):
+        super().__init__()
+        self.worker = worker
+        self.X = X
 
     def run(self):
-        # 模拟一些耗时任务
-        time.sleep(3)
-        print("Worker 线程完成任务")
-        # 发射信号通知主线程
-        self.finished.emit()
+        self.worker.test(self.X)
 
-
-# 创建一个共享的 QWidget，读取和修改 Project 中的数据
-class MainWindow(QWidget):
-    def __init__(self, project):
+class MainWindow(QMainWindow):
+    def __init__(self):
         super().__init__()
-        self.project = project
-        self.init_ui()
+        self.setWindowTitle("Test Thread Example")
 
-    def init_ui(self):
-        self.layout = QVBoxLayout()
-        self.label = QLabel(f"Project Name: {self.project.name}")
-        self.data_label = QLabel(f"Data: {self.project.data}")
-        self.button = QPushButton("Start Worker Thread")
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.data_label)
-        self.layout.addWidget(self.button)
-        self.setLayout(self.layout)
+        # 创建进度条和按钮
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setRange(0, 100)
+        self.button = QPushButton("Start Test", self)
+        self.button.clicked.connect(self.start_test)
 
-        # 按钮点击时启动线程
-        self.button.clicked.connect(self.start_worker)
+        # 布局
+        layout = QVBoxLayout()
+        layout.addWidget(self.progressBar)
+        layout.addWidget(self.button)
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
 
-    def start_worker(self):
+        # 创建 worker
+        self.worker = Worker(numParallel=4)  # 使用4个并行任务
+
+        # 连接信号和槽
+        self.worker.updateProcess.connect(self.update_progress)
+        self.worker.result.connect(self.handle_result)
+
+    def start_test(self):
+        # 禁用按钮以防止重复点击
+        self.button.setEnabled(False)
+        X = np.random.rand(10, 5)  # 模拟输入
+
         # 创建并启动线程
-        self.thread = QThread()
-        self.worker = Worker()
-        self.worker.moveToThread(self.thread)
-
-        # 当 worker 完成工作后，通知主线程
-        self.worker.finished.connect(self.on_worker_finished)
-
-        # 线程启动后执行 run 函数
-        self.thread.started.connect(self.worker.run)
-
-        # 启动线程
+        self.thread = WorkerThread(self.worker, X)
+        self.thread.finished.connect(self.thread.deleteLater)  # 确保线程完成后被清理
         self.thread.start()
 
-    def on_worker_finished(self):
-        print("主线程收到完成信号，线程即将退出")
-        # 确保线程完成任务后安全退出
-        self.thread.quit()
-        if self.thread.wait():  # 等待线程完全退出
-            print("线程已退出")
+    def update_progress(self, value):
+        self.progressBar.setValue(int(value))  # 更新进度条
 
-
-# 主函数
-def main():
-    app = QApplication(sys.argv)
-
-    # 创建一个共享的 Project 实例
-    shared_project = Project()
-
-    # 创建主窗口，传入共享 Project 实例
-    main_window = MainWindow(shared_project)
-
-    # 显示窗口
-    main_window.show()
-
-    sys.exit(app.exec_())
-
+    def handle_result(self, Y):
+        print("Test finished, received result:", Y)
+        # 任务完成后恢复按钮
+        self.button.setEnabled(True)
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())

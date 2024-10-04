@@ -9,7 +9,10 @@ SAWidget{
     padding-top: 10px;
 }
 
-
+#conclusionWidget{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
 
 #hyperStack{
     border-top: 1px solid rgba(0, 0, 0, 0.15);
