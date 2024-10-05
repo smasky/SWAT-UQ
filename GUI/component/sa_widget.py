@@ -485,6 +485,7 @@ class SimulationWidget(QWidget):
 
     def simulation(self):
         
+        self.verbose.append("Model Simulating ... Please Waiting!\n")
         self.simBtn.setEnabled(False)
         Pro.simulation(self.processBar, self.finish)
     

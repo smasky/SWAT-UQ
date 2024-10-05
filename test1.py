@@ -1,101 +1,61 @@
 import sys
-import time
+from PyQt5.QtWidgets import QApplication, QMainWindow
+import pyqtgraph as pg
 import numpy as np
-import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QProgressBar, QPushButton, QVBoxLayout, QWidget
 
-class Worker(QObject):
-    updateProcess = pyqtSignal(float)  # 进度信号
-    result = pyqtSignal(object)        # 结果信号
-
-    def __init__(self, numParallel):
-        super(Worker, self).__init__()
-        self.numParallel = numParallel  # 并行数
-
-    def _subprocess(self, data, idx):
-        # 模拟耗时操作
-        time.sleep(1)
-        # 返回子线程的计算结果
-        return idx, np.random.rand(1)[0]
-
-    def test(self, X):
-        print("Running in thread:", threading.current_thread().name)  # 打印当前线程名称
-        n = X.shape[0]
-        Y = np.zeros((n, 1))  # 用于存储结果
-        count = 0
-        
-        # 使用 ThreadPoolExecutor 执行子任务
-        with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
-            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
-            
-            # 等待每个任务完成并更新进度
-            for future in as_completed(futures):
-                idx, obj_value = future.result()  # 获取结果
-                Y[idx, :] = obj_value  # 存储结果
-                
-                count += 1
-                percent = (count / n) * 100
-                self.updateProcess.emit(percent)  # 发射进度信号
-
-        self.result.emit(Y)  # 最后发射结果信号
-
-class WorkerThread(QThread):
-    def __init__(self, worker, X):
-        super().__init__()
-        self.worker = worker
-        self.X = X
-
-    def run(self):
-        self.worker.test(self.X)
-
-class MainWindow(QMainWindow):
+class InteractiveBarGraph(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Test Thread Example")
 
-        # 创建进度条和按钮
-        self.progressBar = QProgressBar(self)
-        self.progressBar.setRange(0, 100)
-        self.button = QPushButton("Start Test", self)
-        self.button.clicked.connect(self.start_test)
+        # 设置窗口
+        self.setWindowTitle('Interactive Bar Graph')
+        self.setGeometry(100, 100, 800, 600)
 
-        # 布局
-        layout = QVBoxLayout()
-        layout.addWidget(self.progressBar)
-        layout.addWidget(self.button)
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
+        # 设置绘图小部件
+        self.plot_widget = pg.PlotWidget()
+        self.setCentralWidget(self.plot_widget)
 
-        # 创建 worker
-        self.worker = Worker(numParallel=4)  # 使用4个并行任务
+        # 设置背景颜色
+        self.plot_widget.setBackground('w')  # 白色背景
 
-        # 连接信号和槽
-        self.worker.updateProcess.connect(self.update_progress)
-        self.worker.result.connect(self.handle_result)
+        # 数据
+        self.x = np.array([1, 2, 3, 4, 5])
+        self.y = np.random.randint(1, 20, size=5)
 
-    def start_test(self):
-        # 禁用按钮以防止重复点击
-        self.button.setEnabled(False)
-        X = np.random.rand(10, 5)  # 模拟输入
+        # 创建柱状图，使用渐变色
+        brush = pg.mkBrush(color=(100, 100, 250, 180))  # 淡蓝色，带透明度
+        self.bar_graph = pg.BarGraphItem(x=self.x, height=self.y, width=0.6, brush=brush)
+        self.plot_widget.addItem(self.bar_graph)
 
-        # 创建并启动线程
-        self.thread = WorkerThread(self.worker, X)
-        self.thread.finished.connect(self.thread.deleteLater)  # 确保线程完成后被清理
-        self.thread.start()
+        # 设置计时器，用于动态更新数据
+        self.timer = pg.QtCore.QTimer()
+        self.timer.timeout.connect(self.update_data)
+        self.timer.start(1000)  # 每秒更新一次
 
-    def update_progress(self, value):
-        self.progressBar.setValue(int(value))  # 更新进度条
+        # 添加鼠标移动事件
+        self.plot_widget.scene().sigMouseMoved.connect(self.mouseMoved)
 
-    def handle_result(self, Y):
-        print("Test finished, received result:", Y)
-        # 任务完成后恢复按钮
-        self.button.setEnabled(True)
+        # 创建标签用于显示数据
+        self.label = pg.TextItem("", anchor=(0.5, 0), color='black')  # 黑色字体
+        self.plot_widget.addItem(self.label)
 
-if __name__ == "__main__":
+    def update_data(self):
+        # 动态更新柱状图数据
+        self.y = np.random.randint(1, 20, size=5)
+        self.bar_graph.setOpts(height=self.y)
+
+    def mouseMoved(self, evt):
+        # 获取鼠标位置
+        pos = evt
+        if self.plot_widget.sceneBoundingRect().contains(pos):
+            mouse_point = self.plot_widget.plotItem.vb.mapSceneToView(pos)
+            index = int(mouse_point.x())
+            if 0 <= index < len(self.x):
+                self.label.setText(f"x: {self.x[index]}, y: {self.y[index]}")
+                self.label.setPos(self.x[index], self.y[index])
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = InteractiveBarGraph()
     window.show()
     sys.exit(app.exec_())

@@ -296,7 +296,8 @@ class Project:
         ub=cls.problemInfos['ub']
         lb=cls.problemInfos['lb']
         nInput=cls.problemInfos['nInput']
-        problem=PracticalProblem(None, nInput, 1, ub, lb)
+        xLabels=cls.problemInfos['xLabels']
+        problem=PracticalProblem(None, nInput, 1, ub, lb, x_labels=xLabels)
         
         verbose=[]
         def write_verbose(text):
