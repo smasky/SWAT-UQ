@@ -22,6 +22,9 @@ class Project:
     
     SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
     SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Sobol Sequence': 'Sobol_Sequence'}
+    SOP_METHOD={'Genetic Algorithm': 'GA', 'Particle Swarm Optimization': 'PSO', 'Differential Evolution': 'DE', 'Artificial Bee Colony': 'ABC', 'Cooperation Search Algorithm': 'CSA', 'Shuffled Complex Evolution-UA':'SCE_UA'}
+    
+    
     SA_SAMPLE={'Sobol': ['Sobol Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
     
     SA_HYPER={'Sobol': {'Z-score':{'type':'bool', 'class': 'Sobol', 'method': '__init__' ,'default': ''}, 'calSecondOrder':{'type':'bool', 'class': 'Sobol','method': '__init__', 'default': '0'}}, 
@@ -34,8 +37,8 @@ class Project:
     SAMPLE_HYPER={'Full Factorial Design': {'levels': {'dec': 'Number of Factors *', 'method': '__init__', 'class': 'FFD','type': 'int', 'related': '*','default': '5'}},
               'Latin Hyper Sampling' : {'nt': {'dec': 'Number for sampling *', 'method' : 'sample', 'type': 'int', 'class' : 'LHS', 'related': '*', 'default': '500'}},
               'Random' : {'nt': {'dec': 'Number for sampling *', 'class' : 'Random', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '500'}},
-              'Fast Sequence' : { 'M' : {'dec': 'M', 'class' : 'Fast_Sequence' ,'method': '__init__', 'type': 'int', 'default': '5'},
-                                  'nt' : {'dec': 'The number for sampling *', 'class' : 'Fast_Sequence','method': 'sample', 'type': 'int', 'related' : '*' ,'default': '500'}
+              'Fast Sequence' : { 'M' : {'dec': 'M', 'class' : 'FAST_Sequence' ,'method': '__init__', 'type': 'int', 'default': '5'},
+                                  'nt' : {'dec': 'The number for sampling *', 'class' : 'FAST_Sequence','method': 'sample', 'type': 'int', 'related' : '*' ,'default': '500'}
                                 },
               'Morris Sequence' : { 'num_levels': {'dec': 'Number of Level', 'class' : 'Morris_Sequence','method': '__init__', 'type': 'int', 'default': '5'},
                                     'nt' : {'dec': 'Number of Trajectory *', 'class' : 'Morris_Sequence', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '100'}

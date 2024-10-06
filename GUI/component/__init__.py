@@ -7,3 +7,4 @@ from .line_box import LineBox
 from .add_para_widget import AddParaWidget
 from .obj_table import ObjTable
 from .sa_widget import SAWidget
+from .op_widget import OPWidget

@@ -1,0 +1,19 @@
+OPWidget{
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius:15px;
+    background-color: rgba(249, 249, 249, 0.75);
+}
+
+#contentWidget{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    padding-top: 10px;
+}
+
+#conclusionWidget{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+#hyperStack{
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+}

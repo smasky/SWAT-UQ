@@ -7,6 +7,7 @@ from .get_start import GetStart
 from .para_setting import ParaSetting
 from .pro_define import ProDefine
 from .sensitivity_analysis import SenAnalysis
+from .optimization import Optimization
 
 from .project import Project as Pro
 class MainWindow(FluentWindow):
@@ -27,6 +28,9 @@ class MainWindow(FluentWindow):
         self.sen_analysis = SenAnalysis(self)
         self.sen_analysis.setObjectName("SenAnalysis")
         
+        self.optimization = Optimization(self)
+        self.optimization.setObjectName("Optimization")
+        
         self.initNavigation()
         
     def initNavigation(self):
@@ -38,6 +42,8 @@ class MainWindow(FluentWindow):
         self.navigationInterface.addSeparator()
         btn=self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr("Sensitivity Analysis"));Pro.btnSets.append(btn); btn.setEnabled(False)
         btn.clicked.connect(self.sen_analysis.updateUI)
+        btn=self.addSubInterface(self.optimization, FIF.CALENDAR, self.tr("Optimization"));Pro.btnSets.append(btn); btn.setEnabled(False)
+        btn.clicked.connect(self.optimization.updateUI)
         
     def initWindow(self):
         

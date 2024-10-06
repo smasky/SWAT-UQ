@@ -1,19 +1,18 @@
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, 
                              QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QThread
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from qfluentwidgets import (BodyLabel, ComboBox, 
                             RadioButton, SpinBox, DoubleSpinBox, TextEdit,
                             CheckBox, PrimaryPushButton, LineEdit, ProgressBar)
-import math
 import os
 import copy
 import GUI.qss
 import GUI.data
 from importlib.resources import path
 from .process_widget import ProcessWidget
+from .button_group import ButtonGroup
 from ..project import Project as Pro
-from ..woker import InitWorker
 class SAWidget(QFrame):
     INDEX=0
     def __init__(self, parent=None):
@@ -202,12 +201,6 @@ class SetupWidget(QWidget):
         self.loadParaFile()
         self.loadObjFile()
     
-    def updateCombobox(self):
-        self.objLine.clear()
-        self.objLine.addItems(Pro.checkProFile())
-        self.paraEdit.clear()
-        self.paraEdit.addItems(Pro.checkParaFile)
-    
     def loadParaFile(self):
         
         path=self.paraEdit.currentText()
@@ -269,40 +262,6 @@ class SetupWidget(QWidget):
             for option in options:
                 index.append(self.SAMPLE_METHOD.index(option))
         self.smBtnGroup.setEnables(index)
-        
-class ButtonGroup(QWidget):
-    currentIndex=None
-    def __init__(self, contents, bool, parent=None):
-        super().__init__(parent)
-        self.btns=[]
-        self.group=QButtonGroup(self)
-        layout=QHBoxLayout(self)
-        layout.setSpacing(25)
-        
-        for i, content in enumerate(contents):
-            btn=RadioButton(content, self)
-            self.btns.append(btn)
-            self.group.addButton(btn, i)
-            layout.addWidget(btn)
-            btn.setEnabled(bool)
-
-        self.group.idClicked.connect(self.setCurrentIndex)
-        
-    def setCurrentIndex(self, i):
-        
-        self.currentIndex=i
-    
-    def setEnables(self, indexes):
-        
-        for btn in self.btns:
-                btn.setEnabled(False)
-                btn.setChecked(False)
-                
-        for index in indexes:
-            self.btns[index].setEnabled(True)
-        
-        self.btns[indexes[0]].click()
-
 class hyperWidget(QWidget):
     
     changed=pyqtSignal()
@@ -514,18 +473,23 @@ class AnalysisWidget(QWidget):
         vBoxLayout.addWidget(self.btnWidget)
         
     def updateUI(self):
-        pass
-    
-    def execute(self):
-        self.textWidget.append("Sensibility Analysis is running ... \n")
+        
         SAInfos=Pro.SAInfos
         
         saName=SAInfos['saName']
         smName=SAInfos['smName']
-        result=Pro.SAResult
         self.textWidget.append(f"Sensibility Analysis you selected: {saName}\n")
         self.textWidget.append(f"The used data set is sampled by {smName}\n")
-        self.textWidget.append(f"The size of the data set is {result['Y'].size}")
+        
+        result=Pro.SAResult
+        
+        self.textWidget.append(f"The size of the data set is {result['Y'].size}\n")
+        
+        self.textWidget.append(f"Please click the execute button to do sensibility analysis.\n")
+        
+    def execute(self):
+        
+        self.textWidget.append("Sensibility Analysis is running ... \n")
         
         Pro.sensibility_analysis(self.textWidget)
         
