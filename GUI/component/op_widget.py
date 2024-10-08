@@ -19,7 +19,10 @@ from ..project import Project as Pro
 class OPWidget(QFrame):
     
     def __init__(self, parent=None):
+        
         super().__init__(parent)
+        
+        self.INDEX=0
         
         vBoxLayout=QVBoxLayout(self)
         
@@ -30,20 +33,23 @@ class OPWidget(QFrame):
         self.processWidget=processWidget
         vBoxLayout.addWidget(processWidget)
         
-        contentWidget=QStackedWidget(self)
-        contentWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        contentWidget.setObjectName("contentWidget")
-        vBoxLayout.addWidget(contentWidget)
+        self.contentWidget=QStackedWidget(self)
+        self.contentWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.contentWidget.setObjectName("contentWidget")
+        vBoxLayout.addWidget(self.contentWidget)
         ##############################################
         
         self.setupWidget=SetupWidget(self)
         self.setupWidget.next.connect(self.updateNext)
-        contentWidget.addWidget(self.setupWidget)
+        self.opWidget=OptimizationWidget(self)
+        
+        self.contentWidget.addWidget(self.setupWidget)
+        self.contentWidget.addWidget(self.opWidget)
         
         ###############################################
         self.nextButton=PrimaryPushButton("Next", self)
         self.nextButton.setEnabled(False)
-        
+        self.nextButton.clicked.connect(self.nextPage)
         self.nextButton.setMinimumWidth(300)
         h=QHBoxLayout();h.addStretch(1);h.addWidget(self.nextButton);h.addStretch(1)
         vBoxLayout.addLayout(h)
@@ -56,6 +62,31 @@ class OPWidget(QFrame):
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
 
+    def nextPage(self):
+        
+        if self.INDEX==0:
+            widget=self.setupWidget
+            hyper=self.setupWidget.hyperStack.widget(1).returnHyper()
+
+            if widget.objType=="SOP":
+                op=widget.SOP_METHOD[widget.sopBtnGroup.currentIndex]
+                Pro.OPInfos={'opName': op, 'opClass': Pro.SOP_METHOD[op], 'opHyper': hyper[Pro.SOP_METHOD[op]]}
+            else:
+                op=widget.MOP_METHOD[widget.mopBtnGroup.currentIndex]
+                Pro.OPInfos={'opName': op, 'opClass': Pro.MOP_METHOD[op], 'opHyper': hyper[Pro.MOP_METHOD[op]]}
+            
+            
+            # sa=widget.SA_METHOD[widget.saBtnGroup.currentIndex]
+            # sm=widget.SAMPLE_METHOD[widget.smBtnGroup.currentIndex]
+            # Pro.SAInfos={'saName': sa, 'saClass': Pro.SA_METHOD[sa],'saHyper': hyper[Pro.SA_METHOD[sa]],
+            #              'smName': sm,'smClass' : Pro.SAMPLE_METHOD[sm],'smHyper': hyper[Pro.SAMPLE_METHOD[sm]]}
+            
+        self.INDEX+=1
+        self.contentWidget.setCurrentIndex(self.INDEX)
+        self.contentWidget.currentWidget().updateUI()
+        self.processWidget.on_button_clicked(self.INDEX)
+        self.nextButton.setEnabled(False)
+    
     def updateUI(self):
         
         self.setupWidget.updateUI()
@@ -124,6 +155,8 @@ class SetupWidget(QWidget):
         self.objEdit.sop.connect(self.showSOP)
         self.objEdit.mop.connect(self.showMOP)
         self.objEdit.clearBtn.connect(self.clearMethod)
+        self.objEdit.sop.connect(self.ensureObj)
+        self.objEdit.mop.connect(self.ensureObj)
         ############################hyperWidget##########################################
         
         self.hyperStack=QStackedWidget(self)
@@ -213,10 +246,105 @@ class SetupWidget(QWidget):
         self.objEdit.addObjs(objs)
 
         Pro.projectInfos['objPath']=path
+        
+    def ensureObj(self):
+        
+        objIDs=self.objEdit.selectID
+        objInfos=[]
+        for objID in objIDs:
+            objInfos.append(self.objInfos[objID])
+        
+        Pro.objInfos=objInfos
 
-class SimulationWidget(QWidget):
+class OptimizationWidget(QWidget):
     
-    def __init__(self):
+    def __init__(self, parent=None):
+        
+        super().__init__(parent)
+        
+        self.currentValue=0
+                
+        vBoxLayout=QVBoxLayout(self); vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.processBar=ProgressBar(self)
+        self.processBar.setValue(self.currentValue)
+        Pro.processBar=self.processBar
+        
+        h=QHBoxLayout(); h.addSpacing(20)
+        h.addWidget(self.processBar); h.addSpacing(20)
+        
+        vBoxLayout.addLayout(h)
+        vBoxLayout.addSpacing(10)
+
+        ##############################
+        h=QHBoxLayout(); h.addSpacing(20)
+        self.label=BodyLabel("SWAT Execution:")
+        self.swatEdit=ComboBox(self); self.swatEdit.setMinimumWidth(400)
+        
+        self.swatEdit.currentIndexChanged.connect(self.swatChanged)
+        h.addWidget(self.label); h.addWidget(self.swatEdit); h.addStretch(1)
+        vBoxLayout.addLayout(h)
+        ##################################
+        h=QHBoxLayout(); h.addSpacing(20)
+        self.label2=BodyLabel("SWAT Parallel:")
+        self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(5)
+        h.addWidget(self.label2); h.addWidget(self.parallelEdit); h.addStretch(1)
+        vBoxLayout.addLayout(h)
+        
+        ########################
+         #################Verbose################
+        self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
+        font = QFont("Consolas")  # 或者使用 "Courier New"
+        font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
+        self.verbose.setFont(font)
+        self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        vBoxLayout.addWidget(self.verbose)
+        ######################################
+        btnWidget=QWidget(self); btnWidget.setObjectName("btnWidget")
+        btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
+        h=QHBoxLayout(btnWidget); h.setContentsMargins(0, 5, 0, 5)
+        self.initializeBtn=PrimaryPushButton("Initialize"); self.initializeBtn.clicked.connect(self.initialize)
+        self.optimizationBtn=PrimaryPushButton("Optimization"); self.optimizationBtn.clicked.connect(self.optimizing)
+        self.optimizationBtn.setEnabled(False)
+        h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.optimizationBtn); h.addStretch(1)
+        
+        vBoxLayout.addWidget(btnWidget)
+        
+    def updateUI(self):
+        self.swatEdit.addItems(Pro.findSwatExe())
+        
+    def swatChanged(self):
+        Pro.projectInfos['swatExe']=self.swatEdit.currentText()
+    
+    def initialize(self):
+        
+        numParallel=int(self.parallelEdit.value())
+        Pro.projectInfos['numParallel']=numParallel
+        
+        self.swatEdit.setEnabled(False)
+        self.parallelEdit.setEnabled(False)
+        
+        self.initializeBtn.setEnabled(False)
+        
+        Pro.initProject(self.verbose, self.optimizationBtn)
+        
+    def optimizing(self):
+        
+        Pro.sampling()
+        # self.verbose.append("Sampling Done. Please start simulation!\n")
+        
+        # self.samplingBtn.setEnabled(False)
+        # self.simBtn.setEnabled(True)
+
+    # def simulation(self):
+        
+    #     self.verbose.append("Model Simulating ... Please Waiting!\n")
+    #     self.simBtn.setEnabled(False)
+    #     Pro.simulation(self.processBar, self.finish)
+    
+    # def finish(self):
+        
+    #     self.verbose.append("Simulation Done. Please click the next to execute analysis!\n")
+    #     self.parent().parent().nextButton.setEnabled(True)
         
 
 class RadioWidget(QWidget):
@@ -226,6 +354,8 @@ class RadioWidget(QWidget):
     clearBtn=pyqtSignal()
     
     def __init__(self, objs, parent=None):
+        
+        self.selectID=[]
         
         super().__init__(parent)
         
@@ -262,11 +392,14 @@ class RadioWidget(QWidget):
             self.hBoxLayout.addWidget(radio)
     
     def ensureType(self):
-        
         count=0
         for radio in self.radios:
             if radio.isChecked():
                 count+=1
+                
+                ID=radio.text().split()[1]
+                self.selectID.append(int(ID))
+                
         if count==0:
             self.clearBtn.emit()
         elif count==1:

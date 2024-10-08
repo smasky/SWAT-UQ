@@ -70,7 +70,7 @@ class Project:
              }
     
     projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
-    problemInfos=None; SAInfos=None; SAResult=None
+    problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None
     
     btnSets=[]
     @classmethod
@@ -108,16 +108,16 @@ class Project:
     @classmethod
     def calDate(cls, observeDate):
         
-        beginY, beginI, _ = observeDate[0]
-        endY, endI, _ = observeDate[-1]
+        _, beginY, beginM, beginD, _= observeDate[0]
+        _, endY, endM, endD, _= observeDate[-1]
         printFlag=cls.modelInfos["printFlag"]
         
         if printFlag==1:
-            startDate=datetime(beginY, 1, 1)+timedelta(days=beginI-1)
-            endDate=datetime(endY, 1, 1)+timedelta(days=endI-1)
+            startDate=datetime(beginY, beginM, beginD)
+            endDate=datetime(endY, endM, endD)
         else:
-            startDate=datetime(beginY, beginI, 1)
-            endDate=datetime(endY, endI, 1)
+            startDate=datetime(beginY, beginM, 1)
+            endDate=datetime(endY, endM, 1)
         
         return startDate, endDate
     
@@ -245,15 +245,16 @@ class Project:
         cls.thread.finished.connect(cls.thread.deleteLater)  # 确保线程完成后被清理
         cls.thread.finished.connect(finish)
         cls.thread.start()
-       
+    
     @classmethod
     def initProject(cls, verboseWidget, btn):
         
         cls.projectInfos["numThreads"]=12 #TODO
     
         cls.worker = InitWorker()
+        cls.worker.initQThread(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
-            
+        
         def accept(infos):
             
             cls.problemInfos=infos["problemInfos"]

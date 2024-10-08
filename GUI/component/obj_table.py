@@ -1,4 +1,4 @@
-from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton
+from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
 
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog,
                              QHeaderView, QFrame, QTableWidgetItem, QWidget, QDialog)
@@ -29,13 +29,13 @@ class ObjTable(QFrame):
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(24); 
+        importButton=PrimaryPushButton("Import From File (.obj)", self); importButton.setFixedSize(200, 30); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(24); 
         self.addButton=addButton; addButton.clicked.connect(self.addPro)
         
-        hBoxLayout=QHBoxLayout(); hBoxLayout.addWidget(importButton);hBoxLayout.addStretch(2)
+        hBoxLayout=QHBoxLayout(); hBoxLayout.addWidget(importButton);hBoxLayout.addStretch(3)
         hBoxLayout.addWidget(label);hBoxLayout.addStretch(3);hBoxLayout.addWidget(addButton)
         self.vBoxLayout.addLayout(hBoxLayout)
          
@@ -54,10 +54,12 @@ class ObjTable(QFrame):
             self.tr('Obj Type'), self.tr('Variable'), self.tr('Weight'), 
             self.tr('Operation')])
         
+        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
         self.generateButton=PrimaryPushButton("Save to Objective File (.obj)", self)
-        self.generateButton.setMaximumWidth(500)
+        self.generateButton.setFixedSize(200, 30)
         self.generateButton.clicked.connect(self.saveProFile)
-        self.vBoxLayout.addWidget(self.generateButton)
+        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
+        self.vBoxLayout.addLayout(hBoxLayout)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
         self.vBoxLayout.setContentsMargins(10, 10, 10, 10)
@@ -85,12 +87,53 @@ class ObjTable(QFrame):
         
     def saveProFile(self):
         
-        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
+        keys=['reachID', 'objType', 'varType', 'weight']
         
-        if not success:
-            return
-        
-        Pro.saveProFile(path, self.objInfos)
+        if len(self.objInfos)>0:
+            temp={}
+            sign=True
+            signID=None
+            for series in self.objInfos:
+                
+                serID=series['serID']
+                
+                if serID not in temp:
+                    temp[serID]=series
+                else:
+                    for key in keys:
+                        if temp[serID][key] != series[key]:
+                            sign=False
+                            signID=serID
+                            break
+                
+                if not sign:
+                    break
+            
+            if not sign:
+                InfoBar.warning(
+                title=f"Error",
+                content=f"The series ID {signID} have different attributes, please check.",
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=2000,
+                parent=self.parent()
+                )
+                
+            else:
+            
+                path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
+                if not success:
+                    return
+                
+                Pro.saveProFile(path, self.objInfos)
+            
+        else:
+            InfoBar.warning(
+            title=f"Error",
+            content=f"There is no objective information to save.",
+            position=InfoBarPosition.TOP_RIGHT,
+            duration=2000,
+            parent=self.parent()
+            )
         
     def addPro(self):
         
@@ -103,6 +146,7 @@ class ObjTable(QFrame):
             self.default['seriesID']=data['serID']+1
             self.default['reachID']=data['reachID']
             self.addRow(data)
+            
             self.objInfos.append(data)
         
     def addRow(self, text):

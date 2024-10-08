@@ -24,13 +24,13 @@ class ParaTable(QFrame):
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File", self); importButton.setFixedHeight(30); 
+        importButton=PrimaryPushButton("Import From File (.par)", self); importButton.setFixedSize(200, 30); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(30); 
         self.addButton=addButton; addButton.clicked.connect(self.addPara)
         
-        hBoxLayout=QHBoxLayout(); hBoxLayout.addWidget(importButton);hBoxLayout.addStretch(2)
+        hBoxLayout=QHBoxLayout();hBoxLayout.addStretch(3)
         hBoxLayout.addWidget(label);hBoxLayout.addStretch(3);hBoxLayout.addWidget(addButton)
         
         self.vBoxLayout.addLayout(hBoxLayout)
@@ -46,12 +46,14 @@ class ParaTable(QFrame):
 
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
-            self.tr('Parameter Name'), self.tr('File Extension'), self.tr('Tuning Mode'),
-            self.tr('Lower Bound'), self.tr('Upper Bound'), self.tr('   Position (SUB-HRU)   '), self.tr('Operation')])
+            str('Parameter Name'), str('File Extension'), str('Tuning Mode'),
+            str('Lower Bound'), str('Upper Bound'), str('Position (SUB-HRU)'), str('Operation')])
         
+        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
         self.generateButton=PrimaryPushButton("Save To Parameter File (.par)", self)
-        self.generateButton.setMaximumWidth(500); self.generateButton.clicked.connect(self.saveParFile)
-        self.vBoxLayout.addWidget(self.generateButton)
+        self.generateButton.setFixedSize(200, 30); self.generateButton.clicked.connect(self.saveParFile)
+        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
+        self.vBoxLayout.addLayout(hBoxLayout)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
         self.vBoxLayout.setContentsMargins(10, 10, 10, 10)
@@ -89,25 +91,39 @@ class ParaTable(QFrame):
         infos=[]
         rows=self.table.rowCount()
         
-        for i in range(rows):
-            paraName=self.table.item(i, 0).text()
-            tuningMode=Pro.INT_MODE[self.table.cellWidget(i, 2).core.currentIndex()]
-            lowerBound=str(self.table.cellWidget(i, 3).core.value())
-            upperBound=str(self.table.cellWidget(i, 4).core.value())
-            position=self.table.cellWidget(i, 5).core.text()
-            infos.append([paraName, tuningMode, lowerBound, upperBound, position])
+        if rows>0:
+            
+            path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos["projectPath"], "Parameter File (*.par)")
+            
+            if not success:
+                return
+            
+            for i in range(rows):
+                paraName=self.table.item(i, 0).text()
+                tuningMode=Pro.INT_MODE[self.table.cellWidget(i, 2).core.currentIndex()]
+                lowerBound=str(self.table.cellWidget(i, 3).core.value())
+                upperBound=str(self.table.cellWidget(i, 4).core.value())
+                position=self.table.cellWidget(i, 5).core.text()
+                infos.append([paraName, tuningMode, lowerBound, upperBound, position])
 
-        path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos["projectPath"], "Parameter File (*.par)")
-        if success:
             Pro.saveParaFile(infos, path)
             self.saveSuccess(path)
-            
-    def saveSuccess(self, path):
         
-        InfoBar.success(
-            title=f"Save Success",
-            content=f"the parameter setting have been save to {path}",
+        else:
+            InfoBar.warning(
+            title=f"Error",
+            content=f"There is no parameter information to save.",
             position=InfoBarPosition.TOP_RIGHT,
-            duration=5000,
+            duration=2000,
             parent=self.parent()
         )
+            
+    def saveSuccess(self, path): 
+        InfoBar.success(
+            title=f"Save Success",
+            content=f"Parameter setting file have been save to {path}",
+            position=InfoBarPosition.TOP_RIGHT,
+            duration=2000,
+            parent=self.parent()
+        )
+    

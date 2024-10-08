@@ -79,28 +79,30 @@ class VerboseWorker(QObject):
         
         verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
         
-        for series in self.objInfos:
-            objID=series['objID']
-            serID=series['serID']
-            reachID=series['reachID']
-            objType=series['objType']
-            varType=series['varType']
-            weight=series['weight']
-            readLines=series['readLines']
+        for objID, Ser in self.objInfos.items():
             
-            objFormatted=f"{objID:^15}"
-            serIDFormatted=f"{serID:^15}"
-            rchFormatted=f"{reachID:^15}"
-            objTypeFormatted=f"{objType:^15}"
-            varFormatted=f"{varType:^15}"
-            weightFormatted=f"{weight:^15.2f}"
-            
-            lineStr=""
-            for line in readLines:
-                lineStr+=str(line[0])+"-"+str(line[1])+" "
-            readLineFormatted=f"{lineStr:<30}"
-            
-            verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
+            for series in Ser:
+                objID=series['objID']
+                serID=series['serID']
+                reachID=series['reachID']
+                objType=series['objType']
+                varType=series['varType']
+                weight=series['weight']
+                readLines=series['readLines']
+                
+                objFormatted=f"{objID:^15}"
+                serIDFormatted=f"{serID:^15}"
+                rchFormatted=f"{reachID:^15}"
+                objTypeFormatted=f"{objType:^15}"
+                varFormatted=f"{varType:^15}"
+                weightFormatted=f"{weight:^15.2f}"
+                
+                lineStr=""
+                for line in readLines:
+                    lineStr+=str(line[0])+"-"+str(line[1])+" "
+                readLineFormatted=f"{lineStr:<30}"
+                
+                verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
         
         verboseInfos.append("="*len(title))
         return verboseInfos
@@ -182,7 +184,7 @@ class ReadWorker(QObject):
                 while True:
                     line=lines[i];n+=1
                     match=patternValue.match(line)
-                    index, year, month ,day, value=int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4)), float(match.group(3))
+                    index, year, month ,day, value=int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4)), float(match.group(5))
                     data.append((index, year, month, day, value))
                     
                     if n==num:
@@ -226,9 +228,10 @@ class SaveWorker(QObject):
         objDict={}
         
         for objInfo in objInfos:
+            
             objID=objInfo['objID']
             objDict.setdefault(objID, [])
-            
+   
             series={}
             series['objID']=objInfo['objID']
             series['serID']=objInfo['serID']
@@ -250,6 +253,7 @@ class SaveWorker(QObject):
         
         for objID, series in objDict.items():
             for ser in series:
+                
                 serID=ser['serID']
                 reachID=ser['reachID']
                 objType=ser['objType']
@@ -269,6 +273,7 @@ class SaveWorker(QObject):
                 for row in observedDate:
                     lines.append(f"{int(row[0]):d} {int(row[1]):d} {int(row[2]):d} {int(row[3]):d} {float(row[4]):.4f}\n")
                 lines.append('\n')
+                
         return lines
             
 class InitWorker(QObject):
@@ -294,11 +299,9 @@ class InitWorker(QObject):
 
     def generateTempPath(self, projectInfos):
         
-        # projectPath=projectInfos['projectPath']
         swatPath=projectInfos['swatPath']
         numParallel=projectInfos['numParallel']
         tempPath=projectInfos['tempPath']
-    
         tempSwatDirs=[]
         
         if not os.path.exists(tempPath):
@@ -387,19 +390,43 @@ class InitWorker(QObject):
     
     def initObj(self, objInfos, modelInfos):
         
-        for ser in objInfos:
+        infos={}
+        
+        for objID, series in objInfos.items():
+            infos.setdefault(objID, [])
             
-            observeData=ser['observeData']
+            temp={}
             
-            beginIndex=observeData[0][0]
-            endIndex=observeData[-1][0]
+            for ser in series:
+                serID=ser['serID']
+                temp.setdefault(serID, [])
+                temp[serID].append(ser)
             
-            readLines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
+            for serID, ser in temp.items():
+                readLines=[]
+                dataList=[]
+                for s in ser:
+                    observeData=s['observeData']
+                    beginIndex=observeData[0][0]
+                    endIndex=observeData[-1][0]
+                    lines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
+                    readLines+=lines
+                    dataList.append(np.array(observeData)[:, 4])
+                s['dataList']=np.concatenate(dataList, axis=0) #TODO
+                s['readLines']=readLines
+                infos[objID].append(s)
+        # for ser in objInfos:
             
-            ser['readLines']=readLines
-            ser['dataList']=np.array(ser['observeData'])[:, 4]
+        #     observeData=ser['observeData']
+        #     beginIndex=observeData[0][0]
+        #     endIndex=observeData[-1][0]
+
+        #     readLines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
             
-        return objInfos
+        #     ser['readLines']=readLines
+        #     ser['dataList']=np.array(ser['observeData'])[:, 4]
+            
+        return infos
             
     def _generate_data_lines(self, start, end, modelInfos):
         

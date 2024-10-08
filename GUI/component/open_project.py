@@ -35,7 +35,7 @@ class OpenProject(FramelessDialog):
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(618, 300)
+        self.setFixedSize(618, 250)
         self.titleBar.hide()
 
     def open_folder_dialog(self):

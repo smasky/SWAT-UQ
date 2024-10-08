@@ -228,16 +228,17 @@ class SetupWidget(QWidget):
     def ensureObj(self):
         
         objID=int(self.objEdit.text().split()[1])
-        Pro.objInfos=self.objInfos[objID]
+        Pro.objInfos={objID: self.objInfos[objID]}
         
-    
     def openParaDialog(self):
+        
         path, success=QFileDialog.getOpenFileName(self, "Open File", "", "Parameter Files (*.par)")
         if success:
             self.paraEdit.setText(path)
             self.paraBtn.setEnabled(True)
      
     def openProDialog(self):
+        
         path, success=QFileDialog.getOpenFileName(self, "Open File", "", "Objective Files (*.obj)")
         
         if success:
@@ -322,7 +323,7 @@ class SimulationWidget(QWidget):
     def swatChanged(self):
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
     
-    def initialize(self, samplingBtn):
+    def initialize(self):
         
         numParallel=int(self.parallelEdit.value())
         Pro.projectInfos['numParallel']=numParallel

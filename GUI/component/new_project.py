@@ -1,7 +1,8 @@
+from PyQt5.QtCore import Qt
 from qframelesswindow import FramelessDialog
 from qfluentwidgets import BodyLabel, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton, IndeterminateProgressRing
 
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout
 from ..project import Project as Pro
 class NewProject(FramelessDialog):
     projectName=None
@@ -16,28 +17,19 @@ class NewProject(FramelessDialog):
         self.vBoxLayout.addStretch(1)
         
         self.contentWidget=QWidget(self)
-        self.contentLayout=QVBoxLayout(self.contentWidget)
+        self.contentLayout=QFormLayout(self.contentWidget)
+        self.contentLayout.setLabelAlignment(Qt.AlignRight)
         self.vBoxLayout.addWidget(self.contentWidget)
         
-        hBoxLayout=QHBoxLayout()
-        nameLabel=BodyLabel(self.tr(str("UQ Project Name:").rjust(19)), self.contentWidget)
-        nameEdit=LineEdit(self.contentWidget); nameEdit.setMinimumWidth(400);self.nameEdit=nameEdit
-        hBoxLayout.addWidget(nameLabel); hBoxLayout.addWidget(nameEdit);hBoxLayout.addStretch(1)
-        self.contentLayout.addLayout(hBoxLayout)
+        self.nameEdit=LineEdit(self.contentWidget)
+        self.nameEdit.setMaximumWidth(400)
+        self.contentLayout.addRow(BodyLabel("UQ Project Name:"), self.nameEdit)
         
-        hBoxLayout=QHBoxLayout()
-        pathLabel=BodyLabel(self.tr(str("UQ Project Path:").rjust(21)), self.contentWidget)
-        pathEdit=LineEdit(self.contentWidget); pathEdit.setMinimumWidth(400); self.pathEdit=pathEdit
-        fileButton=PrimaryToolButton(FluentIcon.FOLDER, self.contentWidget); fileButton.clicked.connect(self.open_folder_dialog)
-        hBoxLayout.addWidget(pathLabel); hBoxLayout.addWidget(pathEdit);hBoxLayout.addWidget(fileButton);hBoxLayout.addStretch(1)
-        self.contentLayout.addLayout(hBoxLayout)
+        self.pathEdit=LineEditWithPath(self.contentWidget)
+        self.contentLayout.addRow(BodyLabel("UQ Project Path:"), self.pathEdit)
         
-        hBoxLayout=QHBoxLayout()
-        swatPathLabel=BodyLabel(self.tr(str("SWAT Project Path:").rjust(20)), self.contentWidget)
-        swatPathEdit=LineEdit(self.contentWidget);swatPathEdit.setMinimumWidth(400);self.swatPathEdit=swatPathEdit
-        fileButton=PrimaryToolButton(FluentIcon.FOLDER, self.contentWidget); fileButton.clicked.connect(self.open_swat_folder_dialog)
-        hBoxLayout.addWidget(swatPathLabel); hBoxLayout.addWidget(swatPathEdit);hBoxLayout.addWidget(fileButton);hBoxLayout.addStretch(1)
-        self.contentLayout.addLayout(hBoxLayout)
+        self.swatPathEdit=LineEditWithPath(self.contentWidget)
+        self.contentLayout.addRow(BodyLabel("SWAT Project Path:"), self.swatPathEdit)
         
         self.vBoxLayout.addStretch(1)
         self.buttonGroup=QWidget(self)
@@ -48,28 +40,15 @@ class NewProject(FramelessDialog):
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(618, 300)
+        self.setFixedSize(618, 250)
         self.titleBar.hide()
-
-    def open_folder_dialog(self):
         
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
-
-        self.pathEdit.setText(folder_path)
-        
-    def open_swat_folder_dialog(self):
-        
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
-        
-        self.swatPathEdit.setText(folder_path)
-    
     def confirm_clicked(self):
         
         projectName=self.nameEdit.text()
-        projectPath=self.pathEdit.text()
-        swatPath=self.swatPathEdit.text()
+        projectPath=self.pathEdit.text
+        swatPath=self.swatPathEdit.text
         
-        # statusBar=IndeterminateProgressRing(self.parent(), start=True)
         Pro.openProject(projectName, projectPath, swatPath)
         
         self.accept()
@@ -77,4 +56,28 @@ class NewProject(FramelessDialog):
     def cancel_clicked(self):
         
         self.reject()
+
+class LineEditWithPath(QWidget):
+    
+    text=None
+    def __init__(self, parent=None):
         
+        super().__init__(parent)
+        
+        hBoxLayout=QHBoxLayout(self)
+        hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        
+        self.LineEdit=LineEdit(self)
+        self.LineEdit.setMinimumWidth(400)
+        self.btn=PrimaryToolButton(FluentIcon.FOLDER, self)
+        self.btn.clicked.connect(self.setText)
+
+        hBoxLayout.addWidget(self.LineEdit)
+        hBoxLayout.addWidget(self.btn)
+        hBoxLayout.addStretch(1)
+        
+    def setText(self):
+        
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        self.LineEdit.setText(folder_path)
+        self.text=folder_path 

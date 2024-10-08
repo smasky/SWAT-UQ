@@ -3,81 +3,72 @@ from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, PushButton
                             SpinBox, ComboBox, DoubleSpinBox, TableWidget, DatePicker, InfoBar, 
                             InfoBarIcon, InfoBarPosition, LineEdit)
 
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QTableWidgetItem
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QWidget,  QFileDialog,
+                             QTableWidgetItem, QFormLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QDate
 from ..project import Project as Pro
 
 import numpy as np
-
-OBJTYPE={"NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4}
-VARTYPE={"Flow":0, "Tol_N":1, "Tol_P":2}
-
 class AddProWidget(FramelessDialog):
+    
     data={}
+    
     def __init__(self, default, parent=None):
         
         super().__init__(parent)
         self.vBoxLayout=QVBoxLayout(self)
-        label=BodyLabel(self.tr("Problem Define"), self)
+        
+        ################Problem Define##################
+        label=BodyLabel(str("Problem Define"), self)
         self.vBoxLayout.addWidget(label)
         
         self.contentWidget=QWidget(self)
         self.vBoxLayout.addWidget(self.contentWidget)
         hBoxLayout=QHBoxLayout(self.contentWidget)
         
-        vBoxLayout=QVBoxLayout()
-        hBoxLayout.addLayout(vBoxLayout)
-        
+        formLayout=QFormLayout()
+        hBoxLayout.addLayout(formLayout, 3)
         self.initDataWidget(hBoxLayout)
         
-        OFFSET=15
+        formLayout.setLabelAlignment(Qt.AlignRight)
         
-        h2=QHBoxLayout()
-        label2=BodyLabel(str("Series ID:").rjust(OFFSET+1), self); serIDEdit=LineEdit(self); serIDEdit.setReadOnly(True)
-        self.serIDEdit=serIDEdit; self.serIDEdit.setText(str(default['serID']));serIDEdit.setMinimumWidth(150)
-        h2.addWidget(label2); h2.addWidget(serIDEdit); h2.addStretch(1)
-        vBoxLayout.addLayout(h2)
+        self.serIDEdit=SpinBox(self)
+        self.serIDEdit.setValue(int(default['serID']))
+        self.serIDEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Series ID:"), self.serIDEdit)
         
-        h1=QHBoxLayout()
-        label1=BodyLabel(str("Objective ID:").rjust(OFFSET-1), self); objIDEdit=SpinBox(self)
-        self.objIDEdit=objIDEdit; self.objIDEdit.setValue(int(default['objID']));objIDEdit.setMinimumWidth(150)
-        h1.addWidget(label1); h1.addWidget(objIDEdit); h1.addStretch(1)
-        vBoxLayout.addLayout(h1)
+        self.objIDEdit=SpinBox(self)
+        self.objIDEdit.setValue(int(default['objID']))
+        self.objIDEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Objective ID:"), self.objIDEdit)
         
-        h3=QHBoxLayout()
-        label3=BodyLabel(str("Reach ID:").rjust(OFFSET), self); reachIDEdit=SpinBox(self)
-        self.reachIDEdit=reachIDEdit; self.reachIDEdit.setValue(int(default['reachID']));reachIDEdit.setMinimumWidth(150)
-        h3.addWidget(label3); h3.addWidget(reachIDEdit); h3.addStretch(1)
-        vBoxLayout.addLayout(h3)
+        self.reachIDEdit=SpinBox(self)
+        self.reachIDEdit.setValue(int(default['reachID']))
+        self.reachIDEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Reach ID:"), self.reachIDEdit)
         
-        h4=QHBoxLayout()
-        label4=BodyLabel(str("Obj Type:").rjust(OFFSET), self); objTypeEdit=ComboBox(self)
-        self.objTypeEdit=objTypeEdit; self.objTypeEdit.setCurrentIndex(default['objType'])
-        objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys())); objTypeEdit.setMinimumWidth(150)
-        h4.addWidget(label4); h4.addWidget(objTypeEdit); h4.addStretch(1)
-        vBoxLayout.addLayout(h4)
+        self.objTypeEdit=ComboBox(self)
+        self.objTypeEdit.setCurrentIndex(default['objType'])
+        self.objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys()))
+        self.objTypeEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Objective Type:"), self.objTypeEdit)
         
-        h5=QHBoxLayout()
-        label5=BodyLabel(str("Variable:").rjust(OFFSET+1), self); varEdit=ComboBox(self)
-        self.varEdit=varEdit; self.varEdit.setCurrentIndex(default['varType'])
-        varEdit.addItems(list(Pro.VAR_INT.keys())); varEdit.setMinimumWidth(150)
-        h5.addWidget(label5); h5.addWidget(varEdit); h5.addStretch(1)
-        vBoxLayout.addLayout(h5)
+        self.varEdit=ComboBox(self)
+        self.varEdit.setCurrentIndex(default['varType'])
+        self.varEdit.addItems(list(Pro.VAR_INT.keys()))
+        self.varEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Variable:"), self.varEdit)
         
-        h6=QHBoxLayout()
-        label6=BodyLabel(str("Weight:").rjust(OFFSET), self); weightEdit=DoubleSpinBox(self)
-        self.weightEdit=weightEdit; self.weightEdit.setValue(float(default['weight']));weightEdit.setMinimumWidth(150)
-        h6.addWidget(label6); h6.addWidget(weightEdit); h6.addStretch(1)
-        vBoxLayout.addLayout(h6)
-        ##############################################
-        # modelInfos=Pro.modelInfos
-        # begin_date=modelInfos['begin_record']
-        # end_date=modelInfos['end_date']
-        ###########################
+        self.weightEdit=DoubleSpinBox(self)
+        self.weightEdit.setValue(float(default['weight']))
+        self.weightEdit.setMaximumWidth(200)
+        formLayout.addRow(BodyLabel("Weight:"), self.weightEdit)
+        
         lbDate=Pro.modelInfos['beginRecord']
         ubDate=Pro.modelInfos['endDate']
         lbQDate=QDate(lbDate.year, lbDate.month, lbDate.day)
         ubQDate=QDate(ubDate.year, ubDate.month, ubDate.day)
+        
         if 'observeData' in default:
             beginDate, endDate = Pro.calDate(default['observeData'])
             beginQDate=QDate(beginDate.year, beginDate.month, beginDate.day)
@@ -86,35 +77,22 @@ class AddProWidget(FramelessDialog):
             beginQDate=lbQDate
             endQDate=ubQDate
         
-        h7=QHBoxLayout()
-        label7=BodyLabel(str("Start Date:").rjust(OFFSET-1), self); 
-        beginDataEdit=DatePicker(self, isMonthTight=True)
-        self.beginDataEdit=beginDataEdit
-
-        beginDataEdit.setDate(beginQDate)
-        beginDataEdit.dateChanged.connect(self.reCalNum)
-        h7.addWidget(label7); h7.addWidget(beginDataEdit); h7.addStretch(1)
-        vBoxLayout.addLayout(h7)
-        #################################
-        h8=QHBoxLayout()
-        label8=BodyLabel(str("End Date:").rjust(OFFSET-1), self); 
-        endDataEdit=DatePicker(self, isMonthTight=True)
-        self.endDataEdit=endDataEdit
-        endDataEdit.setDate(endQDate)
-        endDataEdit.dateChanged.connect(self.reCalNum)
-        h8.addWidget(label8); h8.addWidget(endDataEdit); h8.addStretch(1)
-        vBoxLayout.addLayout(h8)
-        ########################################
-        h9=QHBoxLayout()
-        label9=BodyLabel(str("Number of Observe Data to Load:").rjust(OFFSET-1), self)
+        self.beginDataEdit=DatePicker(self, isMonthTight=True)
+        self.beginDataEdit.setDate(beginQDate)
+        self.beginDataEdit.dateChanged.connect(self.reCalNum)
+        self.beginDataEdit.setMaximumWidth(100)
+        formLayout.addRow(BodyLabel("Start Date:"), self.beginDataEdit)
+        
+        self.endDataEdit=DatePicker(self, isMonthTight=True)
+        self.endDataEdit.setDate(endQDate)
+        self.endDataEdit.dateChanged.connect(self.reCalNum)
+        self.endDataEdit.setMaximumWidth(100)
+        formLayout.addRow(BodyLabel("End Date:"), self.endDataEdit)
+        
         self.numDisplay=LineEdit(self); self.numDisplay.setEnabled(False)
         self.numDisplay.setText(str(self.calDeltaNum(self.beginDataEdit.date, self.endDataEdit.date)))
-        h9.addWidget(label9); h9.addWidget(self.numDisplay); h9.addStretch(1)
-        
-        vBoxLayout.addLayout(h9)
-        ####################################
-        
-        vBoxLayout.addStretch(1)
+        self.numDisplay.setMaximumWidth(100)
+        formLayout.addRow(BodyLabel("Size of Data required:"), self.numDisplay)
         
         if 'observeData' in default:
             data=default['observeData']
@@ -122,14 +100,23 @@ class AddProWidget(FramelessDialog):
         
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
-        self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
-        self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        self.yesButton=PrimaryPushButton("Confirm", self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        self.cancelButton=PushButton("Cancel", self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(1000, 400)
+        self.setFixedSize(1000, 500)
         self.titleBar.hide()
+    
+    def createRightLabel(self, text):
+        
+        widget=QWidget()
+        hLayout=QHBoxLayout(widget)
+        hLayout.addStretch(1)
+        hLayout.addWidget(BodyLabel(text))
+
+        return widget
     
     def initDataWidget(self, layout):
         
@@ -139,6 +126,7 @@ class AddProWidget(FramelessDialog):
         self.dataTable.setColumnCount(5)
         self.dataTable.setHorizontalHeaderLabels([self.tr('Index'), self.tr('Year'), self.tr('Month'), 
                                                   self.tr('Day'), self.tr('Value')])
+        self.dataTable.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         vBoxLayout.addWidget(self.dataTable)
         
@@ -153,7 +141,7 @@ class AddProWidget(FramelessDialog):
         
         vBoxLayout.addLayout(hBoxLayout)
         
-        layout.addLayout(vBoxLayout)
+        layout.addLayout(vBoxLayout, 4)
     
     def importData(self):
         
