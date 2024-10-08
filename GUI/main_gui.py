@@ -42,7 +42,7 @@ class MainWindow(FluentWindow):
         self.navigationInterface.addSeparator()
         btn=self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr("Sensitivity Analysis"));Pro.btnSets.append(btn); btn.setEnabled(False)
         btn.clicked.connect(self.sen_analysis.updateUI)
-        btn=self.addSubInterface(self.optimization, FIF.CALENDAR, self.tr("Optimization"));Pro.btnSets.append(btn); btn.setEnabled(False)
+        btn=self.addSubInterface(self.optimization, FIF.ALBUM, self.tr("Optimization"));Pro.btnSets.append(btn); btn.setEnabled(False)
         btn.clicked.connect(self.optimization.updateUI)
         
     def initWindow(self):

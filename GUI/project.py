@@ -22,8 +22,8 @@ class Project:
     
     SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
     SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Sobol Sequence': 'Sobol_Sequence'}
-    SOP_METHOD={'Genetic Algorithm': 'GA', 'Particle Swarm Optimization': 'PSO', 'Differential Evolution': 'DE', 'Artificial Bee Colony': 'ABC', 'Cooperation Search Algorithm': 'CSA', 'Shuffled Complex Evolution-UA':'SCE_UA'}
-    
+    SOP_METHOD={'Genetic Algorithm (GA)': 'GA', 'Particle Swarm Optimization (PSO)': 'PSO', 'Differential Evolution (DE)': 'DE', 'Artificial Bee Colony (ABC)': 'ABC', 'Cooperation Search Algorithm (CSA)': 'CSA', 'Shuffled Complex Evolution-UA (SCE-UA)':'SCE_UA'}
+    MOP_METHOD={'Reference Vector guided Evolutionary Algorithm (RVEA)': 'RVEA', 'Non-dominated Sorting Genetic Algorithm II (NSGA-II)': 'NSGAII', 'MultiObjective Evolutionary Algorithm based on Decomposition (MOEA/D)' : 'MOEAD'}
     
     SA_SAMPLE={'Sobol': ['Sobol Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
     
@@ -48,6 +48,18 @@ class Project:
                                   'scramble' : {'dec' : 'Scramble', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False'}
                                   }
             }
+    
+    SOP_HYPER={'Artificial Bee Colony (ABC)': {'employedRate' : {'dec':'Employed Rate', 'class' : 'ABC', 'method': '__init__', 'type': 'float', 'default': '0.3'}},
+               'Cooperation Search Algorithm (CSA)' : {'alpha' : {'dec':'Alpha', 'class' : 'CSA', 'method': '__init__', 'type': 'float', 'default': '0.5'}, 'beta' : {'dec':'Beta', 'class' : 'CSA', 'method': '__init__', 'type': 'float', 'default': '0.3'}, 'M' : {'dec':'M', 'class' : 'CSA', 'method': '__init__', 'type': 'int', 'default': '3'}},
+               'Differential Evolution (DE)': {'cr': {'dec':'cr', 'class': 'DE', 'method': '__init__', 'type': 'float', 'default': '0.9'}, 'f': {'dec':'f', 'class': 'DE', 'method': '__init__', 'type': 'float', 'default': '0.5'}},
+               'Genetic Algorithm (GA)': {'proC': {'dec': 'proC', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'proM': {'dec': 'proM', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'disC': {'dec': 'disC', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}, 'disM': {'dec': 'disM', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}},
+               'Particle Swarm Optimization (PSO)': {'w': {'dec': 'w', 'class': 'PSO', 'method': '__init__', 'type': 'float', 'default': '0.1'}, 'c1': {'dec': 'c1', 'class': 'PSO', 'method': '__init__', 'type': 'float', 'default': '0.5'}, 'c2': {'dec': 'c2', 'class': 'PSO', 'method': '__init__', 'type': 'float', 'default': '0.5'}},
+               'Shuffled Complex Evolution-UA (SCE-UA)': {'ngs': {'dec': 'ngs', 'class': 'SCE_UA', 'method': '__init__', 'type': 'int', 'default': '3'}, 'npg': {'dec': 'npg', 'class': 'SCE_UA', 'method': '__init__', 'type': 'int', 'default': '7'}, 'nps': {'dec': 'nps', 'class': 'SCE_UA', 'method': '__init__', 'type': 'int', 'default': '4'}, 'nspl': {'dec':'nspl', 'class':'SCE_UA', 'method': '__init__', 'type':'int', 'default': '7'}},
+            }
+    
+    MOP_HYPER={'Reference Vector guided Evolutionary Algorithm (RVEA)' : {'alpha': {'dec': 'alpha', 'class': 'RVEA', 'method': '__init__', 'type': 'float', 'default': '2.0'}, 'fr': {'dec': 'fr', 'class': 'RVEA', 'method': '__init__', 'type': 'float', 'default': '0.1'}},
+               'Non-dominated Sorting Genetic Algorithm II (NSGA-II)' : {'proC': {'dec': 'proC', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'proM': {'dec': 'proM', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'disC': {'dec': 'disC', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}, 'disM': {'dec': 'disM', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}}, 
+    }
     
     FORMULA={'Full Factorial Design' : 'nInput**levels',
              'Latin Hyper Sampling' : 'nt',

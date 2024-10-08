@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QButtonGroup, QHBoxLayout
-from qfluentwidgets import RadioButton
+from PyQt5.QtWidgets import QWidget, QButtonGroup, QHBoxLayout, QSizePolicy
+from qfluentwidgets import RadioButton, PushButton
 from qfluentwidgets import FlowLayout
 
 class ButtonGroup(QWidget):
@@ -9,8 +9,8 @@ class ButtonGroup(QWidget):
         self.btns=[]
         self.group=QButtonGroup(self)
         layout=FlowLayout(self)
-        layout.setSpacing(25)
-        
+        # layout.setSpacing(25)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         for i, content in enumerate(contents):
             btn=RadioButton(content, self)
             self.btns.append(btn)
@@ -19,10 +19,22 @@ class ButtonGroup(QWidget):
             btn.setEnabled(bool)
 
         self.group.idClicked.connect(self.setCurrentIndex)
+    
+    def clearBtn(self):
+        
+        for btn in self.group.buttons():
+            btn.setAutoExclusive(False)
+            btn.setChecked(False)
+            btn.setEnabled(False)
         
     def setCurrentIndex(self, i):
         
         self.currentIndex=i
+    
+    def setEnabled_(self, bool):
+        
+        for btn in self.btns:
+            btn.setEnabled(bool)
     
     def setEnables(self, indexes):
         
