@@ -1,83 +1,54 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QSpinBox, QComboBox, QDoubleSpinBox, QLabel, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFormLayout, QSpacerItem, QSizePolicy, QRadioButton, QButtonGroup
 from PyQt5.QtCore import Qt
 
 class BodyLabel(QLabel):
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
-        self.setStyleSheet("font-weight: bold;")
+    def __init__(self, text):
+        super().__init__(text)
 
-class MyForm(QWidget):
-    def __init__(self, default, parent=None):
+class ButtonGroup(QButtonGroup):
+    def __init__(self, options, exclusive, parent=None):
         super().__init__(parent)
-        
-        vBoxLayout = QVBoxLayout(self)
-        
-        label = BodyLabel("Problem Define", self)
-        vBoxLayout.addWidget(label)
-        
-        contentWidget = QWidget(self)
-        vBoxLayout.addWidget(contentWidget)
-        hBoxLayout = QHBoxLayout(contentWidget)
-        
-        formLayout = QFormLayout()
-        hBoxLayout.addLayout(formLayout)
-        
-        # 设置标签右对齐
-        formLayout.setLabelAlignment(Qt.AlignRight)
-        
-        # 定义一个函数来创建右对齐的字段
-        def create_right_aligned_field(widget):
-            h_layout = QHBoxLayout()
-            h_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-            h_layout.addWidget(widget)
-            return h_layout
-        
-        serIDEdit = QSpinBox(self)
-        serIDEdit.setValue(int(default['serID']))
-        formLayout.addRow(BodyLabel('Series ID:'), create_right_aligned_field(serIDEdit))
-        
-        objIDEdit = QSpinBox(self)
-        objIDEdit.setValue(int(default['objID']))
-        formLayout.addRow(BodyLabel("Objective ID:"), create_right_aligned_field(objIDEdit))
-        
-        reachIDEdit = QSpinBox(self)
-        reachIDEdit.setValue(int(default['reachID']))
-        formLayout.addRow(BodyLabel("Reach ID:"), create_right_aligned_field(reachIDEdit))
-        
-        objTypeEdit = QComboBox(self)
-        objTypeEdit.setCurrentIndex(default['objType'])
-        objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys()))
-        formLayout.addRow(BodyLabel("Objective Type:"), create_right_aligned_field(objTypeEdit))
-        
-        varEdit = QComboBox(self)
-        varEdit.setCurrentIndex(default['varType'])
-        varEdit.addItems(list(Pro.VAR_INT.keys()))
-        formLayout.addRow(BodyLabel("Variable:"), create_right_aligned_field(varEdit))
-        
-        weightEdit = QDoubleSpinBox(self)
-        weightEdit.setValue(float(default['weight']))
-        formLayout.addRow(BodyLabel("Weight:"), create_right_aligned_field(weightEdit))
+        layout = QVBoxLayout(parent)
+        for option in options:
+            button = QRadioButton(option)
+            self.addButton(button)
+            layout.addWidget(button)
 
-# 示例默认值
-default = {
-    'serID': 1,
-    'objID': 2,
-    'reachID': 3,
-    'objType': 0,  # 假设这是下拉框的默认索引
-    'varType': 1,  # 假设这是另一个下拉框的默认索引
-    'weight': 0.5
-}
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
 
-# Pro 类的模拟定义，用于提供下拉框的数据
-class Pro:
-    OBJTYPE_INT = {'Type1': 1, 'Type2': 2}
-    VAR_INT = {'Var1': 1, 'Var2': 2}
+        vBoxLayout = QVBoxLayout()
 
-# 创建表单实例并显示窗口
+        # 创建 QFormLayout
+        h = QFormLayout()
+        h.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+
+        # 添加第一个 ButtonGroup
+        line1 = QButtonGroup(["Option 1", "Option 2", "Option 3"], True, self)
+        self.saBtnGroup = line1
+        h.addRow(QLabel("Sensibility Analysis:"), self.saBtnGroup)
+
+        # 添加第二个 ButtonGroup
+        line2 = QButtonGroup(["Method 1", "Method 2", "Method 3"], False, self)
+        self.smBtnGroup = line2
+        h.addRow(QLabel("Sampling Method:"), self.smBtnGroup)
+
+        # 创建一个 QHBoxLayout 并添加左右两侧的 QSpacerItem
+        hb = QHBoxLayout()
+        spacer_left = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacer_right = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        hb.addItem(spacer_left)   # 左侧的可伸缩空白
+        hb.addLayout(h)           # 中间的表单布局
+        hb.addItem(spacer_right)  # 右侧的可伸缩空白
+
+        # 将 hb 添加到 vBoxLayout
+        vBoxLayout.addLayout(hb)
+        self.setLayout(vBoxLayout)
+
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    import sys
-    app = QApplication(sys.argv)
-    form = MyForm(default)
-    form.show()
-    sys.exit(app.exec_())
+    app = QApplication([])
+    window = MyWidget()
+    window.show()
+    app.exec_()

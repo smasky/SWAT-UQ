@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, 
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QGridLayout,
                              QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -11,7 +11,6 @@ import GUI.qss
 import GUI.data
 from importlib.resources import path
 
-from .button_group import ButtonGroup
 from .process_widget import ProcessWidget
 from .hyper_widget import hyperWidget
 from ..project import Project as Pro
@@ -40,7 +39,7 @@ class OPWidget(QFrame):
         ##############################################
         
         self.setupWidget=SetupWidget(self)
-        self.setupWidget.next.connect(self.updateNext)
+        self.setupWidget.objEdit.nextBtn.connect(self.updateNext)
         self.opWidget=OptimizationWidget(self)
         
         self.contentWidget.addWidget(self.setupWidget)
@@ -69,17 +68,11 @@ class OPWidget(QFrame):
             hyper=self.setupWidget.hyperStack.widget(1).returnHyper()
 
             if widget.objType=="SOP":
-                op=widget.SOP_METHOD[widget.sopBtnGroup.currentIndex]
+                op=widget.SOP_METHOD[widget.sopComBox.currentIndex()]
                 Pro.OPInfos={'opName': op, 'opClass': Pro.SOP_METHOD[op], 'opHyper': hyper[Pro.SOP_METHOD[op]]}
             else:
-                op=widget.MOP_METHOD[widget.mopBtnGroup.currentIndex]
+                op=widget.MOP_METHOD[widget.mopComBox.currentIndex()]
                 Pro.OPInfos={'opName': op, 'opClass': Pro.MOP_METHOD[op], 'opHyper': hyper[Pro.MOP_METHOD[op]]}
-            
-            
-            # sa=widget.SA_METHOD[widget.saBtnGroup.currentIndex]
-            # sm=widget.SAMPLE_METHOD[widget.smBtnGroup.currentIndex]
-            # Pro.SAInfos={'saName': sa, 'saClass': Pro.SA_METHOD[sa],'saHyper': hyper[Pro.SA_METHOD[sa]],
-            #              'smName': sm,'smClass' : Pro.SAMPLE_METHOD[sm],'smHyper': hyper[Pro.SAMPLE_METHOD[sm]]}
             
         self.INDEX+=1
         self.contentWidget.setCurrentIndex(self.INDEX)
@@ -91,13 +84,11 @@ class OPWidget(QFrame):
         
         self.setupWidget.updateUI()
     
-    def updateNext(self):
+    def updateNext(self, bool):
         
-        self.nextButton.setEnabled(True)
+        self.nextButton.setEnabled(bool)
         
 class SetupWidget(QWidget):
-    
-    next=pyqtSignal()
     
     def __init__(self, parent=None):
         
@@ -108,55 +99,67 @@ class SetupWidget(QWidget):
         self.objType=None
         
         #######################Parameter Path############################
-        h0=QHBoxLayout()
-        label0=BodyLabel("Parameter File:")
+        gridLayout=QGridLayout()
+        
         self.paraEdit=ComboBox(self); self.paraEdit.setMinimumWidth(300)
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
+        gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
+        gridLayout.addWidget(self.paraEdit, 0, 1)
         
-        label1=BodyLabel("Number of Parameters:")
-        self.numPara=LineEdit(self); self.numPara.setEnabled(False)
-        
-        h0.addSpacing(50);h0.addWidget(label0); h0.addWidget(self.paraEdit);h0.addSpacing(50) 
-        h0.addWidget(label1); h0.addWidget(self.numPara)
-        h0.addStretch(1)
-        vBoxLayout.addLayout(h0)
+        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 2, Qt.AlignmentFlag.AlignRight)
+        self.numPara=LineEdit(self); self.numPara.setEnabled(False); self.numPara.setMaximumWidth(50)
+        gridLayout.addWidget(self.numPara, 0, 3)
         
         ########################Objective Path#######################
         
-        h0=QHBoxLayout()
-        label0=BodyLabel("Objective File:")
-        self.objLine=ComboBox(self); self.objLine.setMinimumWidth(300)
+        gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        self.objLine=ComboBox(self); self.objLine.setFixedWidth(300)
+        gridLayout.addWidget(self.objLine, 1, 1)
         
-        label1=BodyLabel("Selection of Optimization Objectives:"); self.objEdit=RadioWidget([])
-        self.objEdit.setEnabled(True); self.objEdit.setMinimumWidth(50)
+        gridLayout.addWidget(BodyLabel("Selection of Optimization Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        self.objEdit=RadioWidget([])
+        self.objEdit.setEnabled(True)
         self.objLine.currentIndexChanged.connect(self.loadObjFile)
-        # self.objEdit.currentIndexChanged.connect(self.ensureObj)
+        gridLayout.addWidget(self.objEdit, 1, 3)
+        self.objEdit.sop.connect(self.ensureObj)
+        self.objEdit.mop.connect(self.ensureObj)
         
-        h0.addSpacing(50);h0.addWidget(label0); h0.addWidget(self.objLine);h0.addSpacing(50)
-        h0.addWidget(label1); h0.addWidget(self.objEdit)
-        h0.addStretch(1)
-        vBoxLayout.addLayout(h0)
+        gridLayout.addWidget(QWidget(), 0 , 4)
+        gridLayout.addWidget(QWidget(), 1 , 4)
+        
+        vBoxLayout.addLayout(gridLayout)
+        vBoxLayout.addSpacing(10)
+        
         #######################Optimization Method###########################
-        h1=QHBoxLayout()
-        label1=BodyLabel("SOP Method:"); line1=ButtonGroup(Pro.SOP_METHOD.keys(), False, self)
-        h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(line1)
-        self.sopBtnGroup=line1; self.SOP_METHOD=list(Pro.SOP_METHOD.keys())
-        vBoxLayout.addLayout(h1)
+        gridLayout=QGridLayout()
+        gridLayout.addWidget(BodyLabel("SOP Method:"), 0, 0, Qt.AlignmentFlag.AlignRight)
+        self.sopComBox=ComboBox(self)
+        self.sopComBox.addItems(Pro.SOP_METHOD.keys())
+        self.SOP_METHOD=list(Pro.SOP_METHOD.keys())
+        self.sopComBox.setEnabled(False)
+        self.sopComBox.setFixedWidth(600)
+        gridLayout.addWidget(self.sopComBox, 0, 1)
         
-        h2=QHBoxLayout()
-        label2=BodyLabel("MOP Method:"); line2=ButtonGroup(Pro.MOP_METHOD.keys(), False, self)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(line2)
-        self.mopBtnGroup=line2; self.MOP_METHOD=list(Pro.MOP_METHOD.keys())
-        vBoxLayout.addLayout(h2)
+        gridLayout.addWidget(BodyLabel("MOP Method:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        self.mopComBox=ComboBox(self)
+        self.mopComBox.addItems(Pro.MOP_METHOD.keys())
+        self.MOP_METHOD=list(Pro.MOP_METHOD.keys())
+        self.mopComBox.setFixedWidth(600)
+        self.mopComBox.setEnabled(False)
+        gridLayout.addWidget(self.mopComBox, 1, 1)
+        gridLayout.addWidget(QWidget(), 0 , 2)
+        gridLayout.addWidget(QWidget(), 1 , 2)
+        vBoxLayout.addLayout(gridLayout)
         
-        self.sopBtnGroup.group.buttonClicked.connect(self.updateHyper)
-        self.mopBtnGroup.group.buttonClicked.connect(self.updateHyper)
-        self.sopBtnGroup.group.buttonClicked.connect(self.nextEmit)
         self.objEdit.sop.connect(self.showSOP)
         self.objEdit.mop.connect(self.showMOP)
         self.objEdit.clearBtn.connect(self.clearMethod)
         self.objEdit.sop.connect(self.ensureObj)
         self.objEdit.mop.connect(self.ensureObj)
+        self.mopComBox.currentIndexChanged.connect(self.updateHyper)
+        self.sopComBox.currentIndexChanged.connect(self.updateHyper)
+        
+        vBoxLayout.addSpacing(20)
         ############################hyperWidget##########################################
         
         self.hyperStack=QStackedWidget(self)
@@ -185,13 +188,21 @@ class SetupWidget(QWidget):
             self.hyperStack.removeWidget(widget)
         
         if self.objType=='SOP':
-            I_op=self.sopBtnGroup.currentIndex
+            I_op=self.sopComBox.currentIndex()
             method=self.SOP_METHOD[I_op]
             options=copy.deepcopy(Pro.SOP_HYPER[method])
         else:
-            I_op=self.mopBtnGroup.currentIndex
+            I_op=self.mopComBox.currentIndex()
             method=self.MOP_METHOD[I_op]
             options=copy.deepcopy(Pro.MOP_HYPER[method])
+        
+        className=Pro.SOP_METHOD[method] if self.objType=='SOP' else Pro.MOP_METHOD[method]
+        if className !="SCE_UA":
+            options['nInit']={'dec': 'nInit', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50'}
+            options['nPop']={'dec': 'nPop', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50'}
+        else:
+            options['maxFEs']={'dec': 'maxFEs', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50000'}
+            options['maxIterTimes']={'dec': 'maxIterTimes', 'class': className, 'method': '__init__', 'type': 'int', 'default': '1000'}
         
         hyper=hyperWidget(options)
         self.hyperStack.addWidget(hyper)
@@ -199,19 +210,21 @@ class SetupWidget(QWidget):
     
     def clearMethod(self):
         
-        self.sopBtnGroup.clearBtn()
-        self.mopBtnGroup.clearBtn()
+        self.sopComBox.setEnabled(False)
+        self.mopComBox.setEnabled(False)
         self.clearHyper()
         
     def showSOP(self):
         
         self.objType='SOP'
-        self.sopBtnGroup.setEnabled_(True)
+        self.sopComBox.setEnabled(True)
+        self.updateHyper()
         
     def showMOP(self):
         
         self.objType='MOP'
-        self.sopBtnGroup.setEnabled_(True)
+        self.sopComBox.setEnabled(True)
+        self.updateHyper()
         
     def updateUI(self):
         
@@ -250,9 +263,9 @@ class SetupWidget(QWidget):
     def ensureObj(self):
         
         objIDs=self.objEdit.selectID
-        objInfos=[]
+        objInfos={}
         for objID in objIDs:
-            objInfos.append(self.objInfos[objID])
+            objInfos[objID]=self.objInfos[objID]
         
         Pro.objInfos=objInfos
 
@@ -291,19 +304,21 @@ class OptimizationWidget(QWidget):
         vBoxLayout.addLayout(h)
         
         ########################
-         #################Verbose################
+        #################Verbose################
+        h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
         font = QFont("Consolas")  # 或者使用 "Courier New"
         font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        vBoxLayout.addWidget(self.verbose)
+        h.addSpacing(10);h.addWidget(self.verbose);h.addSpacing(10)
+        vBoxLayout.addLayout(h)
         ######################################
         btnWidget=QWidget(self); btnWidget.setObjectName("btnWidget")
         btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
         h=QHBoxLayout(btnWidget); h.setContentsMargins(0, 5, 0, 5)
         self.initializeBtn=PrimaryPushButton("Initialize"); self.initializeBtn.clicked.connect(self.initialize)
-        self.optimizationBtn=PrimaryPushButton("Optimization"); self.optimizationBtn.clicked.connect(self.optimizing)
+        self.optimizationBtn=PrimaryPushButton("Optimizing"); self.optimizationBtn.clicked.connect(self.optimizing)
         self.optimizationBtn.setEnabled(False)
         h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.optimizationBtn); h.addStretch(1)
         
@@ -322,7 +337,6 @@ class OptimizationWidget(QWidget):
         
         self.swatEdit.setEnabled(False)
         self.parallelEdit.setEnabled(False)
-        
         self.initializeBtn.setEnabled(False)
         
         Pro.initProject(self.verbose, self.optimizationBtn)
@@ -330,28 +344,13 @@ class OptimizationWidget(QWidget):
     def optimizing(self):
         
         Pro.sampling()
-        # self.verbose.append("Sampling Done. Please start simulation!\n")
         
-        # self.samplingBtn.setEnabled(False)
-        # self.simBtn.setEnabled(True)
-
-    # def simulation(self):
-        
-    #     self.verbose.append("Model Simulating ... Please Waiting!\n")
-    #     self.simBtn.setEnabled(False)
-    #     Pro.simulation(self.processBar, self.finish)
-    
-    # def finish(self):
-        
-    #     self.verbose.append("Simulation Done. Please click the next to execute analysis!\n")
-    #     self.parent().parent().nextButton.setEnabled(True)
-        
-
 class RadioWidget(QWidget):
     
     sop=pyqtSignal()
     mop=pyqtSignal()
     clearBtn=pyqtSignal()
+    nextBtn=pyqtSignal(bool)
     
     def __init__(self, objs, parent=None):
         
@@ -368,7 +367,7 @@ class RadioWidget(QWidget):
             self.radios.append(radio)
             radio.stateChanged.connect(self.ensureType)
             self.hBoxLayout.addWidget(radio)
-        
+
         self.hBoxLayout.addStretch(1)
         
         
@@ -393,18 +392,21 @@ class RadioWidget(QWidget):
     
     def ensureType(self):
         count=0
+        self.selectID=[]
         for radio in self.radios:
             if radio.isChecked():
                 count+=1
-                
                 ID=radio.text().split()[1]
                 self.selectID.append(int(ID))
                 
         if count==0:
             self.clearBtn.emit()
+            self.nextBtn.emit(False)
         elif count==1:
             self.clearBtn.emit()
             self.sop.emit()
+            self.nextBtn.emit(True)
         else:
             self.clearBtn.emit()
             self.mop.emit()
+            self.nextBtn.emit(True)

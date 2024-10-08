@@ -252,7 +252,7 @@ class Project:
         cls.projectInfos["numThreads"]=12 #TODO
     
         cls.worker = InitWorker()
-        cls.worker.initQThread(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
+        # cls.worker.initQThread(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         
         def accept(infos):

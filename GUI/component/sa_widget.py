@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, 
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QGridLayout, QSpacerItem,
                              QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 from qfluentwidgets import (BodyLabel, ComboBox, 
                             RadioButton, SpinBox, DoubleSpinBox, TextEdit,
@@ -83,7 +83,6 @@ class SAWidget(QFrame):
         self.contentWidget.setCurrentIndex(self.INDEX)
         self.contentWidget.currentWidget().updateUI()
         self.processWidget.on_button_clicked(self.INDEX)
-        # self.nextButton.setEnabled(False)
 
 class SetupWidget(QWidget):
     
@@ -92,52 +91,63 @@ class SetupWidget(QWidget):
         
         vBoxLayout=QVBoxLayout(self)
         #######################Parameter Path############################
-        h0=QHBoxLayout()
-        label0=BodyLabel("Parameter File:")
-        self.paraEdit=ComboBox(self); self.paraEdit.setMinimumWidth(300)
+        gridLayout=QGridLayout()
+        self.paraEdit=ComboBox(self); self.paraEdit.setFixedWidth(300)
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
+        gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
+        gridLayout.addWidget(self.paraEdit, 0, 1)
         
-        label1=BodyLabel("Number of Parameters:")
-        self.numPara=LineEdit(self); self.numPara.setEnabled(False)
+        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 2, Qt.AlignmentFlag.AlignRight)
+        self.numPara=LineEdit(self); self.numPara.setEnabled(False); self.numPara.setMaximumWidth(50)
+        gridLayout.addWidget(self.numPara, 0, 3)
         
-        h0.addSpacing(50);h0.addWidget(label0); h0.addWidget(self.paraEdit);h0.addSpacing(50) 
-        h0.addWidget(label1); h0.addWidget(self.numPara)
-        h0.addStretch(1)
-        vBoxLayout.addLayout(h0)
         ######################Objective Path###########################
-        h0=QHBoxLayout()
-        label0=BodyLabel("Objective File:")
-        self.objLine=ComboBox(self); self.objLine.setMinimumWidth(300)
+        gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        self.objLine=ComboBox(self); self.objLine.setFixedWidth(300)
+        gridLayout.addWidget(self.objLine, 1, 1)
         
-        label1=BodyLabel("Selection of Objectives:"); self.objEdit=ComboBox(self)
-        self.objEdit.setEnabled(True); self.objEdit.setMinimumWidth(50)
+        gridLayout.addWidget(BodyLabel("Selection of Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        self.objEdit=ComboBox(self)
+        self.objEdit.setEnabled(True); self.objEdit.setMaximumWidth(300)
         self.objLine.currentIndexChanged.connect(self.loadObjFile)
         self.objEdit.currentIndexChanged.connect(self.ensureObj)
+        gridLayout.addWidget(self.objEdit, 1, 3)
+        gridLayout.addWidget(QWidget(), 0 , 4)
+        gridLayout.addWidget(QWidget(), 1 , 4)
         
-        h0.addSpacing(50);h0.addWidget(label0); h0.addWidget(self.objLine);h0.addSpacing(50)
-        h0.addWidget(label1); h0.addWidget(self.objEdit)
-        h0.addStretch(1)
-        vBoxLayout.addLayout(h0)
-
+        vBoxLayout.addLayout(gridLayout)
+        vBoxLayout.addSpacing(10)
         #######################SA Combobox#############################
-        h1=QHBoxLayout()
-        label1=BodyLabel("Sensibility Analysis:"); line1=ButtonGroup(Pro.SA_METHOD.keys(), True, self)
-        h1.addSpacing(50); h1.addWidget(label1); h1.addWidget(line1)
+        h=QFormLayout()
+        h.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        line1=ButtonGroup(Pro.SA_METHOD.keys(), True, self)
         self.saBtnGroup=line1; self.SA_METHOD=list(Pro.SA_METHOD.keys())
-        vBoxLayout.addLayout(h1)
+        label=BodyLabel("Sensibility Analysis:"); label.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        label.setStyleSheet('''BodyLabel{
+                                padding-bottom: 9px; 
+                                }''')
+        h.addRow(label, self.saBtnGroup)
         
         ########################Sampling Method#################################
-        h2=QHBoxLayout()
-        label2=BodyLabel("Sampling Method:"); line2=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
-        h2.addSpacing(50); h2.addWidget(label2); h2.addWidget(line2)
+        line2=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
         self.smBtnGroup=line2; self.SAMPLE_METHOD=list(Pro.SAMPLE_METHOD.keys())
-        vBoxLayout.addLayout(h2)
+        label=BodyLabel("Sampling Method:");label.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        label.setStyleSheet('''BodyLabel{
+                                padding-bottom: 9px; 
+                                }''')
+        h.addRow(label, self.smBtnGroup)
+        
+        hb=QHBoxLayout();hb.addStretch(1);hb.addLayout(h);hb.addStretch(1)
+        vBoxLayout.addLayout(hb)
+        
+        vBoxLayout.addSpacing(20)
         
         self.hyperStack=QStackedWidget(self)
         vBoxLayout.addWidget(self.hyperStack)
         self.hyperStack.addWidget(QWidget())
         self.hyperStack.setCurrentIndex(0)
         
+        vBoxLayout.addWidget(self.hyperStack)
         vBoxLayout.addStretch(1)
         
         conclusionWidget=QWidget(self)
@@ -222,7 +232,6 @@ class SetupWidget(QWidget):
         self.objEdit.clear()
         self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
 
-        
         Pro.projectInfos['objPath']=path
     
     def ensureObj(self):
@@ -298,12 +307,14 @@ class SimulationWidget(QWidget):
         h.addWidget(self.label2); h.addWidget(self.parallelEdit); h.addStretch(1)
         vBoxLayout.addLayout(h)
         #################Verbose################
+        h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas")  # 或者使用 "Courier New"
+        font = QFont("Consolas", pointSize=12)  # 或者使用 "Courier New"
         font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        vBoxLayout.addWidget(self.verbose)
+        h.addSpacing(10); h.addWidget(self.verbose); h.addSpacing(10)
+        vBoxLayout.addLayout(h)
         ######################################
         btnWidget=QWidget(self); btnWidget.setObjectName("btnWidget")
         btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
@@ -360,8 +371,8 @@ class AnalysisWidget(QWidget):
         vBoxLayout=QVBoxLayout(self)
         
         self.textWidget=TextEdit(self); self.textWidget.setReadOnly(True)
-        font = QFont("Consolas")  # 或者使用 "Courier New"
-        font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
+        font = QFont("Consolas", pointSize=12)  
+        font.setStyleHint(QFont.Monospace) 
         self.textWidget.setFont(font)
         vBoxLayout.addWidget(self.textWidget)
         

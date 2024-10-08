@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QFormLayout
+from PyQt5.QtCore import pyqtSignal, Qt
 from qfluentwidgets import BodyLabel, SpinBox, DoubleSpinBox, CheckBox
 
 
@@ -10,20 +10,25 @@ class hyperWidget(QWidget):
     def __init__(self, dicts, parent=None):
         
         super().__init__(parent)
-        vBoxLayout=QVBoxLayout(self)
-        vBoxLayout.setSpacing(10)
+        formLayout1=QFormLayout()
+        formLayout1.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        formLayout2=QFormLayout()
+        formLayout2.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        hBoxLayout=QHBoxLayout(self)
         self.widgets=[]
         self.relatedWidgets=[]
         
+        count=0
         for name, contents in dicts.items():
-            
+    
             if 'dec' in contents:
                 dec=contents['dec']
             else:
                 dec=name
             
-            h=QHBoxLayout()
             label=BodyLabel(dec+":")
+            label.setFixedWidth(200)
+            label.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
             
             type=contents['type']
             value=contents['default']
@@ -57,12 +62,18 @@ class hyperWidget(QWidget):
             line.setProperty('type', type)
             self.widgets.append(line)
             
-            h.addSpacing(50); h.addWidget(label); h.addWidget(line);h.addStretch(10)
-            vBoxLayout.addLayout(h)
+            if count%2==0:
+                formLayout1.addRow(label, line)
+            else:
+                formLayout2.addRow(label, line)
+            count+=1
             
-        vBoxLayout.setContentsMargins(0,0,0,0)
-        vBoxLayout.addStretch(1)
-    
+        hBoxLayout.addStretch(1)
+        hBoxLayout.addLayout(formLayout1)
+        hBoxLayout.addStretch(3)
+        hBoxLayout.addLayout(formLayout2)
+        hBoxLayout.addStretch(3)
+        
     def changedEvent(self):
         
         self.changed.emit()
