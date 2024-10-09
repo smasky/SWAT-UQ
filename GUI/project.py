@@ -5,14 +5,16 @@ import sys
 from importlib.resources import path
 from datetime import datetime, timedelta
 from PyQt5.QtWidgets import QApplication
-from .woker import (InitWorker, ReadWorker, SaveWorker, InitThread,
+from .woker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit,
                     VerboseWorker, RunWorker, EvaluateThread)
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
+from UQPyL.optimization import GA, DE, SCE_UA
 from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
+from UQPyL.utility.verbose import Verbose
 from PyQt5.QtCore import QThread, Qt, QDate
 class Project:
     
@@ -70,7 +72,7 @@ class Project:
              }
     
     projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
-    problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None
+    problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None; OPResult=None
     
     btnSets=[]
     @classmethod
@@ -127,7 +129,6 @@ class Project:
         printFlag=cls.modelInfos["printFlag"]
         beginRecord=cls.modelInfos['beginRecord']
         baseDate=QDate(beginRecord.year, beginRecord.month, beginRecord.day)
-        # baseDate=QDate(beginDate.year(), 1, 1)
         
         if printFlag==1:
             nowDate=beginDate.addDays(delta)
@@ -229,11 +230,14 @@ class Project:
         cls.SAResult={}
         cls.SAResult['X']=X
     
-    @classmethod #TODO
+    @classmethod 
     def simulation(cls, processBar, finish):
         
+        tolN=cls.SAResult['X'].shape[0]
+        
         def update_progress(value):
-            processBar.setValue(value)
+            percent=value/tolN*100
+            processBar.setValue(percent)
         
         def accept(Y):
             cls.SAResult['Y']=Y
@@ -245,14 +249,76 @@ class Project:
         cls.thread.finished.connect(cls.thread.deleteLater)  # 确保线程完成后被清理
         cls.thread.finished.connect(finish)
         cls.thread.start()
-    
+        
+    @classmethod
+    def optimizing(cls, FEsBar, itersBar, verbose, finish):
+        
+        cls.OPResult={}
+        cls.OPResult['verbose']=[]
+        
+        opInfos=cls.OPInfos
+        
+        
+        opClass=opInfos['opClass']
+        opHyper=opInfos['opHyper']
+        
+        initHyper={}
+        
+        for hyper in opHyper:
+            name=hyper['name']
+            func=hyper['method']
+            value=hyper['value']
+            
+            if func=="__init__":
+                initHyper[name]=value
+        
+        optimizer=eval(opClass)(**initHyper)
+        
+        maxFEs=initHyper['maxFEs']
+        maxIterTimes=initHyper['maxIterTimes']
+        
+        def update_FEsBar(value):
+            
+            percent=value/maxFEs*100
+            FEsBar.setValue(percent)
+        
+        def update_itersBar(value):
+            
+            percent=value/maxIterTimes*100
+            itersBar.setValue(percent)
+
+        def update_verbose(txt):
+            
+            cls.OPResult['verbose'].append(txt+'\n')
+            verbose.append(txt+'\n')
+        
+        def saveResult():
+            
+            cls.OPResult['bestDec']=optimizer.result.bestDec
+            cls.OPResult['bestObj']=optimizer.result.bestObj
+            cls.OPResult['historyBestDecs']=optimizer.result.historyBestDecs
+            cls.OPResult['historyBestObjs']=optimizer.result.historyBestObjs
+            
+        iterEmit=IterEmit()
+        verboseEmit=VerboseEmit()
+        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
+        cls.worker.updateProcess.connect(update_FEsBar)
+        iterEmit.iterSend.connect(update_itersBar)
+        Verbose.iterEmit=iterEmit
+        Verbose.verboseEmit=verboseEmit
+        verboseEmit.verboseSend.connect(update_verbose)
+        cls.thread=OptimizeThread(cls.worker, optimizer, cls.problemInfos)
+        cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.thread.finished.connect(finish)
+        cls.thread.finished.connect(saveResult)
+        cls.thread.start()
+        
     @classmethod
     def initProject(cls, verboseWidget, btn):
         
-        cls.projectInfos["numThreads"]=12 #TODO
+        cls.projectInfos["numThreads"]=12 
     
         cls.worker = InitWorker()
-        # cls.worker.initQThread(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         
         def accept(infos):

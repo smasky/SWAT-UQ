@@ -8,9 +8,7 @@ from datetime import datetime, timedelta
 import itertools
 import pandas as pd
 import subprocess
-import tempfile
-import time
-import threading
+from UQPyL.problems import PracticalProblem
 from concurrent.futures import ThreadPoolExecutor, as_completed
 class VerboseWorker(QObject):
     
@@ -289,6 +287,8 @@ class InitWorker(QObject):
         
         problemInfos=self.initProblem(paraInfos)
         
+        problemInfos['nOutput']=len(list(objInfos.keys()))
+        
         problemInfos['defaultVar']=defaultVar
         
         projectInfos=self.generateTempPath(projectInfos)
@@ -415,16 +415,6 @@ class InitWorker(QObject):
                 s['dataList']=np.concatenate(dataList, axis=0) #TODO
                 s['readLines']=readLines
                 infos[objID].append(s)
-        # for ser in objInfos:
-            
-        #     observeData=ser['observeData']
-        #     beginIndex=observeData[0][0]
-        #     endIndex=observeData[-1][0]
-
-        #     readLines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
-            
-        #     ser['readLines']=readLines
-        #     ser['dataList']=np.array(ser['observeData'])[:, 4]
             
         return infos
             
@@ -627,30 +617,12 @@ class RunWorker(QObject):
         for dir in swatDirs:
             self.workPath.put(dir)
         
+        self.count=0
+        
         super().__init__()
         
         self.start.connect(self.evaluate)
         
-    # def evaluate(self, X):
-        
-    #     n=X.shape[0]
-    #     Y=np.zeros((n,1))
-
-    #     count=0
-    
-    #     with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
-    #         futures=[executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
-        
-    #     for future in futures:
-    #         id, obj_value=future.result()
-    #         Y[id, :]=obj_value
-            
-    #         count+=1
-    #         percent=(count+1)/n*100
-    #         self.updateProcess.emit(percent)
-                  
-    #     self.result.emit(Y)
-    
     def _subprocess(self, x, id):
         
         workPath=self.workPath.get()
@@ -666,29 +638,32 @@ class RunWorker(QObject):
             text=True)
         process.wait()
 
-        obj=0.0
-        for series in self.objInfos:
+        objs=[]
+        for obj, series in self.objInfos.items():
             
-            reachID=series['reachID']
-            readLines=series['readLines']
-            # observeData=series['observeData']
-            varType=series['varType']
-            objType=series['objType']
-            weight=series['weight']
+            for ser in series:
             
-            simValueList=[]
-            for line in readLines:
+                reachID=ser['reachID']
+                readLines=ser['readLines']
+                varType=ser['varType']
+                objType=ser['objType']
+                weight=ser['weight']
                 
-                startLine, endLine=line[0], line[1]
-                subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
-                simValueList.append(subValue)
-                
-            simValue=np.concatenate(simValueList, axis=0)
-            obValue=series['dataList']
-            obj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+                simValueList=[]
+                for line in readLines:
+                    
+                    startLine, endLine=line[0], line[1]
+                    subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
+                    simValueList.append(subValue)
+            
+                simValue=np.concatenate(simValueList, axis=0)
+                obValue=ser['dataList']
+                obj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+            
+            objs.append(obj)
             
         self.workPath.put(workPath)
-        return id, obj
+        return id, objs
         
     def setValues(self, path, x):
                 
@@ -708,21 +683,21 @@ class RunWorker(QObject):
     
         n = X.shape[0]
         Y = np.zeros((n, 1))
-        count = 0
         
-   
         with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
             
             for future in as_completed(futures):
-                idx, obj_value = future.result()  
-                Y[idx, :] = obj_value  
+                idx, obj_value = future.result()
                 
-                count += 1
-                percent = (count / n) * 100
-                self.updateProcess.emit(percent) 
-
-        self.result.emit(Y) 
+                for i, value in enumerate(obj_value):
+                    Y[idx, i] = value
+                
+                self.count += 1
+                self.updateProcess.emit(self.count) 
+                
+        self.result.emit(Y)
+        return Y
 class EvaluateThread(QThread):
     
     def __init__(self, worker, X):
@@ -733,6 +708,23 @@ class EvaluateThread(QThread):
     def run(self):
         self.worker.evaluate(self.X)
 
+class OptimizeThread(QThread):
+    
+    def __init__(self, worker, optimizer, problemInfos):
+        super().__init__()
+        self.worker = worker
+        self.optimizer = optimizer
+        
+        nInput=problemInfos['nInput']
+        nOutput=problemInfos['nOutput']
+        lb=problemInfos['lb']
+        ub=problemInfos['ub']
+        xLabels=problemInfos['xLabels']
+        self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels)
+        
+    def run(self):
+        self.optimizer.run(self.problem)
+        
 class InitThread(QThread):
     
     def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos):
@@ -746,3 +738,28 @@ class InitThread(QThread):
     def run(self):
         
         self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos)
+
+class IterEmit(QObject):
+    
+    iterCount=0
+    iterSend=pyqtSignal(int)
+    
+    def __init__(self, parent=None):
+        
+        super().__init__(parent)
+        
+    def send(self):
+        
+        self.iterCount+=1
+        self.iterSend.emit(self.iterCount)
+
+class VerboseEmit(QObject):
+    
+    verboseSend=pyqtSignal(str)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+    
+    def send(self, txt):
+        
+        self.verboseSend.emit(txt)

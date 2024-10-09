@@ -41,10 +41,13 @@ class OPWidget(QFrame):
         self.setupWidget=SetupWidget(self)
         self.setupWidget.objEdit.nextBtn.connect(self.updateNext)
         self.opWidget=OptimizationWidget(self)
+        self.opWidget.nextBtn.connect(self.updateNext)
+        self.conWidget=ConclusionWidget(self)
+        
         
         self.contentWidget.addWidget(self.setupWidget)
         self.contentWidget.addWidget(self.opWidget)
-        
+        self.contentWidget.addWidget(self.conWidget)
         ###############################################
         self.nextButton=PrimaryPushButton("Next", self)
         self.nextButton.setEnabled(False)
@@ -78,7 +81,7 @@ class OPWidget(QFrame):
         self.contentWidget.setCurrentIndex(self.INDEX)
         self.contentWidget.currentWidget().updateUI()
         self.processWidget.on_button_clicked(self.INDEX)
-        self.nextButton.setEnabled(False)
+        self.nextButton.setEnabled(False) #TODO
     
     def updateUI(self):
         
@@ -200,9 +203,9 @@ class SetupWidget(QWidget):
         if className !="SCE_UA":
             options['nInit']={'dec': 'nInit', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50'}
             options['nPop']={'dec': 'nPop', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50'}
-        else:
-            options['maxFEs']={'dec': 'maxFEs', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50000'}
-            options['maxIterTimes']={'dec': 'maxIterTimes', 'class': className, 'method': '__init__', 'type': 'int', 'default': '1000'}
+        
+        options['maxFEs']={'dec': 'maxFEs', 'class': className, 'method': '__init__', 'type': 'int', 'default': '50000'}
+        options['maxIterTimes']={'dec': 'maxIterTimes', 'class': className, 'method': '__init__', 'type': 'int', 'default': '1000'}
         
         hyper=hyperWidget(options)
         self.hyperStack.addWidget(hyper)
@@ -271,24 +274,31 @@ class SetupWidget(QWidget):
 
 class OptimizationWidget(QWidget):
     
+    nextBtn=pyqtSignal(bool)
+    
     def __init__(self, parent=None):
         
         super().__init__(parent)
-        
-        self.currentValue=0
                 
         vBoxLayout=QVBoxLayout(self); vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.processBar=ProgressBar(self)
-        self.processBar.setValue(self.currentValue)
-        Pro.processBar=self.processBar
         
-        h=QHBoxLayout(); h.addSpacing(20)
-        h.addWidget(self.processBar); h.addSpacing(20)
+        ##################################Process Bar#####################################
+        formLayout=QFormLayout()
+        formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        self.FEsBar=ProgressBar(self)
+        self.FEsBar.setValue(0)
+        formLayout.addRow(BodyLabel("Function Evaluations:"), self.FEsBar)
+    
+        self.iterBar=ProgressBar(self)
+        self.iterBar.setValue(0)
+        formLayout.addRow(BodyLabel("Iterations:"), self.iterBar)
         
+        h=QHBoxLayout()
+        h.addSpacing(20);h.addLayout(formLayout);h.addSpacing(20)
         vBoxLayout.addLayout(h)
         vBoxLayout.addSpacing(10)
 
-        ##############################
+        ###################################################
         h=QHBoxLayout(); h.addSpacing(20)
         self.label=BodyLabel("SWAT Execution:")
         self.swatEdit=ComboBox(self); self.swatEdit.setMinimumWidth(400)
@@ -296,19 +306,18 @@ class OptimizationWidget(QWidget):
         self.swatEdit.currentIndexChanged.connect(self.swatChanged)
         h.addWidget(self.label); h.addWidget(self.swatEdit); h.addStretch(1)
         vBoxLayout.addLayout(h)
-        ##################################
+        ######################################################
         h=QHBoxLayout(); h.addSpacing(20)
         self.label2=BodyLabel("SWAT Parallel:")
         self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(5)
         h.addWidget(self.label2); h.addWidget(self.parallelEdit); h.addStretch(1)
         vBoxLayout.addLayout(h)
         
-        ########################
         #################Verbose################
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas")  # 或者使用 "Courier New"
-        font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
+        font = QFont("Consolas")  
+        font.setStyleHint(QFont.Monospace)  
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         h.addSpacing(10);h.addWidget(self.verbose);h.addSpacing(10)
@@ -343,8 +352,48 @@ class OptimizationWidget(QWidget):
         
     def optimizing(self):
         
-        Pro.sampling()
+        self.optimizationBtn.setEnabled(False)
+        Pro.optimizing(self.FEsBar, self.iterBar, self.verbose, self.finish)
+    
+    def finish(self):
         
+        self.verbose.append("Optimization Finished! Please click the next button to proceed.")
+        self.nextBtn.emit(True)
+
+class ConclusionWidget(QWidget):
+    
+    def __init__(self, parent=None):
+        
+        super().__init__(parent)
+                
+        vBoxLayout=QVBoxLayout(self); vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        
+        ######################################
+        
+        h=QHBoxLayout()
+        self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
+        font = QFont("Consolas")  
+        font.setStyleHint(QFont.Monospace)  
+        self.verbose.setFont(font)
+        self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        
+        h.addSpacing(10);h.addWidget(self.verbose);h.addSpacing(10)
+        vBoxLayout.addLayout(h)
+        vBoxLayout.addSpacing(10)
+        ############################
+        
+        h=QHBoxLayout()
+        self.applyBtn=PrimaryPushButton("Apply optimal parameters to SWAT")
+        h.addStretch(1); h.addWidget(self.applyBtn); h.addStretch(1)
+        vBoxLayout.addLayout(h)
+        vBoxLayout.addSpacing(10)
+        
+    def updateUI(self):
+        
+        self.verbose.setText("")
+        # Pro.OPResult['verbose']=[]
+        self.verbose.setText("".join(Pro.OPResult['verbose']))
+            
 class RadioWidget(QWidget):
     
     sop=pyqtSignal()
@@ -370,7 +419,6 @@ class RadioWidget(QWidget):
 
         self.hBoxLayout.addStretch(1)
         
-        
     def clear(self):
         
         if self.hBoxLayout is not None:
@@ -391,6 +439,7 @@ class RadioWidget(QWidget):
             self.hBoxLayout.addWidget(radio)
     
     def ensureType(self):
+        
         count=0
         self.selectID=[]
         for radio in self.radios:
@@ -410,3 +459,4 @@ class RadioWidget(QWidget):
             self.clearBtn.emit()
             self.mop.emit()
             self.nextBtn.emit(True)
+

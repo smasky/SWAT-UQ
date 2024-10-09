@@ -21,7 +21,7 @@ class ProDefine(ScrollArea):
         self.setWidget(self.view)
         
         banner=BannerWidget(self)
-        with path(GUI.picture, "header.png") as header_path:
+        with path(GUI.picture, "header2.png") as header_path:
             banner.setPixmap(str(header_path))
         banner.setTitle("Problem Define")
         vBoxLayout.addWidget(banner)

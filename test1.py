@@ -1,54 +1,36 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFormLayout, QSpacerItem, QSizePolicy, QRadioButton, QButtonGroup
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QProgressBar
 
-class BodyLabel(QLabel):
-    def __init__(self, text):
-        super().__init__(text)
-
-class ButtonGroup(QButtonGroup):
-    def __init__(self, options, exclusive, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout(parent)
-        for option in options:
-            button = QRadioButton(option)
-            self.addButton(button)
-            layout.addWidget(button)
-
-class MyWidget(QWidget):
+class MyWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        vBoxLayout = QVBoxLayout()
+        # 创建一个 QVBoxLayout
+        layout = QVBoxLayout()
 
-        # 创建 QFormLayout
-        h = QFormLayout()
-        h.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        # 创建一个 QProgressBar
+        progressBar = QProgressBar()
+        progressBar.setValue(50)  # 设置进度值
 
-        # 添加第一个 ButtonGroup
-        line1 = QButtonGroup(["Option 1", "Option 2", "Option 3"], True, self)
-        self.saBtnGroup = line1
-        h.addRow(QLabel("Sensibility Analysis:"), self.saBtnGroup)
+        # 设置样式表去掉黑边
+        # progressBar.setStyleSheet("""
+        #     QProgressBar {
+        #         border: 0px;  /* 去掉边框 */
+        #         text-align: center;  /* 文本居中 */
+        #         background-color: #E0E0E0;  /* 背景颜色 */
+        #     }
+        #     QProgressBar::chunk {
+        #         background-color: #3B5998;  /* 进度条颜色 */
+        #     }
+        # """)
 
-        # 添加第二个 ButtonGroup
-        line2 = QButtonGroup(["Method 1", "Method 2", "Method 3"], False, self)
-        self.smBtnGroup = line2
-        h.addRow(QLabel("Sampling Method:"), self.smBtnGroup)
+        # 添加进度条到布局
+        layout.addWidget(progressBar)
 
-        # 创建一个 QHBoxLayout 并添加左右两侧的 QSpacerItem
-        hb = QHBoxLayout()
-        spacer_left = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        spacer_right = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        # 设置窗口布局
+        self.setLayout(layout)
 
-        hb.addItem(spacer_left)   # 左侧的可伸缩空白
-        hb.addLayout(h)           # 中间的表单布局
-        hb.addItem(spacer_right)  # 右侧的可伸缩空白
-
-        # 将 hb 添加到 vBoxLayout
-        vBoxLayout.addLayout(hb)
-        self.setLayout(vBoxLayout)
-
-if __name__ == "__main__":
-    app = QApplication([])
-    window = MyWidget()
-    window.show()
-    app.exec_()
+# 启动应用程序
+app = QApplication([])
+window = MyWindow()
+window.show()
+app.exec_()

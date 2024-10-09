@@ -21,7 +21,7 @@ class Optimization(ScrollArea):
         self.setWidget(self.view)
         
         banner=BannerWidget(self)
-        with path(GUI.picture, "header.png") as header_path:
+        with path(GUI.picture, "header4.png") as header_path:
             banner.setPixmap(str(header_path))
         banner.setTitle("Optimization")
         vBoxLayout.addWidget(banner)
