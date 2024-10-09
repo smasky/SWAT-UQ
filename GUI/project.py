@@ -5,7 +5,7 @@ import sys
 from importlib.resources import path
 from datetime import datetime, timedelta
 from PyQt5.QtWidgets import QApplication
-from .woker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit,
+from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
                     VerboseWorker, RunWorker, EvaluateThread)
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
@@ -76,7 +76,7 @@ class Project:
     
     btnSets=[]
     @classmethod
-    def openProject(cls, projectName, projectPath, swatPath):
+    def openProject(cls, projectName, projectPath, swatPath, close):
         
         projectInfos={}
         projectInfos["projectName"]=projectName
@@ -85,27 +85,21 @@ class Project:
         projectInfos['tempPath']=os.path.join(projectPath, 'temp')
         cls.projectInfos=projectInfos
         
-        cls.loadModel()
+        cls.loadModel(close)
 
     @classmethod
-    def loadModel(cls):
+    def loadModel(cls, close):
         
-        cls.thread=QThread()
         cls.worker=InitWorker()
+        cls.thread=NewThread(cls.worker, cls.projectInfos)
         
-        def run():
-            cls.worker.initModel(cls.projectInfos)
+        def accept():
+            close()
         
-        def accept(infos):
-            cls.modelInfos=infos
-            cls.thread.quit()
-            cls.thread.deleteLater()
-            cls.worker.deleteLater()
-        
-        cls.worker.moveToThread(cls.thread)
-        cls.worker.result.connect(accept, Qt.QueuedConnection)
-        cls.thread.started.connect(run)
+        cls.thread.finished.connect(accept)
+        cls.thread.finished.connect(cls.thread.deleteLater)
         cls.thread.start()
+        
         
     @classmethod
     def calDate(cls, observeDate):

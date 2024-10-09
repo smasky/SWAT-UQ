@@ -724,7 +724,19 @@ class OptimizeThread(QThread):
         
     def run(self):
         self.optimizer.run(self.problem)
+
+class NewThread(QThread):
+    
+    def __init__(self, worker, projectInfos):
+        super().__init__()
+        self.worker=worker
+        self.projectInfos=projectInfos
+    
+    def run(self):
         
+        self.worker.initModel(self.projectInfos)
+    
+
 class InitThread(QThread):
     
     def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos):

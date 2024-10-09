@@ -1,12 +1,12 @@
-from qfluentwidgets import ScrollArea, FluentIcon, Dialog, IndeterminateProgressRing
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from qfluentwidgets import ScrollArea, FluentIcon, Dialog, InfoBar, InfoBarPosition
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
 from importlib.resources import path
 
 import GUI.qss
 import GUI.picture
-from .component import BannerWidget, NewProject, OpenProject, LinkCardView
+from .component import BannerWidget, NewProject, OpenProject, LinkCardView, WaitDialog
 from .project import Project
 class GetStart(ScrollArea):
     
@@ -62,6 +62,23 @@ class GetStart(ScrollArea):
         res=newPro.exec()
         
         if res==Dialog.Accepted:
+            projectName=newPro.nameEdit.text()
+            projectPath=newPro.pathEdit.text
+            swatPath=newPro.swatPathEdit.text
+            
+            
+            info=InfoBar.success(
+            title=self.tr('Create Project'),
+            content=self.tr("Loading and checking model, please wait..."),
+            orient=Qt.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP_RIGHT,
+            duration=20000,
+            parent=self
+            )
+            
+            Project.openProject(projectName, projectPath, swatPath, info.close)
+                        
             self.activateBtn()
     
     def click_open_project(self):

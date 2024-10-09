@@ -1,8 +1,8 @@
 from PyQt5.QtCore import Qt
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton, IndeterminateProgressRing
+from qfluentwidgets import BodyLabel, IndeterminateProgressRing, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton, IndeterminateProgressRing
 
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout, QSizePolicy
 from ..project import Project as Pro
 class NewProject(FramelessDialog):
     projectName=None
@@ -45,17 +45,38 @@ class NewProject(FramelessDialog):
         
     def confirm_clicked(self):
         
-        projectName=self.nameEdit.text()
-        projectPath=self.pathEdit.text
-        swatPath=self.swatPathEdit.text
-        
-        Pro.openProject(projectName, projectPath, swatPath)
+        # projectName=self.nameEdit.text()
+        # projectPath=self.pathEdit.text
+        # swatPath=self.swatPathEdit.text
+                
+        # Pro.openProject(projectName, projectPath, swatPath, waitGUI.accept)
         
         self.accept()
     
     def cancel_clicked(self):
         
         self.reject()
+
+class WaitDialog(FramelessDialog):
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+        self.setModal(True)  # 设置为模态对话框
+        self.setFixedSize(100, 100)
+        self.vBoxLayout=QVBoxLayout(self)
+        label=BodyLabel(self.tr("Loading ...."), self)
+        self.vBoxLayout.addStretch(1)
+        self.vBoxLayout.addWidget(label)
+        ring=IndeterminateProgressRing(self)
+        ring.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.vBoxLayout.addWidget(ring)
+
+    def accept(self):
+        pass
+        
+    def close_(self):
+        self.accept()
 
 class LineEditWithPath(QWidget):
     
