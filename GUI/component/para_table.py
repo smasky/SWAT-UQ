@@ -40,7 +40,6 @@ class ParaTable(QFrame):
         self.table.setObjectName("contentTable")
         self.vBoxLayout.addWidget(self.table)
         
-        # self.table.verticalHeader()
         self.table.setBorderRadius(8)
         self.table.setBorderVisible(True)
 
@@ -63,6 +62,7 @@ class ParaTable(QFrame):
         self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
         
     def addPara(self):
+        
         modelInfos=Pro.modelInfos
         dialog=AddParaWidget(modelInfos['para_file'], [], parent=self)
         dialog.exec()

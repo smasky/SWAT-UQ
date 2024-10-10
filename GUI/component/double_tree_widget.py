@@ -1,15 +1,22 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,QTreeWidgetItem,
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,QTreeWidgetItem, QCompleter,
                              QPushButton)
-from qfluentwidgets import TreeWidget, PrimaryToolButton, FluentIcon
+from qfluentwidgets import TreeWidget, PrimaryToolButton, FluentIcon, BodyLabel, LineEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
 class DoubleTreeWidget(QWidget):
+    
     def __init__(self, leftOptions, rightOptions, selected, parent=None):
         super().__init__(parent)
         self.leftOptions=leftOptions
         self.rightOptions=rightOptions
         self.initUI()
+        
+        self.completer = QCompleter(self.getAllItems(self.leftOptions))
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.searchBox.setCompleter(self.completer)
+        self.searchBox.textChanged.connect(self.filterTree)
+        
         
         if selected is not None:
             self.populateTree(self.targetTree, selected)
@@ -18,8 +25,17 @@ class DoubleTreeWidget(QWidget):
         self.targetTree.header().setStyleSheet("QHeaderView::section { color: black; }")
         
     def initUI(self):
+        
+        vLayout=QVBoxLayout()
+        
+        h=QHBoxLayout()
+        self.searchBox=LineEdit()
+        h.addWidget(BodyLabel('Search:')); h.addWidget(self.searchBox)
+        
+        vLayout.addLayout(h)
+        
         layout = QHBoxLayout()
-
+        
         self.sourceTree = TreeWidget()
         self.sourceTree.setHeaderLabel("Source Parameters")
         
@@ -44,17 +60,62 @@ class DoubleTreeWidget(QWidget):
         layout.addLayout(btnLayout)
         layout.addWidget(self.targetTree)
 
-        self.setLayout(layout)
+        vLayout.addLayout(layout)
+        
+        self.setLayout(vLayout)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+    def getAllItems(self, content):
+            """获取所有项目名称"""
+            items = []
+            for key, values in content.items():
+                items.append(key)
+                items.extend(values)
+            return items
+
+    def resetSearch(self):
+        
+        self.searchBox.clear()
+        root = self.sourceTree.invisibleRootItem()
+        for i in range(root.childCount()):
+            root.child(i).setHidden(False)
+            root.child(i).setExpanded(False)
+
+    def filterTree(self):
+        searchText = self.searchBox.text().lower()
+        root = self.sourceTree.invisibleRootItem()
+        self.filterTreeItems(root, searchText)
+
+    def filterTreeItems(self, item, searchText):
+        hasMatchingChild = False
+        for i in range(item.childCount()):
+            child = item.child(i)
+            childMatch = self.filterTreeItems(child, searchText)
+            if childMatch:
+                hasMatchingChild = True
+            child.setHidden(searchText not in child.text(0).lower() and not childMatch)
+
+        # 如果当前项目或其子项目匹配，则展开父项目
+        if searchText in item.text(0).lower() or hasMatchingChild:
+            item.setExpanded(True)
+            return True
+        else:
+            item.setExpanded(False)
+            return False
+
+    def hasVisibleChildren(self, item):
+        for i in range(item.childCount()):
+            if not item.child(i).isHidden():
+                return True
+        return False
+
     def populateTree(self, widget, content):
-        """为 Source 树结构添加参数项目"""
         if isinstance(content, dict):
-            keys=list(content.keys())
-            rootItems={}
+            keys = list(content.keys())
+            rootItems = {}
             for key in keys:
-                rootItem=QTreeWidgetItem(widget, [key])
-                rootItems[key]=rootItem
+                rootItem = QTreeWidgetItem(widget, [key])
+                rootItems[key] = rootItem
 
             for rootItem in rootItems.values():
                 rootItem.setFlags(rootItem.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
@@ -64,25 +125,23 @@ class DoubleTreeWidget(QWidget):
                 self.addChildItems(rootItems[key], value)
     
     def addChildItems(self, parent, children):
-        
         for child in children:
             childItem = QTreeWidgetItem(parent, [child])
             childItem.setFlags(childItem.flags() | Qt.ItemIsUserCheckable)
             childItem.setCheckState(0, Qt.Unchecked)
 
     def moveToRight(self):
-     
         self.copyCheckedChildItems(self.sourceTree.invisibleRootItem())
-        
         self.uncheckAllItems(self.sourceTree.invisibleRootItem())
-
-    
+        self.resetSearch()
     def copyCheckedChildItems(self, sourceRoot):
-        
         for i in range(sourceRoot.childCount()):
             sourceChild = sourceRoot.child(i)
 
-            if not self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0) and sourceChild.childCount()==0:
+            if sourceChild.isHidden():
+                continue  # 跳过隐藏的项目
+
+            if not self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0) and sourceChild.childCount() == 0:
                 if sourceChild.checkState(0) == Qt.Checked:
                     child = QTreeWidgetItem(self.targetTree, [sourceChild.text(0)])
                     child.setFlags(child.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
@@ -90,6 +149,9 @@ class DoubleTreeWidget(QWidget):
             
             for j in range(sourceChild.childCount()):
                 subChild = sourceChild.child(j)
+                if subChild.isHidden():
+                    continue  # 跳过隐藏的子项目
+
                 if subChild.checkState(0) == Qt.Checked:
                     if not self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0):
                         child = QTreeWidgetItem(self.targetTree, [sourceChild.text(0)])
@@ -100,24 +162,21 @@ class DoubleTreeWidget(QWidget):
                         child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
                         child.setCheckState(0, Qt.Unchecked)
                     else:
-                        child=self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0)[0]
+                        child = self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0)[0]
                         self.addChildItems(child, [subChild.text(0)])
                     
                     child.setExpanded(True)
-                    
+
     def uncheckAllItems(self, rootItem):
-        
         for i in range(rootItem.childCount()):
             child = rootItem.child(i)
             child.setCheckState(0, Qt.Unchecked)
-            self.uncheckAllItems(child)  # 递归处理子项
+            self.uncheckAllItems(child)
 
     def removeSelectedFromTarget(self):
-        
         self.removeCheckedItems(self.targetTree.invisibleRootItem())
 
     def removeCheckedItems(self, targetRoot):
-        """递归地移除选中的项目"""
         i = 0
         while i < targetRoot.childCount():
             child = targetRoot.child(i)

@@ -1,14 +1,20 @@
-from qfluentwidgets import ScrollArea, FluentIcon, Dialog, InfoBar, InfoBarPosition
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication
-from PyQt5.QtCore import Qt, QUrl
+from qfluentwidgets import (ScrollArea, FluentIcon, Dialog, InfoBar, PrimaryPushButton, PushButton,
+                            InfoBarPosition, MessageBoxBase, SubtitleLabel,
+                            BodyLabel, ComboBox)
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication, QHBoxLayout
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices
 from importlib.resources import path
 
+import glob
+import os
 import GUI.qss
 import GUI.picture
-from .component import BannerWidget, NewProject, OpenProject, LinkCardView, WaitDialog
+from .component import BannerWidget, NewProject, OpenProject, LinkCardView
 from .project import Project
 class GetStart(ScrollArea):
+    
+    openBox=pyqtSignal(list)
     
     def __init__(self, parent=None):
         
@@ -54,42 +60,114 @@ class GetStart(ScrollArea):
                 self.setStyleSheet(f.read())
         
         self.setWidgetResizable(True)
-
+    
     def click_new_project(self):
         
-        newPro=NewProject(self)
-        newPro.setWindowModality(Qt.WindowModal)
+        if Project.projectInfos:
+            
+            dialog=ReOpenWidget(self.window(), self.click_new_project_)
+            dialog.show()
+        
+        else:
+            self.click_new_project_()
+    
+    def click_new_project_(self):
+        
+        newPro=NewProject(self.window())
         res=newPro.exec()
         
         if res==Dialog.Accepted:
-            projectName=newPro.nameEdit.text()
-            projectPath=newPro.pathEdit.text
-            swatPath=newPro.swatPathEdit.text
             
-            
-            info=InfoBar.success(
-            title=self.tr('Create Project'),
-            content=self.tr("Loading and checking model, please wait..."),
-            orient=Qt.Horizontal,
-            isClosable=True,
-            position=InfoBarPosition.TOP_RIGHT,
-            duration=20000,
-            parent=self
-            )
-            
-            Project.openProject(projectName, projectPath, swatPath, info.close)
-                        
-            self.activateBtn()
+            if not newPro.ifOpenExistingProject:
+                info=InfoBar.success(
+                title=self.tr('Create Project'),
+                content=self.tr("Loading and checking model, please wait..."),
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=20000,
+                parent=self
+                )
+                
+                Project.openProject(newPro.projectName, newPro.projectPath, newPro.swatPath, info.close, self.activateBtn)
+                
+            else:
+                
+                info=InfoBar.success(
+                title=self.tr('Open Project'),
+                content=self.tr("Loading and checking model files, please wait..."),
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=20000,
+                parent=self
+                )
+                
+                dict=self.readFiles(newPro.projectPath)
+                Project.window=self
+                Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], info.close, self.activateBtn)
+
+    def readFiles(self, path):
+        
+        dict={}
+        
+        with open(path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
+                key, value = line.split(': ', 1)
+                key = key.strip()
+                value = value.strip().replace('/', '\\')
+                dict[key] = value
+                
+        return dict
     
     def click_open_project(self):
+        
+        if Project.projectInfos:
+            
+            dialog=ReOpenWidget(self.window(), self.click_open_project_)
+            dialog.show()
+        
+        else:
+            self.click_open_project_()
+    
+    def click_open_project_(self):
         
         openPro=OpenProject(self)
         openPro.setWindowModality(Qt.WindowModal)
         res=openPro.exec()
         
-        if res==Dialog.Accepted:
-            Project.projectPath=openPro.projectPath
-            self.activateBtn()
+        if res:
+            if openPro.projectFile==None:
+                InfoBar.error(
+                    title=self.tr('Error'),
+                    content=self.tr("There is no project file in the selected directory."),
+                    orient=Qt.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP_RIGHT,
+                    duration=20000,
+                    parent=self
+                )
+
+                return
+            info=InfoBar.success(
+                    title=self.tr('Open Project'),
+                    content=self.tr("Loading and checking model files, please wait..."),
+                    orient=Qt.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP_RIGHT,
+                    duration=20000,
+                    parent=self
+                )
+            
+            projectFile=openPro.projectFile
+            projectPath=openPro.projectPath
+            dict=self.readFiles(os.path.join(projectPath, projectFile))
+            
+            Project.window=self
+            Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], info.close, self.activateBtn)
             
     def click_examples(self):
         
@@ -106,7 +184,27 @@ class GetStart(ScrollArea):
         btnSets=Project.btnSets
         for btn in btnSets[1:]:
             btn.setEnabled(True)
-        
-        
 
+class ReOpenWidget(MessageBoxBase):
+    
+    def __init__(self, parent=None, continue_func=None):
+        super().__init__(parent)
         
+        self.continue_func=continue_func
+        
+        self.titleLabel=SubtitleLabel("A project has been opened now", self)
+        self.contentLabel=BodyLabel("Do you want to create or open another project?", self)
+
+        self.yesButton.setText("Yes")
+        self.yesButton.clicked.connect(self.continue_)
+        self.cancelButton.setText("Cancel")
+        self.cancelButton.clicked.connect(self.reject)
+        
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.contentLabel)
+    
+    def continue_(self):
+        
+        Project.clearAll()
+        
+        self.continue_func()

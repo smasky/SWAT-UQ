@@ -22,7 +22,7 @@ class AddParaWidget(FramelessDialog):
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
-        self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        self.cancelButton=PushButton(self.tr("Cancel (set all)"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
@@ -42,7 +42,6 @@ class AddParaWidget(FramelessDialog):
                 child=topChild.child(j)
                 paraName=child.text(0)
                 self.selected[topName].append(paraName)
-                
                         
         self.accept()
     

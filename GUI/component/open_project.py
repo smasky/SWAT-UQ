@@ -1,8 +1,11 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton
+from qfluentwidgets import (BodyLabel, PushButton, LineEdit, PrimaryToolButton, SubtitleLabel, ComboBox,
+                            FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition, MessageBoxBase)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-
+from PyQt5.QtCore import Qt
+import glob
+import os
 class OpenProject(FramelessDialog):
     
     projectPath=None
@@ -48,8 +51,63 @@ class OpenProject(FramelessDialog):
         
         self.projectPath=self.pathEdit.text()
         
+        full_files=glob.glob(os.path.join(self.projectPath, "*.prj"))
+        files = [os.path.basename(file) for file in full_files]
+        
+        self.projectFile=None
+        if len(files)>1:
+            dialog=SelctProject(files, self.window())
+            res=dialog.exec()
+            if res:
+                self.projectFile=dialog.comBox.currentText()
+            else:
+                self.reject()
+        elif len(files)==1:
+            self.projectFile=files[0]
+        
         self.accept()
     
     def cancel_clicked(self):
         
         self.reject()
+
+class SelctProject(MessageBoxBase):
+    def __init__(self, files, parent=None):
+        super().__init__(parent)
+        
+        self.titleLabel=SubtitleLabel("There exists more than one project files in this directory.", self)
+        self.contentLabel=BodyLabel("You should select one to apply", self)
+        
+        self.comBox=ComboBox(self)
+        self.comBox.addItems(files)
+        
+        self.yesButton.setText("Open")
+        self.yesButton.clicked.connect(self.open_existing_project)
+        self.cancelButton.setText("Cancel")
+        self.cancelButton.clicked.connect(self.continue_to_create)
+        
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.contentLabel)
+        self.viewLayout.addWidget(self.comBox)
+    
+    def open_existing_project(self):
+        self.accept()
+    
+    def continue_to_create(self):
+        self.reject()
+
+class ReOpenWidget(MessageBoxBase):
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        self.titleLabel=SubtitleLabel("A project has been opened now", self)
+        self.contentLabel=BodyLabel("Do you want to create or open another project?", self)
+
+        self.yesButton.setText("Yes")
+        self.yesButton.clicked.connect(self.accept)
+        self.cancelButton.setText("Cancel")
+        self.cancelButton.clicked.connect(self.reject)
+        
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.contentLabel)

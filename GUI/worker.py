@@ -386,7 +386,7 @@ class InitWorker(QObject):
         
         modelInfos['para_file']=para_file
         
-        self.result.emit(modelInfos)
+        return modelInfos
     
     def initObj(self, objInfos, modelInfos):
         
@@ -727,15 +727,20 @@ class OptimizeThread(QThread):
 
 class NewThread(QThread):
     
+    occurError=pyqtSignal(str)
+    
     def __init__(self, worker, projectInfos):
         super().__init__()
         self.worker=worker
         self.projectInfos=projectInfos
-    
+        self.modelInfos=None
     def run(self):
         
-        self.worker.initModel(self.projectInfos)
+        try:
+            self.modelInfos=self.worker.initModel(self.projectInfos)
     
+        except Exception as e:
+            self.occurError.emit("There are some error in model file, please check!")
 
 class InitThread(QThread):
     

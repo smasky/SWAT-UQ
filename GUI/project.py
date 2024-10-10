@@ -2,9 +2,7 @@ import os
 import glob
 import numpy as np
 import sys
-from importlib.resources import path
-from datetime import datetime, timedelta
-from PyQt5.QtWidgets import QApplication
+from datetime import datetime
 from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
                     VerboseWorker, RunWorker, EvaluateThread)
 #C++ Module
@@ -15,8 +13,11 @@ from UQPyL.optimization import GA, DE, SCE_UA
 from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
 from UQPyL.utility.verbose import Verbose
-from PyQt5.QtCore import QThread, Qt, QDate
+from PyQt5.QtCore import QDate, Qt
+from qfluentwidgets import InfoBar, InfoBarPosition
 class Project:
+    
+    
     
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
     INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
@@ -71,35 +72,49 @@ class Project:
              'Sobol Sequence' : '(nt+2)*nInput'
              }
     
-    projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
+    window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
     problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None; OPResult=None
     
     btnSets=[]
     @classmethod
-    def openProject(cls, projectName, projectPath, swatPath, close):
+    def openProject(cls, projectName, projectPath, swatPath, close, activate):
         
         projectInfos={}
-        projectInfos["projectName"]=projectName
-        projectInfos["projectPath"]=projectPath
+        projectInfos['projectName']=projectName
+        projectInfos['projectPath']=projectPath
         projectInfos['swatPath']=swatPath
-        projectInfos['tempPath']=os.path.join(projectPath, 'temp')
+        projectInfos['tempPath']=os.path.join(projectInfos['projectPath'], 'temp')
+        
+        projectFile=f"{projectName}.prj"
+        
+        with open(os.path.join(projectPath, projectFile), 'w') as f:
+            f.write(f"projectName: {projectName}\n")
+            f.write(f"projectPath: {projectInfos['projectPath']}\n")
+            f.write(f"swatPath: {projectInfos['swatPath']}\n")
+            f.write(f"tempPath: {projectInfos['tempPath']}\n")
+        
         cls.projectInfos=projectInfos
         
-        cls.loadModel(close)
+        cls.loadModel(close, activate)
 
     @classmethod
-    def loadModel(cls, close):
+    def loadModel(cls, close, activate):
         
         cls.worker=InitWorker()
         cls.thread=NewThread(cls.worker, cls.projectInfos)
         
         def accept():
+            cls.modelInfos=cls.thread.modelInfos
+            activate()
             close()
+        
+        def reject(error):
+            cls.showError(error)
         
         cls.thread.finished.connect(accept)
         cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.thread.occurError.connect(reject)
         cls.thread.start()
-        
         
     @classmethod
     def calDate(cls, observeDate):
@@ -392,5 +407,33 @@ class Project:
         
         verboseWidget.append("".join(verbose))
         
-        
-        
+    @classmethod
+    def showError(cls, error):
+         
+        InfoBar.error(
+                title='Error',
+                content=error,
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=20000,
+                parent=cls.window
+                )
+    
+    @classmethod
+    def clearAll(cls):
+        cls.window=None
+        cls.projectInfos=None
+        cls.modelInfos=None
+        cls.paraInfos=None
+        cls.proInfos=None
+        cls.objInfos=None
+        cls.problemInfos=None
+        cls.SAInfos=None
+        cls.SAResult=None
+        cls.OPInfos=None
+        cls.OPResult=None
+
+        btnSets=Project.btnSets
+        for btn in btnSets[1:]:
+            btn.setEnabled(False)

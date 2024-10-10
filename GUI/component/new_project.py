@@ -1,7 +1,10 @@
 from PyQt5.QtCore import Qt
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, IndeterminateProgressRing, PushButton, LineEdit, PrimaryToolButton, FluentIcon, PrimaryPushButton, IndeterminateProgressRing
-
+from qfluentwidgets import (BodyLabel, IndeterminateProgressRing, PushButton, ComboBox,
+                            LineEdit, PrimaryToolButton, FluentIcon, MessageBoxBase, SubtitleLabel,
+                            PrimaryPushButton, IndeterminateProgressRing)
+import glob
+import os
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout, QSizePolicy
 from ..project import Project as Pro
 class NewProject(FramelessDialog):
@@ -45,38 +48,54 @@ class NewProject(FramelessDialog):
         
     def confirm_clicked(self):
         
-        # projectName=self.nameEdit.text()
-        # projectPath=self.pathEdit.text
-        # swatPath=self.swatPathEdit.text
+        self.projectName=self.nameEdit.text()
+        self.projectPath=self.pathEdit.text.replace('/', '\\')
+        self.swatPath=self.swatPathEdit.text.replace('/', '\\')
                 
-        # Pro.openProject(projectName, projectPath, swatPath, waitGUI.accept)
         
+        full_files=glob.glob(os.path.join(self.projectPath, "*.prj"))
+        files = [os.path.basename(file) for file in full_files]
+        
+        if files:
+            dialog=AskForExistingProject(files, self.window())
+            res=dialog.exec()
+
+            if res:
+                self.projectPath=os.path.join(self.projectPath, dialog.comBox.currentText())
+                self.ifOpenExistingProject=True
+            else:
+                self.ifOpenExistingProject=False
+            
         self.accept()
     
     def cancel_clicked(self):
         
         self.reject()
-
-class WaitDialog(FramelessDialog):
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint)
-        self.setModal(True)  # 设置为模态对话框
-        self.setFixedSize(100, 100)
-        self.vBoxLayout=QVBoxLayout(self)
-        label=BodyLabel(self.tr("Loading ...."), self)
-        self.vBoxLayout.addStretch(1)
-        self.vBoxLayout.addWidget(label)
-        ring=IndeterminateProgressRing(self)
-        ring.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.vBoxLayout.addWidget(ring)
-
-    def accept(self):
-        pass
         
-    def close_(self):
+class AskForExistingProject(MessageBoxBase):
+    def __init__(self, files, parent=None):
+        super().__init__(parent)
+        
+        self.titleLabel=SubtitleLabel("There are existing projects in this directory.", self)
+        self.contentLabel=BodyLabel("Do you want to open an existing project or click continue?", self)
+        
+        self.comBox=ComboBox(self)
+        self.comBox.addItems(files)
+        
+        self.yesButton.setText("Open existing project")
+        self.yesButton.clicked.connect(self.open_existing_project)
+        self.cancelButton.setText("Continue to create")
+        self.cancelButton.clicked.connect(self.continue_to_create)
+        
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.contentLabel)
+        self.viewLayout.addWidget(self.comBox)
+    
+    def open_existing_project(self):
         self.accept()
+    
+    def continue_to_create(self):
+        self.reject()
 
 class LineEditWithPath(QWidget):
     

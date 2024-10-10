@@ -27,6 +27,8 @@ class LineBox(LineEdit):
                 text=self.generateText(dialog.selected)
                 self.setText(text)
                 text=self.text()
+            else:
+                self.setText("all")
             self.isSelected=False
             self.clearFocus()
       
