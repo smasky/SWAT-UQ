@@ -1,4 +1,4 @@
-from qfluentwidgets import (StrongBodyLabel, PrimaryToolButton, FluentIcon, 
+from qfluentwidgets import (StrongBodyLabel, PrimaryToolButton, FluentIcon, SubtitleLabel,
                             PrimaryPushButton, InfoBar, InfoBarPosition, IndeterminateProgressRing)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame, QFileDialog
@@ -20,11 +20,11 @@ class ParaTable(QFrame):
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
         
-        label=StrongBodyLabel("Parameter Information List")
+        label=SubtitleLabel("Parameter Information List")
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File (.par)", self); importButton.setFixedSize(200, 30); 
+        importButton=PrimaryPushButton("Import From File (.par)", self); importButton.setFixedSize(300, 40); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(30); 
@@ -50,7 +50,9 @@ class ParaTable(QFrame):
         
         hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
         self.generateButton=PrimaryPushButton("Save To Parameter File (.par)", self)
-        self.generateButton.setFixedSize(200, 30); self.generateButton.clicked.connect(self.saveParFile)
+        self.generateButton.setFixedSize(300, 40); self.generateButton.clicked.connect(self.saveParFile)
+        # self.generateButton.setEnabled(False)
+        
         hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)
         

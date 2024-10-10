@@ -25,6 +25,8 @@ class OpenProject(FramelessDialog):
         hBoxLayout=QHBoxLayout()
         pathLabel=BodyLabel(self.tr(str("UQ Project Path:").rjust(21)), self.contentWidget)
         pathEdit=LineEdit(self.contentWidget); pathEdit.setMinimumWidth(400); self.pathEdit=pathEdit
+        self.pathEdit.textChanged.connect(self.checkNull)
+        
         fileButton=PrimaryToolButton(FluentIcon.FOLDER, self.contentWidget); fileButton.clicked.connect(self.open_folder_dialog)
         hBoxLayout.addWidget(pathLabel); hBoxLayout.addWidget(pathEdit);hBoxLayout.addWidget(fileButton);hBoxLayout.addStretch(1)
         self.contentLayout.addLayout(hBoxLayout)
@@ -33,14 +35,20 @@ class OpenProject(FramelessDialog):
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        self.yesButton.setEnabled(False)
         self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(618, 250)
+        self.setFixedSize(718, 250)
         self.titleBar.hide()
 
+    def checkNull(self):
+        
+        if not self.pathEdit.text()=="":
+            self.yesButton.setEnabled(True)
+    
     def open_folder_dialog(self):
         
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")

@@ -1,4 +1,4 @@
-from qfluentwidgets import PillToolButton, BodyLabel, FluentIcon
+from qfluentwidgets import PillToolButton, BodyLabel, FluentIcon, SubtitleLabel
 
 from PyQt5.QtWidgets import QHBoxLayout, QFrame, QVBoxLayout
 
@@ -14,11 +14,14 @@ class StepWidget(QFrame):
         h=QHBoxLayout()
         
         self.btn=PillToolButton(FluentIcon.ACCEPT_MEDIUM, self)
+        self.btn.setFixedSize(45, 35)
 
         h.addStretch(1);h.addWidget(self.btn);h.addStretch(1)
         vBoxLayout.addLayout(h)
         
-        label=BodyLabel(self.tr(content), self)
+        vBoxLayout.addSpacing(5)
+        
+        label=SubtitleLabel(self.tr(content), self)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         vBoxLayout.addWidget(label)
         vBoxLayout.addStretch(1)
@@ -31,7 +34,7 @@ class ProcessWidget(QFrame):
         self.widgets=[]
         self.btns=[]
         self.hBoxLayout=QHBoxLayout(self)
-        self.setMaximumHeight(80)
+        self.setMaximumHeight(90)
     def addStep(self, i, content):
         
         btnWidget=StepWidget(content, self)

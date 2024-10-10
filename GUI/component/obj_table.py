@@ -1,4 +1,4 @@
-from qfluentwidgets import StrongBodyLabel, PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
+from qfluentwidgets import StrongBodyLabel, SubtitleLabel,PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
 
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog,
                              QHeaderView, QFrame, QTableWidgetItem, QWidget, QDialog)
@@ -25,11 +25,11 @@ class ObjTable(QFrame):
         self.vBoxLayout=QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
         
-        label=StrongBodyLabel("Objective Information List")
+        label=SubtitleLabel("Objective Information List")
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File (.obj)", self); importButton.setFixedSize(200, 30); 
+        importButton=PrimaryPushButton("Import From File (.obj)", self); importButton.setFixedSize(300, 40); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
         
         addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(24); 
@@ -56,7 +56,7 @@ class ObjTable(QFrame):
         
         hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
         self.generateButton=PrimaryPushButton("Save to Objective File (.obj)", self)
-        self.generateButton.setFixedSize(200, 30)
+        self.generateButton.setFixedSize(300, 40)
         self.generateButton.clicked.connect(self.saveProFile)
         hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)

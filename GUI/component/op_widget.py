@@ -44,7 +44,6 @@ class OPWidget(QFrame):
         self.opWidget.nextBtn.connect(self.updateNext)
         self.conWidget=ConclusionWidget(self)
         
-        
         self.contentWidget.addWidget(self.setupWidget)
         self.contentWidget.addWidget(self.opWidget)
         self.contentWidget.addWidget(self.conWidget)
@@ -106,29 +105,40 @@ class SetupWidget(QWidget):
         
         self.paraEdit=ComboBox(self); self.paraEdit.setMinimumWidth(300)
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
+        self.paraEdit._showComboMenu=self.dynamicShowPara
+        self.paraEdit.setPlaceholderText("Click to select parameter file")
         gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
         gridLayout.addWidget(self.paraEdit, 0, 1)
         
-        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 2, Qt.AlignmentFlag.AlignRight)
+        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 3, Qt.AlignmentFlag.AlignRight)
         self.numPara=LineEdit(self); self.numPara.setEnabled(False); self.numPara.setMaximumWidth(50)
-        gridLayout.addWidget(self.numPara, 0, 3)
+        gridLayout.addWidget(self.numPara, 0, 4)
         
         ########################Objective Path#######################
         
         gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         self.objLine=ComboBox(self); self.objLine.setFixedWidth(300)
+        self.objLine._showComboMenu=self.dynamicShowObj
+        self.objLine.setPlaceholderText("Click to select objective file")
         gridLayout.addWidget(self.objLine, 1, 1)
         
-        gridLayout.addWidget(BodyLabel("Selection of Optimization Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        gridLayout.addWidget(BodyLabel("Selection of Optimization Objectives:"), 1, 3, Qt.AlignmentFlag.AlignRight)
         self.objEdit=RadioWidget([])
         self.objEdit.setEnabled(True)
         self.objLine.currentIndexChanged.connect(self.loadObjFile)
-        gridLayout.addWidget(self.objEdit, 1, 3)
+        gridLayout.addWidget(self.objEdit, 1, 4)
         self.objEdit.sop.connect(self.ensureObj)
         self.objEdit.mop.connect(self.ensureObj)
         
-        gridLayout.addWidget(QWidget(), 0 , 4)
-        gridLayout.addWidget(QWidget(), 1 , 4)
+        gridLayout.addWidget(QWidget(), 0, 2)
+        gridLayout.addWidget(QWidget(), 1, 2)
+        gridLayout.setColumnStretch(0, 1)
+        gridLayout.setColumnStretch(1, 1)
+        gridLayout.setColumnStretch(2, 0.7)
+        gridLayout.setColumnStretch(3, 1)
+        gridLayout.setColumnStretch(4, 1)
+        # h=QHBoxLayout()
+        # h.addStretch(1);h.addLayout(gridLayout);h.addStretch(1)
         
         vBoxLayout.addLayout(gridLayout)
         vBoxLayout.addSpacing(10)
@@ -171,6 +181,18 @@ class SetupWidget(QWidget):
         self.hyperStack.setCurrentIndex(0)
 
         vBoxLayout.addStretch(1)
+    
+    def dynamicShowPara(self):
+        
+        self.paraEdit.clear()
+        self.paraEdit.addItems(Pro.findParaFile())
+        super(ComboBox, self.paraEdit)._showComboMenu()
+    
+    def dynamicShowObj(self):
+        
+        self.objLine.clear()
+        self.objLine.addItems(Pro.findProFile())
+        super(ComboBox, self.objLine)._showComboMenu()
     
     def nextEmit(self):
         self.next.emit()
@@ -231,14 +253,15 @@ class SetupWidget(QWidget):
         
     def updateUI(self):
         
-        self.paraEdit.clear()
-        self.objLine.clear()
-        self.paraEdit.addItems(Pro.findParaFile())
-        self.objLine.addItems(Pro.findProFile())
-        self.paraEdit.setCurrentIndex(0)
-        self.objLine.setCurrentIndex(0)
-        self.loadParaFile()
-        self.loadObjFile()
+        pass
+        # self.paraEdit.clear()
+        # self.objLine.clear()
+        # self.paraEdit.addItems(Pro.findParaFile())
+        # self.objLine.addItems(Pro.findProFile())
+        # self.paraEdit.setCurrentIndex(0)
+        # self.objLine.setCurrentIndex(0)
+        # self.loadParaFile()
+        # self.loadObjFile()
     
     def loadParaFile(self):
         

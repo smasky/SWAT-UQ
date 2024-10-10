@@ -14,14 +14,12 @@ class ButtonGroup(QWidget):
         self.group=QButtonGroup(self)
         layout=QHBoxLayout(self)
         
-        # layout.setSpacing(25)
-        # self.setMinimumWidth(1000)
+
         self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
         for i, content in enumerate(contents):
             btn=RadioButton(content, self)
             self.btns.append(btn)
             self.group.addButton(btn, i)
-            # btn.setStyleSheet("background-color: red;")
             layout.addWidget(btn, Qt.AlignmentFlag.AlignCenter)
             btn.setEnabled(bool)
         layout.addStretch(1)

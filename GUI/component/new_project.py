@@ -26,26 +26,41 @@ class NewProject(FramelessDialog):
         
         self.nameEdit=LineEdit(self.contentWidget)
         self.nameEdit.setMaximumWidth(400)
+        self.nameEdit.textChanged.connect(self.checkNull)
         self.contentLayout.addRow(BodyLabel("UQ Project Name:"), self.nameEdit)
         
         self.pathEdit=LineEditWithPath(self.contentWidget)
+        self.pathEdit.LineEdit.textChanged.connect(self.checkNull)
         self.contentLayout.addRow(BodyLabel("UQ Project Path:"), self.pathEdit)
         
         self.swatPathEdit=LineEditWithPath(self.contentWidget)
+        self.swatPathEdit.LineEdit.textChanged.connect(self.checkNull)
         self.contentLayout.addRow(BodyLabel("SWAT Project Path:"), self.swatPathEdit)
         
         self.vBoxLayout.addStretch(1)
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        self.yesButton.setEnabled(False)
         self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(618, 250)
+        self.setFixedSize(718, 250)
         self.titleBar.hide()
+    
+    def checkNull(self):
         
+        text1=self.nameEdit.text()
+        text2=self.pathEdit.LineEdit.text()
+        text3=self.swatPathEdit.LineEdit.text()
+        
+        all_filled = bool(text1) and bool(text2) and bool(text3)
+        
+        self.yesButton.setEnabled(all_filled)
+    
     def confirm_clicked(self):
         
         self.projectName=self.nameEdit.text()
@@ -55,7 +70,7 @@ class NewProject(FramelessDialog):
         
         full_files=glob.glob(os.path.join(self.projectPath, "*.prj"))
         files = [os.path.basename(file) for file in full_files]
-        
+        self.ifOpenExistingProject=False
         if files:
             dialog=AskForExistingProject(files, self.window())
             res=dialog.exec()
@@ -63,8 +78,6 @@ class NewProject(FramelessDialog):
             if res:
                 self.projectPath=os.path.join(self.projectPath, dialog.comBox.currentText())
                 self.ifOpenExistingProject=True
-            else:
-                self.ifOpenExistingProject=False
             
         self.accept()
     

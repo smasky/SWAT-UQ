@@ -94,6 +94,8 @@ class SetupWidget(QWidget):
         gridLayout=QGridLayout()
         self.paraEdit=ComboBox(self); self.paraEdit.setFixedWidth(300)
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
+        self.paraEdit._showComboMenu=self.dynamicShowPara
+        self.paraEdit.setPlaceholderText("Click to select parameter file")
         gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
         gridLayout.addWidget(self.paraEdit, 0, 1)
         
@@ -104,12 +106,15 @@ class SetupWidget(QWidget):
         ######################Objective Path###########################
         gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         self.objLine=ComboBox(self); self.objLine.setFixedWidth(300)
+        self.objLine._showComboMenu=self.dynamicShowObj
+        self.objLine.setPlaceholderText("Click to select objective file")
         gridLayout.addWidget(self.objLine, 1, 1)
+        self.objLine.currentIndexChanged.connect(self.loadObjFile)
         
         gridLayout.addWidget(BodyLabel("Selection of Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
         self.objEdit=ComboBox(self)
         self.objEdit.setEnabled(True); self.objEdit.setMaximumWidth(300)
-        self.objLine.currentIndexChanged.connect(self.loadObjFile)
+        
         self.objEdit.currentIndexChanged.connect(self.ensureObj)
         gridLayout.addWidget(self.objEdit, 1, 3)
         gridLayout.addWidget(QWidget(), 0 , 4)
@@ -200,17 +205,27 @@ class SetupWidget(QWidget):
         num=eval(formula, related)
         
         self.numLine.setText(str(num))
+    
+    def dynamicShowPara(self):
+        
+        self.paraEdit.clear()
+        self.paraEdit.addItems(Pro.findParaFile())
+        super(ComboBox, self.paraEdit)._showComboMenu()
+    
+    def dynamicShowObj(self):
+        
+        self.objLine.clear()
+        self.objLine.addItems(Pro.findProFile())
+        super(ComboBox, self.objLine)._showComboMenu()
         
     def updateUI(self):
         
-        self.paraEdit.clear()
-        self.objLine.clear()
-        self.paraEdit.addItems(Pro.findParaFile())
-        self.objLine.addItems(Pro.findProFile())
-        self.paraEdit.setCurrentIndex(0)
-        self.objLine.setCurrentIndex(0)
-        self.loadParaFile()
-        self.loadObjFile()
+        pass 
+    
+        # self.paraEdit.setCurrentIndex(0)
+        # self.objLine.setCurrentIndex(0)
+        # self.loadParaFile()
+        # self.loadObjFile()
     
     def loadParaFile(self):
         
@@ -221,7 +236,7 @@ class SetupWidget(QWidget):
         
         Pro.paraInfos=infos
         Pro.projectInfos['paraPath']=path
-     
+    
     def loadObjFile(self):
         
         path=self.objLine.currentText()
