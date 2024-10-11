@@ -27,7 +27,7 @@ class hyperWidget(QWidget):
                 dec=name
             
             label=BodyLabel(dec+":")
-            label.setFixedWidth(200)
+            label.setFixedWidth(250)
             label.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
             
             type=contents['type']
@@ -67,6 +67,9 @@ class hyperWidget(QWidget):
             else:
                 formLayout2.addRow(label, line)
             count+=1
+            
+            formLayout1.setSpacing(10)
+            formLayout2.setSpacing(10)
             
         hBoxLayout.addStretch(1)
         hBoxLayout.addLayout(formLayout1)

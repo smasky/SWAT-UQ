@@ -1,5 +1,5 @@
-from qfluentwidgets import (StrongBodyLabel, PrimaryToolButton, FluentIcon, SubtitleLabel,
-                            PrimaryPushButton, InfoBar, InfoBarPosition, IndeterminateProgressRing)
+from qfluentwidgets import (PrimaryToolButton, FluentIcon, SubtitleLabel,
+                            PrimaryPushButton, InfoBar, InfoBarPosition)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame, QFileDialog
 from PyQt5.QtCore import Qt

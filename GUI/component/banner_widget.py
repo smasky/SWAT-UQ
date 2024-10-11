@@ -15,12 +15,9 @@ class BannerWidget(QWidget):
         
         self.galleryLabel = QLabel(self);self.galleryLabel.setObjectName('galleryLabel')
         self.banner = QPixmap('')
-        # self.linkCard=LinkCardView()
         
         self.vBoxLayout.addWidget(self.galleryLabel)
         self.vBoxLayout.addSpacing(10)
-        # self.vBoxLayout.addWidget(self.linkCard)
-        # self.vBoxLayout.addStretch(1)
         
         self.vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -28,12 +25,6 @@ class BannerWidget(QWidget):
         with path(GUI.qss, "banner_widget.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-    
-    # def deleteLink(self):
-    #     self.vBoxLayout.removeWidget(self.linkCard)
-    
-    # def addCard(self, icon, title, content, url):
-    #     self.linkCard.addCard(icon, title, content, url)
     
     def addWidget(self,widget):
         self.vBoxLayout.addWidget(widget)
@@ -68,7 +59,7 @@ class BannerWidget(QWidget):
         path.addRect(QRectF(w-50, h-50, 50, 50))
         path = path.simplified()
         painter.fillPath(path, QBrush(line))
-        # draw banner image
+        
         pixmap = self.banner.scaled(
             QSize(self.width(),336), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
         path.addRect(QRectF(0, 336, w, 336 ))

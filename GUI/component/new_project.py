@@ -93,6 +93,7 @@ class AskForExistingProject(MessageBoxBase):
         self.contentLabel=BodyLabel("Do you want to open an existing project or click continue?", self)
         
         self.comBox=ComboBox(self)
+        self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
         
         self.yesButton.setText("Open existing project")

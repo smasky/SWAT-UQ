@@ -559,10 +559,10 @@ class InitWorker(QObject):
         for future in as_completed(futures):
             res=future.result()
             for key, items in res.items():
-                values=' '.join(str(e) for e in items)
-                _, file_name=key.split("|")
-                file_var[file_name].setdefault("default", [])
-                file_var[file_name]["default"].append(values)
+                values=' '.join(str(value) for value in items)
+                paraName, file_name=key.split('|')
+                file_var[file_name].setdefault("default", {})
+                file_var[file_name]["default"][paraName]=values
         return file_var
 
 from UQPyL.utility.metrics import r_square
@@ -639,8 +639,9 @@ class RunWorker(QObject):
         process.wait()
 
         objs=[]
+        
         for obj, series in self.objInfos.items():
-            
+            vObj=0
             for ser in series:
             
                 reachID=ser['reachID']
@@ -658,9 +659,9 @@ class RunWorker(QObject):
             
                 simValue=np.concatenate(simValueList, axis=0)
                 obValue=ser['dataList']
-                obj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+                vObj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
             
-            objs.append(obj)
+            objs.append(vObj)
             
         self.workPath.put(workPath)
         return id, objs
@@ -728,17 +729,19 @@ class OptimizeThread(QThread):
 class NewThread(QThread):
     
     occurError=pyqtSignal(str)
+    accept=pyqtSignal()
     
     def __init__(self, worker, projectInfos):
         super().__init__()
         self.worker=worker
         self.projectInfos=projectInfos
         self.modelInfos=None
+        
     def run(self):
         
         try:
             self.modelInfos=self.worker.initModel(self.projectInfos)
-    
+            self.accept.emit()
         except Exception as e:
             self.occurError.emit("There are some error in model file, please check!")
 

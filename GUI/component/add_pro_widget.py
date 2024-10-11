@@ -48,8 +48,8 @@ class AddProWidget(FramelessDialog):
         formLayout.addRow(BodyLabel("Reach ID:"), self.reachIDEdit)
         
         self.objTypeEdit=ComboBox(self)
-        self.objTypeEdit.setCurrentIndex(default['objType'])
         self.objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys()))
+        self.objTypeEdit.setCurrentIndex(default['objType'])
         self.objTypeEdit.setMaximumWidth(200)
         formLayout.addRow(BodyLabel("Objective Type:"), self.objTypeEdit)
         
@@ -61,6 +61,8 @@ class AddProWidget(FramelessDialog):
         
         self.weightEdit=DoubleSpinBox(self)
         self.weightEdit.setValue(float(default['weight']))
+        self.weightEdit.setSingleStep(0.1)
+        self.weightEdit.setRange(0.0, 10.0)
         self.weightEdit.setMaximumWidth(200)
         formLayout.addRow(BodyLabel("Weight:"), self.weightEdit)
         
@@ -106,7 +108,7 @@ class AddProWidget(FramelessDialog):
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(1000, 500)
+        self.setFixedSize(1100, 500)
         self.titleBar.hide()
     
     def createRightLabel(self, text):
@@ -127,7 +129,9 @@ class AddProWidget(FramelessDialog):
         self.dataTable.setHorizontalHeaderLabels([self.tr('Index'), self.tr('Year'), self.tr('Month'), 
                                                   self.tr('Day'), self.tr('Value')])
         self.dataTable.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
+        self.dataTable.horizontalHeader().setVisible(True)
+        self.dataTable.verticalHeader().setVisible(True)
+        self.dataTable.setRowCount(5)
         vBoxLayout.addWidget(self.dataTable)
         
         hBoxLayout=QHBoxLayout()
@@ -137,11 +141,19 @@ class AddProWidget(FramelessDialog):
         
         clearButton=PushButton(self.tr("Clear Data"))
         clearButton.setMaximumWidth(250)
+        clearButton.clicked.connect(self.clearAndResetTable)
         hBoxLayout.addWidget(clearButton)
+        
         
         vBoxLayout.addLayout(hBoxLayout)
         
         layout.addLayout(vBoxLayout, 4)
+    
+    def clearAndResetTable(self):
+        
+        self.dataTable.clearContents()
+       
+        self.dataTable.setRowCount(5)
     
     def importData(self):
         
@@ -178,9 +190,14 @@ class AddProWidget(FramelessDialog):
         
         m = len(data)
         
+        n = self.dataTable.rowCount()
+        
         for i in range(m):
             index, year, month, day, value = data[i]
-            self.dataTable.insertRow(i)
+            
+            if i>=n:  
+                self.dataTable.insertRow(i)
+                
             item=QTableWidgetItem(f"{index:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
@@ -199,7 +216,8 @@ class AddProWidget(FramelessDialog):
             self.dataTable.setItem(i, 3, item)
             item=QTableWidgetItem(f"{value:.2f}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.dataTable.setItem(i, 4, item) 
+            self.dataTable.setItem(i, 4, item)
+             
         self.observeData=data
         
     def calDeltaNum(self, begin, end):
@@ -251,7 +269,7 @@ class AddProWidget(FramelessDialog):
         data=[]
         
         for i in range(rows):
-            data.append((int(self.dataTable.item(i, 0).text()),int(self.dataTable.item(i, 1).text()), int(self.dataTable.item(i, 2).text()),int(self.dataTable.item(i, 3).text()),float(self.dataTable.item(i, 4).text())))
+            data.append((int(self.dataTable.item(i, 0).text()), int(self.dataTable.item(i, 1).text()), int(self.dataTable.item(i, 2).text()), int(self.dataTable.item(i, 3).text()),float(self.dataTable.item(i, 4).text())))
 
         return data
         

@@ -41,6 +41,7 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         lowerBox=DoubleSpinBox(self); lowerBox.setMaximum(1000); lowerBox.setFixedHeight(30)
+        lowerBox.setRange(-100, 1000)
         layout.addWidget(lowerBox); widget.core=lowerBox
         self.setCellWidget(row, col, widget)
         col+=1
@@ -49,6 +50,7 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         upperBox=DoubleSpinBox(self); upperBox.setMaximum(1000); upperBox.setFixedHeight(30)
+        upperBox.setRange(-100, 10000)
         layout.addWidget(upperBox); widget.core=upperBox
         self.setCellWidget(row, col, widget)
         col+=1

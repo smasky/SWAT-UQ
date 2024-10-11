@@ -87,6 +87,7 @@ class SelctProject(MessageBoxBase):
         self.contentLabel=BodyLabel("You should select one to apply", self)
         
         self.comBox=ComboBox(self)
+        self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
         
         self.yesButton.setText("Open")

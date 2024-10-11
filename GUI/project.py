@@ -41,7 +41,7 @@ class Project:
               'Latin Hyper Sampling' : {'nt': {'dec': 'Number for sampling *', 'method' : 'sample', 'type': 'int', 'class' : 'LHS', 'related': '*', 'default': '500'}},
               'Random' : {'nt': {'dec': 'Number for sampling *', 'class' : 'Random', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '500'}},
               'Fast Sequence' : { 'M' : {'dec': 'M', 'class' : 'FAST_Sequence' ,'method': '__init__', 'type': 'int', 'default': '5'},
-                                  'nt' : {'dec': 'The number for sampling *', 'class' : 'FAST_Sequence','method': 'sample', 'type': 'int', 'related' : '*' ,'default': '500'}
+                                  'nt' : {'dec': 'Number for sampling *', 'class' : 'FAST_Sequence','method': 'sample', 'type': 'int', 'related' : '*' ,'default': '500'}
                                 },
               'Morris Sequence' : { 'num_levels': {'dec': 'Number of Level', 'class' : 'Morris_Sequence','method': '__init__', 'type': 'int', 'default': '5'},
                                     'nt' : {'dec': 'Number of Trajectory *', 'class' : 'Morris_Sequence', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '100'}
@@ -64,7 +64,7 @@ class Project:
                'Non-dominated Sorting Genetic Algorithm II (NSGA-II)' : {'proC': {'dec': 'proC', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'proM': {'dec': 'proM', 'class': 'GA', 'method': '__init__', 'type': 'float', 'default': '1'}, 'disC': {'dec': 'disC', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}, 'disM': {'dec': 'disM', 'class': 'GA', 'method': '__init__', 'type': 'int', 'default': '20'}}, 
     }
     
-    FORMULA={'Full Factorial Design' : 'nInput**levels',
+    FORMULA={'Full Factorial Design' : 'levels**nInput',
              'Latin Hyper Sampling' : 'nt',
              'Random' : 'nt',
              'Fast Sequence' : 'nt*nInput',  
@@ -78,23 +78,28 @@ class Project:
     btnSets=[]
     @classmethod
     def openProject(cls, projectName, projectPath, swatPath, close, activate):
-        
-        projectInfos={}
-        projectInfos['projectName']=projectName
-        projectInfos['projectPath']=projectPath
-        projectInfos['swatPath']=swatPath
-        projectInfos['tempPath']=os.path.join(projectInfos['projectPath'], 'temp')
-        
-        projectFile=f"{projectName}.prj"
-        
-        with open(os.path.join(projectPath, projectFile), 'w') as f:
-            f.write(f"projectName: {projectName}\n")
-            f.write(f"projectPath: {projectInfos['projectPath']}\n")
-            f.write(f"swatPath: {projectInfos['swatPath']}\n")
-            f.write(f"tempPath: {projectInfos['tempPath']}\n")
-        
-        cls.projectInfos=projectInfos
-        
+        try:
+            projectInfos={}
+            projectInfos['projectName']=projectName
+            projectInfos['projectPath']=projectPath
+            projectInfos['swatPath']=swatPath
+            projectInfos['tempPath']=os.path.join(projectInfos['projectPath'], 'temp')
+            
+            projectFile=f"{projectName}.prj"
+            
+            with open(os.path.join(projectPath, projectFile), 'w') as f:
+                f.write(f"projectName: {projectName}\n")
+                f.write(f"projectPath: {projectInfos['projectPath']}\n")
+                f.write(f"swatPath: {projectInfos['swatPath']}\n")
+                f.write(f"tempPath: {projectInfos['tempPath']}\n")
+            
+            cls.projectInfos=projectInfos
+            
+        except Exception as e:
+            
+            cls.showError("Some errors occur in project file, please check!")
+
+            return
         cls.loadModel(close, activate)
 
     @classmethod
@@ -105,13 +110,13 @@ class Project:
         
         def accept():
             cls.modelInfos=cls.thread.modelInfos
-            activate()
             close()
+            activate()
         
         def reject(error):
             cls.showError(error)
         
-        cls.thread.finished.connect(accept)
+        cls.thread.accept.connect(accept)
         cls.thread.finished.connect(cls.thread.deleteLater)
         cls.thread.occurError.connect(reject)
         cls.thread.start()
@@ -141,7 +146,7 @@ class Project:
         
         if printFlag==1:
             nowDate=beginDate.addDays(delta)
-            index=baseDate.daysTo(nowDate)+1
+            index=baseDate.daysTo(nowDate)
             return index, nowDate.year(), nowDate.month(), nowDate.day()
         else:
             nowDate=beginDate.addMonths(delta)
@@ -307,7 +312,7 @@ class Project:
             cls.OPResult['bestObj']=optimizer.result.bestObj
             cls.OPResult['historyBestDecs']=optimizer.result.historyBestDecs
             cls.OPResult['historyBestObjs']=optimizer.result.historyBestObjs
-            
+        
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
         cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
