@@ -1,10 +1,16 @@
-from qfluentwidgets import TableWidget, PrimaryToolButton, FluentIcon, DoubleSpinBox, ComboBox
+from qfluentwidgets import (TableWidget, PrimaryToolButton, FluentIcon, DoubleSpinBox, ComboBox,
+                            FluentStyleSheet, getStyleSheet)
 
-from PyQt5.QtWidgets import QTableWidgetItem, QSizePolicy, QHBoxLayout, QWidget
+from PyQt5.QtWidgets import QTableWidgetItem, QSizePolicy, QHBoxLayout, QWidget, QVBoxLayout
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
+import GUI.qss
+import GUI.data
+from importlib.resources import path
 from .line_box import LineBox
 from ..project import Project as Pro
+from .utility import setFont, getFont, Medium, substitute
 
 class TableWidgetPara(TableWidget):
     
@@ -12,6 +18,9 @@ class TableWidgetPara(TableWidget):
         
         super().__init__(parent)
         
+        qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
+        qss=substitute(qss, {'QTableView': { 'font': " 16px 'Segoe UI', 'Microsoft YaHei';"}, 'QHeaderView::section':{'font': " 18px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
+        self.setStyleSheet(qss)
         
     def addRow(self, content):
         
@@ -19,11 +28,12 @@ class TableWidgetPara(TableWidget):
         col=0
         
         self.insertRow(row)
-        
+        self.setRowHeight(row, 35) 
         for _, value in enumerate(content[:2]):
             
             item=QTableWidgetItem(str(value));item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            item.setFont(getFont(18))
             self.setItem(row, col, item)
             col+=1
         
@@ -31,8 +41,10 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         tuneType=ComboBox(); tuneType.addItems(['Relative', 'Value', 'Add'])
+        tuneType.setFont_(16)
         tuneType.setCurrentIndex(1)
         tuneType.setFixedHeight(30)
+        
         layout.addWidget(tuneType); widget.core=tuneType
         self.setCellWidget(row, col, widget)
         col+=1
@@ -99,7 +111,7 @@ class TableWidgetPara(TableWidget):
         button=PrimaryToolButton(FluentIcon.DELETE, self); button.clicked.connect(self.delete_row)
         button.setProperty('row', row); widget.btn=button
         button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) 
-        button.setFixedSize(24, 24)
+        button.setFixedSize(25, 25)
         layout.addStretch(1);layout.addWidget(button);layout.addStretch(1)
         self.setCellWidget(row, col, widget)
         
@@ -127,3 +139,5 @@ class TableWidgetPara(TableWidget):
             widget = self.cellWidget(row, 6)  
             if widget:
                 widget.btn.setProperty('row', row)
+
+

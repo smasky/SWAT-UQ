@@ -1,12 +1,11 @@
-from qfluentwidgets import (ScrollArea, FluentIcon, Dialog, InfoBar, PrimaryPushButton, PushButton,
+from qfluentwidgets import (ScrollArea, FluentIcon, Dialog, InfoBar, getFont, setFont,
                             InfoBarPosition, MessageBoxBase, SubtitleLabel,
-                            BodyLabel, ComboBox)
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication, QHBoxLayout
+                            BodyLabel,)
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
-from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtGui import QDesktopServices, QFont
 from importlib.resources import path
 
-import glob
 import os
 import GUI.qss
 import GUI.picture
@@ -22,13 +21,15 @@ class GetStart(ScrollArea):
         
         self.view=QWidget(self)
         self.view.setObjectName('view')
-        vBoxLayout=QVBoxLayout(self.view)
+        vMainLayout=QVBoxLayout(self.view)
         self.setWidget(self.view)
         
         banner=BannerWidget(self)
+        
         with path(GUI.picture, "header.png") as header_path:
             banner.setPixmap(str(header_path))
-        banner.setTitle("SWAT-UQ")
+            
+        banner.setTitle(self.tr("SWAT-UQ"))
         
         linkCard=LinkCardView(self); banner.vBoxLayout.addWidget(linkCard); banner.vBoxLayout.addStretch(1)
         
@@ -44,7 +45,7 @@ class GetStart(ScrollArea):
         
         linkCard.addCard(FluentIcon.BOOK_SHELF,
                        self.tr('Examples'),
-                       self.tr('Review the documentation or explore examples of projects.'),
+                       self.tr('Review the documentation or explore more examples of SWAT-UQ projects.'),
                        self.click_examples)
         
         linkCard.addCard(FluentIcon.HELP,
@@ -52,9 +53,9 @@ class GetStart(ScrollArea):
                        self.tr('Please feel free to seek assistance or report any bugs to the developers.'),
                        self.click_help)
         
-        vBoxLayout.addWidget(banner)
-        vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        # vBoxLayout.addStretch(1)
+        vMainLayout.addWidget(banner)
+        vMainLayout.setContentsMargins(0, 0, 0, 0)
+        
         with path(GUI.qss, "get_start.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
@@ -197,11 +198,17 @@ class ReOpenWidget(MessageBoxBase):
 
         self.yesButton.setText("Yes")
         self.yesButton.clicked.connect(self.continue_)
+        self.yesButton.setFont(getFont(18, QFont.Medium))
         self.cancelButton.setText("Cancel")
         self.cancelButton.clicked.connect(self.reject)
+        self.cancelButton.setFont(getFont(18, QFont.Medium))
         
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.contentLabel)
+        
+        with path(GUI.qss, "messagebox.qss") as qss_path:
+            with open(qss_path) as f:
+                self.setStyleSheet(f.read())
     
     def continue_(self):
         

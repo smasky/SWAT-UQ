@@ -1,9 +1,12 @@
-from qfluentwidgets import LineEdit, Dialog
-from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QComboBox
-from PyQt5.QtCore import Qt
+from qfluentwidgets import LineEdit, Dialog, BodyLabel, PrimaryPushButton, PrimaryToolButton, PushButton
+from qframelesswindow import FramelessDialog
 
-from .open_project import OpenProject
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from PyQt5.QtGui import QFont
 from .add_para_widget import AddParaWidget
+from .utility import setFont, getFont, Medium
+from .double_tree_widget import DoubleTreeWidget
 class LineBox(LineEdit):
     
     def __init__(self, leftOptions, rightOptions, parent=None):
@@ -20,15 +23,16 @@ class LineBox(LineEdit):
         if self.isSelected is False:
             self.isSelected=True
             
-            dialog=AddParaWidget(self.leftOptions, self.rightOptions, self.data, self)
+            dialog=PositionWidget(self.leftOptions, self.rightOptions, self.data, self)
             res=dialog.exec()
             
             if res==Dialog.Accepted:
-                text=self.generateText(dialog.selected)
-                self.setText(text)
-                text=self.text()
-            else:
-                self.setText("all")
+                if dialog.isAll or len(dialog.selected)==0:
+                    self.setText("all")
+                else:
+                    text=self.generateText(dialog.selected)
+                    self.setText(text)
+                    text=self.text()
             self.isSelected=False
             self.clearFocus()
       
@@ -43,3 +47,63 @@ class LineBox(LineEdit):
         text=" ".join(tmp)
         return text
 
+class PositionWidget(FramelessDialog):
+    
+    isAll=False
+    def __init__(self, leftOptions, rightOptions, selected=None, parent=None):
+        
+        super().__init__(parent)
+        self.selected={}
+        self.vBoxLayout=QVBoxLayout(self)
+        
+        label=BodyLabel(self.tr("Position Generation"), self)
+        setFont(label, 18, Medium)
+        
+        self.vBoxLayout.addWidget(label)
+        
+        self.contentWidget=DoubleTreeWidget(leftOptions, rightOptions, selected, self)
+        self.vBoxLayout.addWidget(self.contentWidget)
+        
+        self.buttonGroup=QWidget(self)
+        self.vBoxLayout.addWidget(self.buttonGroup)
+        
+        self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        setFont(self.yesButton, 18, Medium)
+        
+        self.setButton=PushButton(self.tr("Set all"), self.buttonGroup); self.setButton.clicked.connect(self.setAll)
+        setFont(self.setButton, 18, Medium)
+        
+        self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        setFont(self.cancelButton, 18, Medium)
+        
+        self.buttonLayout=QHBoxLayout(self.buttonGroup)
+        self.buttonLayout.addWidget(self.yesButton)
+        self.buttonLayout.addWidget(self.setButton)
+        self.buttonLayout.addWidget(self.cancelButton)
+        
+        self.setFixedSize(1000, 600)
+        self.titleBar.hide()
+    
+    def confirm_clicked(self):
+        
+        targetRoot=self.contentWidget.targetTree.invisibleRootItem()
+        
+        for i in range(targetRoot.childCount()):
+            topChild=targetRoot.child(i)
+            topName=topChild.text(0)
+            self.selected.setdefault(topName, [])
+            for j in range(topChild.childCount()):
+                child=topChild.child(j)
+                paraName=child.text(0)
+                self.selected[topName].append(paraName)
+                        
+        self.accept()
+    
+    def setAll(self):
+        
+        self.ifAll=True
+        self.accept()
+    
+    def cancel_clicked(self):
+        
+        self.reject()

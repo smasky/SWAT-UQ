@@ -10,6 +10,7 @@ from importlib.resources import path
 
 from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
+from .utility import getFont, Medium
 from ..project import Project as Pro
 class ParaTable(QFrame):
     
@@ -21,13 +22,15 @@ class ParaTable(QFrame):
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
         
         label=SubtitleLabel("Parameter Information List")
+        label.setFont(getFont(25, Medium))
+        
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
-        importButton=PrimaryPushButton("Import From File (.par)", self); importButton.setFixedSize(300, 40); 
-        self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         
-        addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(30); 
+        addButton=PrimaryPushButton("Add", self); addButton.setFixedHeight(30)
+        addButton.setFont(getFont(18, Medium))
+        
         self.addButton=addButton; addButton.clicked.connect(self.addPara)
         
         hBoxLayout=QHBoxLayout();hBoxLayout.addStretch(3)
@@ -46,18 +49,25 @@ class ParaTable(QFrame):
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
             str('Parameter Name'), str('File Extension'), str('Tuning Mode'),
-            str('Lower Bound'), str('Upper Bound'), str('Position (SUB-HRU)'), str('Operation')])
+            str('Lower Bound'), str('Upper Bound'), str('Position'), str('Operation')])
         
-        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
-        self.generateButton=PrimaryPushButton("Save To Parameter File (.par)", self)
+        
+        hBoxLayout=QHBoxLayout();
+        importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40); 
+        self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
+        importButton.setFont(getFont(18, Medium))
+        
+        hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
+        self.generateButton=PrimaryPushButton("Save Current Parameters", self)
         self.generateButton.setFixedSize(300, 40); self.generateButton.clicked.connect(self.saveParFile)
-        # self.generateButton.setEnabled(False)
+        self.generateButton.setFont(getFont(18, Medium))
         
         hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
         self.vBoxLayout.setContentsMargins(10, 10, 10, 10)
+        
         with path(GUI.qss, "para_table.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())

@@ -1,10 +1,11 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, PushButton,  PrimaryPushButton
+from qfluentwidgets import BodyLabel, PushButton,  PrimaryPushButton, getFont
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
 from .double_tree_widget import DoubleTreeWidget
-
+from .utility import getFont, Medium, setFont
 
 class AddParaWidget(FramelessDialog):
     
@@ -13,7 +14,10 @@ class AddParaWidget(FramelessDialog):
         super().__init__(parent)
         self.selected={}
         self.vBoxLayout=QVBoxLayout(self)
+        
         label=BodyLabel(self.tr("Parameter Selection"), self)
+        setFont(label, 18, Medium)
+        
         self.vBoxLayout.addWidget(label)
         
         self.contentWidget=DoubleTreeWidget(leftOptions, rightOptions, selected, self)
@@ -21,13 +25,18 @@ class AddParaWidget(FramelessDialog):
         
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
+        
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        setFont(self.yesButton, 18, Medium)
+        
         self.cancelButton=PushButton(self.tr("Cancel (set all)"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        setFont(self.cancelButton, 18, Medium)
+        
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(800, 400)
+        self.setFixedSize(1000, 600)
         self.titleBar.hide()
     
     def confirm_clicked(self):

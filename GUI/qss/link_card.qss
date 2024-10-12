@@ -9,15 +9,15 @@ LinkCard:hover {
     border: 1px solid rgb(220, 220, 220);
 }
 
-#titleLabel {
+/* #titleLabel {
     font: 18px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
     color: black;
-}
-
+} */
+/* 
 #contentLabel {
     font: 12px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
     color: rgb(93, 93, 93);
-}
+} */
 
 LinkCardView {
     background-color: transparent;

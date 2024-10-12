@@ -1,11 +1,13 @@
 from qframelesswindow import FramelessDialog
 from qfluentwidgets import (BodyLabel, PushButton, LineEdit, PrimaryToolButton, SubtitleLabel, ComboBox,
-                            FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition, MessageBoxBase)
+                            FluentIcon, PrimaryPushButton, setFont, getFont, MessageBoxBase)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 import glob
 import os
+from importlib.resources import path
+import GUI.qss
 class OpenProject(FramelessDialog):
     
     projectPath=None
@@ -14,7 +16,8 @@ class OpenProject(FramelessDialog):
         super().__init__(parent)
         
         self.vBoxLayout=QVBoxLayout(self)
-        label=BodyLabel(self.tr("Open UQ Project"), self)
+        label=BodyLabel(self.tr("Open Existing SWAT-UQ Project"), self)
+        label.setFont(getFont(18, QFont.Medium))
         self.vBoxLayout.addWidget(label)
         self.vBoxLayout.addStretch(1)
         
@@ -23,8 +26,9 @@ class OpenProject(FramelessDialog):
         self.vBoxLayout.addWidget(self.contentWidget)
  
         hBoxLayout=QHBoxLayout()
-        pathLabel=BodyLabel(self.tr(str("UQ Project Path:").rjust(21)), self.contentWidget)
+        pathLabel=BodyLabel(self.tr(str("SWAT-UQ Project Path:").rjust(21)), self.contentWidget)
         pathEdit=LineEdit(self.contentWidget); pathEdit.setMinimumWidth(400); self.pathEdit=pathEdit
+        self.pathEdit.setFont(getFont(18, 60))
         self.pathEdit.textChanged.connect(self.checkNull)
         
         fileButton=PrimaryToolButton(FluentIcon.FOLDER, self.contentWidget); fileButton.clicked.connect(self.open_folder_dialog)
@@ -36,7 +40,10 @@ class OpenProject(FramelessDialog):
         self.vBoxLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
         self.yesButton.setEnabled(False)
+        self.yesButton.setFont(getFont(18, QFont.Medium))
         self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        self.cancelButton.setFont(getFont(18, QFont.Medium))
+        
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
@@ -89,16 +96,27 @@ class SelctProject(MessageBoxBase):
         self.comBox=ComboBox(self)
         self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
+        self.comBox.setFont_(18, QFont.Medium)
         
         self.yesButton.setText("Open")
         self.yesButton.clicked.connect(self.open_existing_project)
+        self.yesButton.setFont(getFont(18, QFont.Medium))
+        self.yesButton.setFixedHeight(50)
+        
         self.cancelButton.setText("Cancel")
         self.cancelButton.clicked.connect(self.continue_to_create)
+        self.cancelButton.setFont(getFont(18, QFont.Medium))
+        self.cancelButton.setFixedHeight(50)
         
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.contentLabel)
         self.viewLayout.addWidget(self.comBox)
-    
+
+        with path(GUI.qss, "messagebox.qss") as qss_path:
+            with open(qss_path) as f:
+                self.setStyleSheet(f.read())
+        
+        
     def open_existing_project(self):
         self.accept()
     

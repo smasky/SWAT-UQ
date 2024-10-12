@@ -1,9 +1,9 @@
 # coding:utf-8
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QPixmap, QDesktopServices
+from PyQt5.QtGui import QPixmap, QDesktopServices, QFont
 from PyQt5.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QSizePolicy
 
-from qfluentwidgets import IconWidget, FluentIcon, TextWrap, SingleDirectionScrollArea
+from qfluentwidgets import IconWidget, TextWrap, SingleDirectionScrollArea, getFont
 
 import GUI.qss
 from importlib.resources import path
@@ -14,11 +14,14 @@ class LinkCard(QFrame):
         super().__init__(parent=parent)
         
         self.click=click
-        self.setFixedSize(230, 200)
+        self.setFixedSize(250, 200)
         self.iconWidget = IconWidget(icon, self)
         self.titleLabel = QLabel(title, self)
-        self.contentLabel = QLabel(TextWrap.wrap(content, 28, False)[0], self)
-
+        self.titleLabel.setFont(getFont(18, QFont.Medium))
+        
+        self.contentLabel = QLabel(TextWrap.wrap(content, 30, False)[0], self)
+        self.contentLabel.setFont(getFont(15))
+        
         self.__initWidget()
         
     def __initWidget(self):
@@ -62,7 +65,7 @@ class LinkCardView(SingleDirectionScrollArea):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.view.setObjectName('view')
-        # self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        
         self.setMinimumHeight(300)
         with path(GUI.qss, "link_card.qss") as qss_path:
             with open(qss_path) as f:

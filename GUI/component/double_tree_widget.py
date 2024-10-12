@@ -1,12 +1,16 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,QTreeWidgetItem, QCompleter,
                              QPushButton)
-from qfluentwidgets import TreeWidget, PrimaryToolButton, FluentIcon, BodyLabel, LineEdit
+from qfluentwidgets import TreeWidget, PrimaryToolButton, FluentIcon, BodyLabel, LineEdit, FluentStyleSheet, getStyleSheet
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
+from .utility import setFont, Medium, substitute, getFont
+import GUI.qss
+from importlib.resources import path
 class DoubleTreeWidget(QWidget):
     
     def __init__(self, leftOptions, rightOptions, selected, parent=None):
+        
         super().__init__(parent)
         self.leftOptions=leftOptions
         self.rightOptions=rightOptions
@@ -16,7 +20,6 @@ class DoubleTreeWidget(QWidget):
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.searchBox.setCompleter(self.completer)
         self.searchBox.textChanged.connect(self.filterTree)
-        
         
         if selected is not None:
             self.populateTree(self.targetTree, selected)
@@ -30,7 +33,8 @@ class DoubleTreeWidget(QWidget):
         
         h=QHBoxLayout()
         self.searchBox=LineEdit()
-        h.addWidget(BodyLabel('Search:')); h.addWidget(self.searchBox)
+        label=BodyLabel('Search:'); setFont(label, 18, Medium)
+        h.addWidget(label); h.addWidget(self.searchBox)
         
         vLayout.addLayout(h)
         
@@ -38,9 +42,14 @@ class DoubleTreeWidget(QWidget):
         
         self.sourceTree = TreeWidget()
         self.sourceTree.setHeaderLabel("Source Parameters")
-        
         self.targetTree = TreeWidget()
         self.targetTree.setHeaderLabel("Target Parameters")
+        
+        qss=getStyleSheet(FluentStyleSheet.TREE_VIEW)
+        qss=substitute(qss, {'QHeaderView::section':{'font': " 18px 'Segoe UI', 'Microsoft YaHei'", 'font-weight': '500'}})
+        
+        self.sourceTree.setStyleSheet(qss)
+        self.targetTree.setStyleSheet(qss)
         
         self.populateTree(self.sourceTree, self.leftOptions)
         self.populateTree(self.targetTree, self.rightOptions)
@@ -48,6 +57,9 @@ class DoubleTreeWidget(QWidget):
         btnLayout = QVBoxLayout()
         self.btnToRight = PrimaryToolButton(FluentIcon.RIGHT_ARROW, self)
         self.btnToLeft = PrimaryToolButton(FluentIcon.LEFT_ARROW, self)
+        self.btnToRight.setFixedSize(40,40)
+        self.btnToLeft.setFixedSize(40,40)
+        
         btnLayout.addStretch()
         btnLayout.addWidget(self.btnToRight)
         btnLayout.addWidget(self.btnToLeft)
@@ -115,6 +127,7 @@ class DoubleTreeWidget(QWidget):
             rootItems = {}
             for key in keys:
                 rootItem = QTreeWidgetItem(widget, [key])
+                rootItem.setFont(0, getFont(18, Medium))
                 rootItems[key] = rootItem
 
             for rootItem in rootItems.values():
@@ -127,13 +140,17 @@ class DoubleTreeWidget(QWidget):
     def addChildItems(self, parent, children):
         for child in children:
             childItem = QTreeWidgetItem(parent, [child])
+            childItem.setFont(0, getFont(16))
+            
             childItem.setFlags(childItem.flags() | Qt.ItemIsUserCheckable)
             childItem.setCheckState(0, Qt.Unchecked)
 
     def moveToRight(self):
+        
         self.copyCheckedChildItems(self.sourceTree.invisibleRootItem())
         self.uncheckAllItems(self.sourceTree.invisibleRootItem())
         self.resetSearch()
+        
     def copyCheckedChildItems(self, sourceRoot):
         for i in range(sourceRoot.childCount()):
             sourceChild = sourceRoot.child(i)
@@ -150,13 +167,15 @@ class DoubleTreeWidget(QWidget):
             for j in range(sourceChild.childCount()):
                 subChild = sourceChild.child(j)
                 if subChild.isHidden():
-                    continue  # 跳过隐藏的子项目
+                    continue  
 
                 if subChild.checkState(0) == Qt.Checked:
                     if not self.targetTree.findItems(sourceChild.text(0), Qt.MatchExactly, 0):
                         child = QTreeWidgetItem(self.targetTree, [sourceChild.text(0)])
                         child.setFlags(child.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
                         child.setCheckState(0, Qt.Unchecked)
+                        
+                        child.setFont(0, getFont(18, Medium))#TODO
                         
                         self.addChildItems(child, [subChild.text(0)])
                         child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
