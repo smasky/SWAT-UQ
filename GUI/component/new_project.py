@@ -102,6 +102,7 @@ class AskForExistingProject(MessageBoxBase):
         self.comBox=ComboBox(self)
         self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
+        self.comBox.setCurrentIndex(0)
         setFont(self.comBox, 18)
         
         self.yesButton.setText("Open existing project")

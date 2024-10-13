@@ -1,30 +1,37 @@
 from PyQt5.QtWidgets import QWidget, QButtonGroup, QHBoxLayout, QSizePolicy, QGridLayout
 from PyQt5.QtCore import Qt
-from qfluentwidgets import RadioButton, PushButton
+from qfluentwidgets import RadioButton, FluentStyleSheet, getStyleSheet
 from qfluentwidgets import FlowLayout
-import GUI.qss
+
 import GUI.data
 from importlib.resources import path
-
+from .utility import substitute, MediumSize, Medium
 class ButtonGroup(QWidget):
     currentIndex=None
     def __init__(self, contents, bool, parent=None):
         super().__init__(parent)
         self.btns=[]
         self.group=QButtonGroup(self)
-        layout=QHBoxLayout(self)
-        
+        layout=FlowLayout(self)
 
-        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
         for i, content in enumerate(contents):
-            btn=RadioButton(content, self)
+            btn=RadioButton_(content, self)
             self.btns.append(btn)
             self.group.addButton(btn, i)
-            layout.addWidget(btn, Qt.AlignmentFlag.AlignCenter)
+            layout.addWidget(btn)
             btn.setEnabled(bool)
-        layout.addStretch(1)
+            
         self.group.idClicked.connect(self.setCurrentIndex)
+    
+    def reset(self):
         
+        for btn in self.group.buttons():
+            self.group.removeButton(btn)
+            btn.setChecked(False)
+        
+        for i, btn in enumerate(self.group.buttons()):
+            self.group.addButton(btn, i)
+    
     def clearBtn(self):
         
         for btn in self.group.buttons():
@@ -51,3 +58,14 @@ class ButtonGroup(QWidget):
             self.btns[index].setEnabled(True)
         
         self.btns[indexes[0]].click()
+
+class RadioButton_(RadioButton):
+    
+    def __init__(self, content, parent=None):
+        super().__init__(parent)
+        self.setText(content)
+        qss=getStyleSheet(FluentStyleSheet.BUTTON)
+        qss=substitute(qss, {'RadioButton' : {'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'",'font-weight': '450'}})
+        self.qss=qss
+        # qss+="RadioButton:hover\n { font-weight : 500;}\n" +"QRadioButton:hover\n { font-weight : 500;}\n"
+        self.setStyleSheet(qss)

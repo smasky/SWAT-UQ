@@ -1,9 +1,12 @@
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget
 import re
-Medium=QFont.Medium
 
-def setFont(widget: QWidget, fontSize=18, weight=QFont.Normal):
+Medium=QFont.Medium
+MediumSize=18
+Normal=QFont.Normal
+
+def setFont(widget: QWidget, fontSize=MediumSize, weight=Medium):
     """ set the font of widget
 
     Parameters
@@ -42,18 +45,18 @@ def substitute(qss, substitutions):
     for css_class, properties in substitutions.items():
         pattern = rf"({css_class}\s*\{{[^}}]*\}})"
     
-    def replace_or_add_properties(match):
-        content = match.group(1)
-        for property_name, new_value in properties.items():
-            existing_match = re.search(rf"{property_name}:\s*[^;]+;", content)
-            if existing_match:
-                content = re.sub(rf"({property_name}:\s*)([^;]+)(;)", rf"\1{new_value}\3", content)
-            else:
-        
-                content = content.rstrip('}') + f"    {property_name}: {new_value};\n}}"
-        return content
+        def replace_or_add_properties(match):
+            content = match.group(1)
+            for property_name, new_value in properties.items():
+                existing_match = re.search(rf"{property_name}:\s*[^;]+;", content)
+                if existing_match:
+                    content = re.sub(rf"({property_name}:\s*)([^;]+)(;)", rf"\1{new_value}\3", content)
+                else:
+            
+                    content = content.rstrip('}') + f"    {property_name}: {new_value};\n}}"
+            return content
     
-    qss = re.sub(pattern, replace_or_add_properties, qss)
+        qss = re.sub(pattern, replace_or_add_properties, qss)
     
     return qss
     

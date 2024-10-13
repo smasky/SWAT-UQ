@@ -28,15 +28,13 @@ class SenAnalysis(ScrollArea):
         
         self.saWidget=SAWidget()
         banner.vBoxLayout.addWidget(self.saWidget)
-        
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        
         self.setWidgetResizable(True)
         
         with path(GUI.qss, "sensitivity_analysis.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-    
+        self.setWidgetResizable(True)
     def updateUI(self):
         
         self.saWidget.updateUI()

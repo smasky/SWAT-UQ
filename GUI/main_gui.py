@@ -63,7 +63,7 @@ class MainWindow(FluentWindow):
     def initWindow(self):
         
         self.setWindowTitle("SWAT-UQ")
-        self.resize(1200, 768)
+        self.resize(1268, 880)
         
         with path(GUI.picture, "icon.png") as iconPath:
             self.setWindowIcon(QIcon(str(iconPath)))

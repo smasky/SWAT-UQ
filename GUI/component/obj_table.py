@@ -11,6 +11,7 @@ from importlib.resources import path
 from .table_widget_pro import TableWidgetPro
 from .add_pro_widget import AddProWidget
 from ..project import Project as Pro
+from .utility import setFont, Medium, MediumSize, Normal
 OBJTYPE={ "NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4 }
 VARIABLE={ "Flow":0 }
 class ObjTable(QFrame):
@@ -28,14 +29,13 @@ class ObjTable(QFrame):
         label=SubtitleLabel("Objective Information List")
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        setFont(label, 25, Medium)
         
-        importButton=PrimaryPushButton("Import From File (.obj)", self); importButton.setFixedSize(300, 40); 
-        self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
-        
-        addButton=PrimaryToolButton(FluentIcon.ADD, self); addButton.setFixedHeight(24); 
+        addButton=PrimaryPushButton("Add", self); addButton.setFixedHeight(30); 
         self.addButton=addButton; addButton.clicked.connect(self.addPro)
+        setFont(addButton, 18, Medium)
         
-        hBoxLayout=QHBoxLayout(); hBoxLayout.addWidget(importButton);hBoxLayout.addStretch(3)
+        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(3)
         hBoxLayout.addWidget(label);hBoxLayout.addStretch(3);hBoxLayout.addWidget(addButton)
         self.vBoxLayout.addLayout(hBoxLayout)
          
@@ -54,10 +54,15 @@ class ObjTable(QFrame):
             self.tr('Obj Type'), self.tr('Variable'), self.tr('Weight'), 
             self.tr('Operation')])
         
+        
+        importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40)
+        setFont(importButton, 18, Medium)
+        self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
         hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
-        self.generateButton=PrimaryPushButton("Save to Objective File (.obj)", self)
+        self.generateButton=PrimaryPushButton("Save Current File", self)
         self.generateButton.setFixedSize(300, 40)
         self.generateButton.clicked.connect(self.saveProFile)
+        setFont(self.generateButton, 18, Medium)
         hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)
         
@@ -155,21 +160,33 @@ class ObjTable(QFrame):
         self.table.insertRow(row)
         
         item=QTableWidgetItem(f"{text['objID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 0, item)
         
         item=QTableWidgetItem(f"{text['serID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 1, item)
         
         item=QTableWidgetItem(f"{text['reachID']:d}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 2, item)
         
         item=QTableWidgetItem(f"{Pro.INT_OBJTYPE[text['objType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 3, item)
         
         item=QTableWidgetItem(f"{Pro.INT_VAR[text['varType']]}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 4, item)
         
         item=QTableWidgetItem(f"{text['weight']:.2f}"); item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+        setFont(item, MediumSize, Normal)
         self.table.setItem(row, 5, item)
         self.table.setCellWidget(row, 6, self.addOperation(row))
         

@@ -1,8 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QFormLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QFormLayout, QFrame
 from PyQt5.QtCore import pyqtSignal, Qt
-from qfluentwidgets import BodyLabel, SpinBox, DoubleSpinBox, CheckBox
+from PyQt5.QtGui import QPainter, QPen, QColor
+from qfluentwidgets import BodyLabel, SpinBox, DoubleSpinBox, CheckBox, FluentStyleSheet, getStyleSheet
 
-
+from .utility import setFont, Medium, MediumSize, Normal, substitute
+from .check_box import CheckBox_
 class hyperWidget(QWidget):
     
     changed=pyqtSignal()
@@ -10,13 +12,18 @@ class hyperWidget(QWidget):
     def __init__(self, dicts, parent=None):
         
         super().__init__(parent)
-        formLayout1=QFormLayout()
-        formLayout1.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        formLayout2=QFormLayout()
-        formLayout2.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        hBoxLayout=QHBoxLayout(self)
+        self.setObjectName("hyperWidget")
+        mainLayout=QGridLayout(self)
         self.widgets=[]
         self.relatedWidgets=[]
+        
+        mainLayout.setColumnStretch(0, 1)
+        mainLayout.setColumnStretch(1 ,1)
+        mainLayout.setColumnStretch(2, 1)
+        mainLayout.setColumnStretch(3, 1)
+        mainLayout.setColumnStretch(4 ,1)
+        mainLayout.setColumnStretch(5, 1)
+        mainLayout.setColumnStretch(6, 1)
         
         count=0
         for name, contents in dicts.items():
@@ -27,26 +34,33 @@ class hyperWidget(QWidget):
                 dec=name
             
             label=BodyLabel(dec+":")
-            label.setFixedWidth(250)
+            setFont(label)
             label.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
             
             type=contents['type']
             value=contents['default']
             method=contents['method']
             class_=contents['class']
+            
             if type=="int":
                 line=SpinBox()
                 line.setMaximum(5000)
                 line.setValue(int(value))
+                line.setMaximumWidth(160)
+                setFont(line, MediumSize, Normal)
 
             elif type=="float":
                 line=DoubleSpinBox()
                 line.setValue(float(value))
+                line.setMaximumWidth(160)
+                setFont(line, MediumSize, Normal)
                 
             elif type=="bool":
-                line=CheckBox()
+                line=CheckBox_()
                 line.setChecked(bool(value))
-
+                
+                setFont(line, MediumSize, Normal)
+                
             if 'related' in contents:
                 if type=="int" or type=="float":
                     line.valueChanged.connect(lambda value: self.changedEvent())
@@ -56,26 +70,26 @@ class hyperWidget(QWidget):
                 self.relatedWidgets.append(line)
             else:
                 line.setProperty('related', 0)
+            
             line.setProperty('name', name)
             line.setProperty('method', method)
             line.setProperty('class', class_)
             line.setProperty('type', type)
             self.widgets.append(line)
             
-            if count%2==0:
-                formLayout1.addRow(label, line)
-            else:
-                formLayout2.addRow(label, line)
+            row=count//2
+            col=2 if count%2==0 else 5
+            mainLayout.addWidget(label, row, col-1, Qt.AlignmentFlag.AlignVCenter)
+            mainLayout.addWidget(line, row, col, Qt.AlignmentFlag.AlignVCenter)
             count+=1
             
-            formLayout1.setSpacing(10)
-            formLayout2.setSpacing(10)
-            
-        hBoxLayout.addStretch(1)
-        hBoxLayout.addLayout(formLayout1)
-        hBoxLayout.addStretch(3)
-        hBoxLayout.addLayout(formLayout2)
-        hBoxLayout.addStretch(3)
+        row=count//2+1
+        for col in [1, 2, 4, 5]:
+            w = QWidget()
+            w.setFixedSize(200, 10)
+            mainLayout.addWidget(w, row, col)
+
+        mainLayout.setContentsMargins(0, 20, 0, 20)
         
     def changedEvent(self):
         
@@ -117,3 +131,26 @@ class hyperWidget(QWidget):
             hyper[class_].append(h)
                 
         return hyper
+    
+    def paintEvent(self, event):
+        # Create QPainter object
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        # Create a pen to define the border style
+        pen = QPen(QColor(0, 0, 0, 30))
+        pen.setWidth(1)
+        painter.setPen(pen)
+        
+        # Calculate the rectangle that covers columns 1 to 5
+        margin = 10  # Margin for the rounded rectangle
+        left = self.layout().cellRect(0, 1).left() - margin
+        top = self.layout().cellRect(0, 1).top() - margin
+        right = self.layout().cellRect(self.layout().rowCount() - 1, 5).right() + margin
+        bottom = self.layout().cellRect(self.layout().rowCount() - 1, 5).bottom() + margin
+        
+        # Draw the rounded rectangle
+        painter.drawRoundedRect(left-10, top-10, right - left+20, bottom - top+20, 15, 15)
+        
+
+        
+        

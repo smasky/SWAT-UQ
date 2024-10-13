@@ -9,7 +9,7 @@ from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThr
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
-from UQPyL.optimization import GA, DE, SCE_UA
+from UQPyL.optimization import GA, DE, SCE_UA, PSO
 from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
 from UQPyL.utility.verbose import Verbose
@@ -245,12 +245,13 @@ class Project:
         cls.SAResult['X']=X
     
     @classmethod 
-    def simulation(cls, processBar, finish):
+    def simulation(cls, processBar, statistics, finish, unfinish):
         
         tolN=cls.SAResult['X'].shape[0]
         
         def update_progress(value):
             percent=value/tolN*100
+            statistics.setText(f"{int(value)}/{tolN}")
             processBar.setValue(percent)
         
         def accept(Y):
@@ -258,14 +259,27 @@ class Project:
         
         cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
         cls.worker.result.connect(accept)
+        cls.worker.result.connect(finish)
+        cls.worker.unfinished.connect(unfinish)
         cls.thread=EvaluateThread(cls.worker, cls.SAResult['X'])
         cls.worker.updateProcess.connect(update_progress)
         cls.thread.finished.connect(cls.thread.deleteLater)  # 确保线程完成后被清理
-        cls.thread.finished.connect(finish)
-        cls.thread.start()
         
+        cls.thread.start()
+    
     @classmethod
-    def optimizing(cls, FEsBar, itersBar, verbose, finish):
+    def cancelSA(cls):
+        
+        cls.worker.stop=True
+    
+    @classmethod
+    def cancelOpt(cls):
+        
+        cls.worker.stop=True
+        Verbose.isStop=True
+    
+    @classmethod
+    def optimizing(cls, FEsBar, itersBar, FEsLabel, itersLabel, verbose, finish, unfinish):
         
         cls.OPResult={}
         cls.OPResult['verbose']=[]
@@ -286,6 +300,9 @@ class Project:
             if func=="__init__":
                 initHyper[name]=value
         
+        initHyper['verboseFreq']=1
+        initHyper['verbose']=False
+        
         optimizer=eval(opClass)(**initHyper)
         
         maxFEs=initHyper['maxFEs']
@@ -295,16 +312,23 @@ class Project:
             
             percent=value/maxFEs*100
             FEsBar.setValue(percent)
+            FEsLabel.setText(f"{int(value)}/{maxFEs} FEs")
         
         def update_itersBar(value):
             
             percent=value/maxIterTimes*100
             itersBar.setValue(percent)
-
+            itersLabel.setText(f"{int(value)}/{maxIterTimes} iters")
+            
         def update_verbose(txt):
             
             cls.OPResult['verbose'].append(txt+'\n')
             verbose.append(txt+'\n')
+        
+        def reset():
+            
+            Verbose.isStop=False
+            Verbose.iterEmit=None
         
         def saveResult():
             
@@ -320,10 +344,13 @@ class Project:
         iterEmit.iterSend.connect(update_itersBar)
         Verbose.iterEmit=iterEmit
         Verbose.verboseEmit=verboseEmit
+
         verboseEmit.verboseSend.connect(update_verbose)
         cls.thread=OptimizeThread(cls.worker, optimizer, cls.problemInfos)
         cls.thread.finished.connect(cls.thread.deleteLater)
-        cls.thread.finished.connect(finish)
+        iterEmit.iterFinished.connect(finish)
+        iterEmit.iterStop.connect(unfinish)
+        cls.thread.finished.connect(reset)
         cls.thread.finished.connect(saveResult)
         cls.thread.start()
         

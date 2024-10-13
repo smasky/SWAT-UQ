@@ -596,8 +596,9 @@ class RunWorker(QObject):
     
     updateProcess=pyqtSignal(float)
     result=pyqtSignal(object)
+    unfinished=pyqtSignal()
     start=pyqtSignal(object)
-    
+    stop=False
     def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, problemInfos):
         
         self.projectInfos=projectInfos
@@ -625,46 +626,47 @@ class RunWorker(QObject):
         
     def _subprocess(self, x, id):
         
-        workPath=self.workPath.get()
-        
-        self.setValues(workPath, x)
-        
-        process= subprocess.Popen(
-            os.path.join(workPath, self.swatExe),
-            cwd=workPath,
-            stdin=subprocess.PIPE, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE,
-            text=True)
-        process.wait()
+        if not self.stop:
+            workPath=self.workPath.get()
+            self.setValues(workPath, x)
+            
+            process= subprocess.Popen(
+                os.path.join(workPath, self.swatExe),
+                cwd=workPath,
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE,
+                text=True)
+            process.wait()
 
-        objs=[]
-        
-        for obj, series in self.objInfos.items():
-            vObj=0
-            for ser in series:
+            objs=[]
             
-                reachID=ser['reachID']
-                readLines=ser['readLines']
-                varType=ser['varType']
-                objType=ser['objType']
-                weight=ser['weight']
+            for obj, series in self.objInfos.items():
+                vObj=0
+                for ser in series:
                 
-                simValueList=[]
-                for line in readLines:
+                    reachID=ser['reachID']
+                    readLines=ser['readLines']
+                    varType=ser['varType']
+                    objType=ser['objType']
+                    weight=ser['weight']
                     
-                    startLine, endLine=line[0], line[1]
-                    subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
-                    simValueList.append(subValue)
+                    simValueList=[]
+                    for line in readLines:
+                        
+                        startLine, endLine=line[0], line[1]
+                        subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
+                        simValueList.append(subValue)
+                
+                    simValue=np.concatenate(simValueList, axis=0)
+                    obValue=ser['dataList']
+                    vObj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+                
+                objs.append(vObj)
             
-                simValue=np.concatenate(simValueList, axis=0)
-                obValue=ser['dataList']
-                vObj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
-            
-            objs.append(vObj)
-            
-        self.workPath.put(workPath)
-        return id, objs
+            self.workPath.put(workPath)
+            return id, objs
+        
         
     def setValues(self, path, x):
                 
@@ -685,19 +687,26 @@ class RunWorker(QObject):
         n = X.shape[0]
         Y = np.zeros((n, 1))
         
+        self._subprocess(X[0, :], 0)
+        
         with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
             
             for future in as_completed(futures):
-                idx, obj_value = future.result()
                 
-                for i, value in enumerate(obj_value):
-                    Y[idx, i] = value
+                if not self.stop:
+                    idx, obj_value = future.result()
+                    
+                    
+                    for i, value in enumerate(obj_value):
+                        Y[idx, i] = value
                 
                 self.count += 1
                 self.updateProcess.emit(self.count) 
-                
-        self.result.emit(Y)
+        if not self.stop:
+            self.result.emit(Y)
+        else:
+            self.unfinished.emit()
         return Y
 class EvaluateThread(QThread):
     
@@ -763,16 +772,25 @@ class IterEmit(QObject):
     
     iterCount=0
     iterSend=pyqtSignal(int)
-    
+    iterStop=pyqtSignal()
+    iterFinished=pyqtSignal()
     def __init__(self, parent=None):
         
         super().__init__(parent)
         
     def send(self):
         
-        self.iterCount+=1
         self.iterSend.emit(self.iterCount)
-
+        self.iterCount+=1
+        
+    def unfinished(self):
+        
+        self.iterStop.emit()
+    
+    def finished(self):
+        
+        self.iterFinished.emit()
+    
 class VerboseEmit(QObject):
     
     verboseSend=pyqtSignal(str)

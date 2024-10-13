@@ -1,9 +1,10 @@
 from qfluentwidgets import PillToolButton, BodyLabel, FluentIcon, SubtitleLabel
 
 from PyQt5.QtWidgets import QHBoxLayout, QFrame, QVBoxLayout
-
-from PyQt5.QtCore import Qt, QPoint, pyqtSignal
+from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor
+
+from .utility import setFont
 class StepWidget(QFrame):
     
     def __init__(self, content, parent=None):
@@ -22,6 +23,7 @@ class StepWidget(QFrame):
         vBoxLayout.addSpacing(5)
         
         label=SubtitleLabel(self.tr(content), self)
+        setFont(label)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         vBoxLayout.addWidget(label)
         vBoxLayout.addStretch(1)
@@ -35,6 +37,7 @@ class ProcessWidget(QFrame):
         self.btns=[]
         self.hBoxLayout=QHBoxLayout(self)
         self.setMaximumHeight(90)
+        
     def addStep(self, i, content):
         
         btnWidget=StepWidget(content, self)
@@ -49,7 +52,16 @@ class ProcessWidget(QFrame):
     
         self.btns[index].setChecked(True)
         self.update()
+    
+    def reset(self):
         
+        for btn in self.btns:
+            btn.setChecked(False)
+        
+        self.btns[0].setChecked(True)
+        
+        self.update()
+    
     def paintEvent(self, event):
         
         super().paintEvent(event)

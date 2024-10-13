@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QGridLayout, QSpacerItem,
-                             QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QGridLayout,
+                             QStackedWidget, QWidget,  QFileDialog)
+from PyQt5.QtCore import  Qt, pyqtSignal
 from PyQt5.QtGui import QFont
 from qfluentwidgets import (BodyLabel, ComboBox, 
-                            RadioButton, SpinBox, DoubleSpinBox, TextEdit,
-                            CheckBox, PrimaryPushButton, LineEdit, ProgressBar)
+                             SpinBox,TextEdit,
+                             PrimaryPushButton, LineEdit, ProgressBar)
 import os
 import copy
 import GUI.qss
@@ -14,6 +14,7 @@ from .process_widget import ProcessWidget
 from .button_group import ButtonGroup
 from .hyper_widget import hyperWidget
 from ..project import Project as Pro
+from .utility import setFont, Normal, Medium, MediumSize
 class SAWidget(QFrame):
     INDEX=0
     def __init__(self, parent=None):
@@ -38,6 +39,7 @@ class SAWidget(QFrame):
         #################################################################
         
         self.setupWidget=SetupWidget(self)
+        
         contentWidget.addWidget(self.setupWidget)
         self.simulationWidget=SimulationWidget(self)
         contentWidget.addWidget(self.simulationWidget)
@@ -49,24 +51,47 @@ class SAWidget(QFrame):
         
         self.nextButton=PrimaryPushButton("Next", self)
         self.nextButton.setEnabled(False)
+        setFont(self.nextButton)
+        self.nextButton.setMinimumWidth(150)
         
-        self.nextButton.setMinimumWidth(300)
-        h=QHBoxLayout();h.addStretch(1);h.addWidget(self.nextButton);h.addStretch(1)
+        self.resetBtn=PrimaryPushButton("Reset", self)
+        self.resetBtn.setMinimumWidth(150)
+        self.resetBtn.clicked.connect(self.reset)
+        setFont(self.resetBtn)
+        
+        h=QHBoxLayout();h.addStretch(1);h.addWidget(self.nextButton);h.addSpacing(20);h.addWidget(self.resetBtn) ;h.addStretch(1)
         vBoxLayout.addLayout(h)
         vBoxLayout.addSpacing(10)
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-         
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        
+        
         #connect
         self.nextButton.clicked.connect(self.nextPage)
+        self.setupWidget.nextBtn.connect(self.nextButton.setEnabled)
+        self.simulationWidget.nextBtn.connect(self.nextButton.setEnabled)
+        self.simulationWidget.resetBtn.connect(self.resetBtn.setEnabled)
         
         #qss
         with path(GUI.qss, "sa_widget.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-
+        
     def updateUI(self):
         self.setupWidget.updateUI()
+    
+    def reset(self):
+        Pro.SAInfos=None
+        Pro.SAResult=None
+        Pro.paraInfos=None
+        Pro.problemInfos=None
+        Pro.objInfos=None
+        
+        self.contentWidget.setCurrentIndex(0)
+        self.setupWidget.reset()
+        self.simulationWidget.reset()
+        self.processWidget.reset()
+        self.INDEX=0
         
     def nextPage(self):
         
@@ -83,86 +108,125 @@ class SAWidget(QFrame):
         self.contentWidget.setCurrentIndex(self.INDEX)
         self.contentWidget.currentWidget().updateUI()
         self.processWidget.on_button_clicked(self.INDEX)
+        
+        self.nextButton.setEnabled(False)
 
 class SetupWidget(QWidget):
-    
+    nextBtn=pyqtSignal(bool)
     def __init__(self, parent=None):
         super().__init__(parent)
         
         vBoxLayout=QVBoxLayout(self)
+        contentWidget=QWidget(self)
         #######################Parameter Path############################
-        gridLayout=QGridLayout()
-        self.paraEdit=ComboBox(self); self.paraEdit.setFixedWidth(300)
+        gridLayout=QGridLayout(contentWidget)
+        self.paraEdit=ComboBox(self )
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
+        self.paraEdit.currentIndexChanged.connect(self.activateSABtn)
         self.paraEdit._showComboMenu=self.dynamicShowPara
         self.paraEdit.setPlaceholderText("Click to select parameter file")
-        gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
-        gridLayout.addWidget(self.paraEdit, 0, 1)
         
-        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 2, Qt.AlignmentFlag.AlignRight)
-        self.numPara=LineEdit(self); self.numPara.setEnabled(False); self.numPara.setMaximumWidth(50)
-        gridLayout.addWidget(self.numPara, 0, 3)
+        label=BodyLabel("Parameter File:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 0, 1, Qt.AlignmentFlag.AlignVCenter)
+        gridLayout.addWidget(self.paraEdit, 0, 2, Qt.AlignmentFlag.AlignVCenter)
+        
+        label=BodyLabel("Number of Parameters:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 0, 4, Qt.AlignmentFlag.AlignVCenter)
+        self.numPara=LineEdit(self); self.numPara.setEnabled(False)
+        setFont(self.numPara)
+        gridLayout.addWidget(self.numPara, 0, 5, Qt.AlignmentFlag.AlignVCenter)
         
         ######################Objective Path###########################
-        gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
-        self.objLine=ComboBox(self); self.objLine.setFixedWidth(300)
+        label=BodyLabel("Objective File:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 1, 1, Qt.AlignmentFlag.AlignVCenter)
+        
+        self.objLine=ComboBox(self)
         self.objLine._showComboMenu=self.dynamicShowObj
         self.objLine.setPlaceholderText("Click to select objective file")
-        gridLayout.addWidget(self.objLine, 1, 1)
+     
+        gridLayout.addWidget(self.objLine, 1, 2, Qt.AlignmentFlag.AlignVCenter)
         self.objLine.currentIndexChanged.connect(self.loadObjFile)
+        self.objLine.currentIndexChanged.connect(self.activateSABtn)
         
-        gridLayout.addWidget(BodyLabel("Selection of Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        label=BodyLabel("Selection of Objectives:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 1, 4, Qt.AlignmentFlag.AlignVCenter)
+        
         self.objEdit=ComboBox(self)
-        self.objEdit.setEnabled(True); self.objEdit.setMaximumWidth(300)
+        self.objEdit.setEnabled(True)
         
         self.objEdit.currentIndexChanged.connect(self.ensureObj)
-        gridLayout.addWidget(self.objEdit, 1, 3)
-        gridLayout.addWidget(QWidget(), 0 , 4)
-        gridLayout.addWidget(QWidget(), 1 , 4)
+        gridLayout.addWidget(self.objEdit, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         
-        vBoxLayout.addLayout(gridLayout)
-        vBoxLayout.addSpacing(10)
-        #######################SA Combobox#############################
-        h=QFormLayout()
-        h.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        line1=ButtonGroup(Pro.SA_METHOD.keys(), True, self)
-        self.saBtnGroup=line1; self.SA_METHOD=list(Pro.SA_METHOD.keys())
-        label=BodyLabel("Sensibility Analysis:"); label.setAlignment(Qt.AlignmentFlag.AlignBottom)
-        label.setStyleSheet('''BodyLabel{
-                                padding-bottom: 9px; 
-                                }''')
-        h.addRow(label, self.saBtnGroup)
+        index=[1, 2, 3, 4, 5]
+        width=[210, 310, 50, 210, 270]
+        for i, w in zip(index, width):
+            qw=QWidget();qw.setFixedHeight(20);qw.setFixedWidth(w)
+            gridLayout.addWidget(qw, 2, i)
         
-        ########################Sampling Method#################################
-        line2=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
-        self.smBtnGroup=line2; self.SAMPLE_METHOD=list(Pro.SAMPLE_METHOD.keys())
-        label=BodyLabel("Sampling Method:");label.setAlignment(Qt.AlignmentFlag.AlignBottom)
-        label.setStyleSheet('''BodyLabel{
-                                padding-bottom: 9px; 
-                                }''')
-        h.addRow(label, self.smBtnGroup)
+        for i in range(2):
+            qw=QWidget();qw.setFixedHeight(55)
+            gridLayout.addWidget(qw, i, 0)
+
+        gridLayout.setColumnStretch(0, 1)
+        gridLayout.setColumnStretch(1, 1)
+        gridLayout.setColumnStretch(2, 1)
+        gridLayout.setColumnStretch(3, 1)
+        gridLayout.setColumnStretch(4, 1)
+        gridLayout.setColumnStretch(5, 1)
+        gridLayout.setColumnStretch(6, 1)
+       
+        label=BodyLabel("Sensibility Analysis:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 3, 1, Qt.AlignmentFlag.AlignVCenter)
         
-        hb=QHBoxLayout();hb.addStretch(1);hb.addLayout(h);hb.addStretch(1)
-        vBoxLayout.addLayout(hb)
+        self.saBtnGroup=ButtonGroup(Pro.SA_METHOD.keys(), False, self)
+        self.SA_METHOD=list(Pro.SA_METHOD.keys())
+        gridLayout.addWidget(self.saBtnGroup, 3, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         
+        w=QWidget();w.setFixedHeight(10);w.setMinimumWidth(300)
+        gridLayout.addWidget(w, 4, 2)
+        label=BodyLabel("Sampling Method:")
+        
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 5, 1, Qt.AlignmentFlag.AlignVCenter)
+        
+        self.smBtnGroup=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
+        self.SAMPLE_METHOD=list(Pro.SAMPLE_METHOD.keys())
+        gridLayout.addWidget(self.smBtnGroup, 5, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
+        
+        vBoxLayout.addWidget(contentWidget)
         vBoxLayout.addSpacing(20)
         
         self.hyperStack=QStackedWidget(self)
+        self.hyperStack.setContentsMargins(0, 0, 0, 0)
         vBoxLayout.addWidget(self.hyperStack)
-        self.hyperStack.addWidget(QWidget())
+        w=QWidget(); w.setFixedHeight(10)
+        self.hyperStack.addWidget(w)
         self.hyperStack.setCurrentIndex(0)
         
-        vBoxLayout.addWidget(self.hyperStack)
         vBoxLayout.addStretch(1)
         
         conclusionWidget=QWidget(self)
         conclusionWidget.setObjectName("conclusionWidget")
         h=QHBoxLayout(conclusionWidget)
         labelC=BodyLabel('The total number of sampling points is:')
+        setFont(labelC)
         lineC=LineEdit(self); lineC.setEnabled(False);lineC.setToolTip("Please select the Sensitivity Analysis and Sampling Method first.")
         self.numLine=lineC; self.numLine.setMinimumWidth(150)
+        setFont(lineC)
         h.addSpacing(50); h.addWidget(labelC); h.addWidget(lineC);h.addStretch(1)
         h.setContentsMargins(0, 10, 0, 10)
+        
         vBoxLayout.addWidget(conclusionWidget)
         
         self.saBtnGroup.group.idClicked.connect(self.enableSampling)
@@ -171,6 +235,16 @@ class SetupWidget(QWidget):
         self.saBtnGroup.group.buttonClicked.connect(self.updateNextButton)
         
         vBoxLayout.setContentsMargins(0,0,0,0)
+    
+    def activateSABtn(self):
+        
+        i=self.paraEdit.currentIndex()
+        j=self.objLine.currentIndex()
+        
+        if(i>=0 and j>=0):
+            self.saBtnGroup.setEnabled_(True)
+            btn=self.saBtnGroup.group.buttons()[0]
+            btn.click()
     
     def updateHyper(self):
         
@@ -191,6 +265,8 @@ class SetupWidget(QWidget):
         hyper.changed.connect(self.updateNumSampling)
         hyper.changed.emit()
         
+        self.nextBtn.emit(True)
+        
     def updateNumSampling(self):
         
         widget=self.sender()
@@ -203,29 +279,36 @@ class SetupWidget(QWidget):
         formula=Pro.FORMULA[self.SAMPLE_METHOD[I_SM]]
         
         num=eval(formula, related)
-        
         self.numLine.setText(str(num))
     
     def dynamicShowPara(self):
         
         self.paraEdit.clear()
         self.paraEdit.addItems(Pro.findParaFile())
+        self.paraEdit.setCurrentIndex(-1)
         super(ComboBox, self.paraEdit)._showComboMenu()
-    
+
     def dynamicShowObj(self):
         
         self.objLine.clear()
         self.objLine.addItems(Pro.findProFile())
+        self.objLine.setCurrentIndex(-1)
         super(ComboBox, self.objLine)._showComboMenu()
+    
+    def reset(self):
+        
+        self.objLine.clear()
+        self.paraEdit.clear()
+        self.objEdit.clear()
+        self.numPara.clear()
+        self.numLine.clear()
+        
+        self.saBtnGroup.setEnabled_(False)
+        self.smBtnGroup.setEnabled_(False)
+        self.hyperStack.setCurrentIndex(0)
         
     def updateUI(self):
-        
         pass 
-    
-        # self.paraEdit.setCurrentIndex(0)
-        # self.objLine.setCurrentIndex(0)
-        # self.loadParaFile()
-        # self.loadObjFile()
     
     def loadParaFile(self):
         
@@ -236,7 +319,7 @@ class SetupWidget(QWidget):
         
         Pro.paraInfos=infos
         Pro.projectInfos['paraPath']=path
-    
+        
     def loadObjFile(self):
         
         path=self.objLine.currentText()
@@ -246,9 +329,9 @@ class SetupWidget(QWidget):
         
         self.objEdit.clear()
         self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
-
+        self.objEdit.setCurrentIndex(0)
         Pro.projectInfos['objPath']=path
-    
+        
     def ensureObj(self):
         
         objID=int(self.objEdit.text().split()[1])
@@ -291,6 +374,9 @@ class SetupWidget(QWidget):
         
 class SimulationWidget(QWidget):
     
+    nextBtn=pyqtSignal(bool)
+    resetBtn=pyqtSignal(bool)
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -301,30 +387,53 @@ class SimulationWidget(QWidget):
         self.processBar.setValue(self.currentValue)
         Pro.processBar=self.processBar
         
-        h=QHBoxLayout(); h.addSpacing(20)
-        h.addWidget(self.processBar); h.addSpacing(20)
+        h1=QHBoxLayout()
         
-        vBoxLayout.addLayout(h)
-        vBoxLayout.addSpacing(10)
+        self.statistics=BodyLabel()
+        setFont(self.statistics, MediumSize, Medium)
+        h1.addStretch(1)
+        h1.addWidget(self.statistics); h1.addSpacing(20)
+        
+        h2=QHBoxLayout(); h2.addSpacing(20)
+        h2.addWidget(self.processBar); h2.addSpacing(20)
+        v=QVBoxLayout()
+        v.addLayout(h2); v.addLayout(h1)
+        
+        vBoxLayout.addLayout(v)
+        # vBoxLayout.addSpacing(10)
 
         ##############################
-        h=QHBoxLayout(); h.addSpacing(20)
+        formLayout=QFormLayout()
+        formLayout.setContentsMargins(20, 0, 0, 0)
+        formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         self.label=BodyLabel("SWAT Execution:")
-        self.swatEdit=ComboBox(self); self.swatEdit.setMinimumWidth(400)
+        self.label.setMinimumWidth(100)
+        setFont(self.label)
         
+        self.swatEdit=ComboBox(self)
+        self.swatEdit.setMaximumWidth(200)
+        self.swatEdit._showComboMenu=self.dynamicShowExe
+        setFont(self.swatEdit, MediumSize, Normal)
         self.swatEdit.currentIndexChanged.connect(self.swatChanged)
-        h.addWidget(self.label); h.addWidget(self.swatEdit); h.addStretch(1)
-        vBoxLayout.addLayout(h)
+        
+        formLayout.addRow(self.label, self.swatEdit)
+        
         ##################################
-        h=QHBoxLayout(); h.addSpacing(20)
+
         self.label2=BodyLabel("SWAT Parallel:")
-        self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(5)
-        h.addWidget(self.label2); h.addWidget(self.parallelEdit); h.addStretch(1)
-        vBoxLayout.addLayout(h)
+        self.label2.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(self.label2)
+        
+        self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(1)
+        setFont(self.parallelEdit, MediumSize, Normal)
+        self.parallelEdit.setMaximumWidth(200)
+        formLayout.addRow(self.label2, self.parallelEdit)
+        
+        vBoxLayout.addLayout(formLayout)
         #################Verbose################
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=12)  # 或者使用 "Courier New"
+        font = QFont("Consolas", pointSize=13)  # 或者使用 "Courier New"
         font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -335,16 +444,39 @@ class SimulationWidget(QWidget):
         btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
         h=QHBoxLayout(btnWidget); h.setContentsMargins(0, 5, 0, 5)
         self.initializeBtn=PrimaryPushButton("Initialize"); self.initializeBtn.clicked.connect(self.initialize)
+        setFont(self.initializeBtn)
         self.samplingBtn=PrimaryPushButton("Sampling"); self.samplingBtn.clicked.connect(self.sampling)
+        setFont(self.samplingBtn)
         self.simBtn=PrimaryPushButton("Simulate"); self.simBtn.clicked.connect(self.simulation)
+        setFont(self.simBtn)
+        self.cancelBtn=PrimaryPushButton("Break"); self.cancelBtn.clicked.connect(self.cancel)
+        self.cancelBtn.setEnabled(False)
+        setFont(self.cancelBtn)
+        
         self.samplingBtn.setEnabled(False); self.simBtn.setEnabled(False)
-        h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.samplingBtn);h.addSpacing(30);h.addWidget(self.simBtn); h.addStretch(1)
-        
+        h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.samplingBtn);h.addSpacing(30);h.addWidget(self.simBtn); h.addSpacing(30); h.addWidget(self.cancelBtn); h.addStretch(1)
         vBoxLayout.addWidget(btnWidget)
+    
+    def dynamicShowExe(self):
         
+        self.swatEdit.clear()
+        self.objLine.addItems(Pro.findProFile())
+        self.objLine.setCurrentIndex(-1)
+        super(ComboBox, self.objLine)._showComboMenu()
+    
+    def reset(self):
+        
+        self.swatEdit.setEnabled(True)
+        self.parallelEdit.setEnabled(True)
+        self.initializeBtn.setEnabled(True)
+        self.simBtn.setEnabled(False)
+        self.samplingBtn.setEnabled(False)
+        self.cancelBtn.setEnabled(False)
+        self.verbose.clear()
         
     def updateUI(self):
         self.swatEdit.addItems(Pro.findSwatExe())
+        self.swatEdit.setCurrentIndex(0)
         
     def swatChanged(self):
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
@@ -373,12 +505,28 @@ class SimulationWidget(QWidget):
         
         self.verbose.append("Model Simulating ... Please Waiting!\n")
         self.simBtn.setEnabled(False)
-        Pro.simulation(self.processBar, self.finish)
+        self.resetBtn.emit(False)
+        self.cancelBtn.setEnabled(True)
+        Pro.simulation(self.processBar, self.statistics, self.finish, self.unfinish)
+
+    def unfinish(self):
+        
+        self.cancelBtn.setEnabled(False)
+        self.initializeBtn.setEnabled(True)
+        self.resetBtn.emit(True)
+        self.processBar.setValue(0)
+        self.verbose.append("Simulation has been canceled by user.\n")
     
+    def cancel(self):
+
+        Pro.cancelSA()
+        self.verbose.append("Canceling... Please wait!\n")
+        
     def finish(self):
         
         self.verbose.append("Simulation Done. Please click the next to execute analysis!\n")
-        self.parent().parent().nextButton.setEnabled(True)
+        self.nextBtn.emit(True)
+        self.resetBtn.emit(True)
 
 class AnalysisWidget(QWidget):
     def __init__(self, parent=None):
@@ -393,10 +541,16 @@ class AnalysisWidget(QWidget):
         
         self.btnWidget=QWidget(self); self.btnWidget.setObjectName("btnWidget")
         self.btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
+        
         h=QHBoxLayout(self.btnWidget); h.setContentsMargins(0, 5, 0, 5)
         self.executeBtn=PrimaryPushButton("Execute Analysis")
         self.executeBtn.clicked.connect(self.execute)
-        h.addStretch(1); h.addWidget(self.executeBtn); h.addStretch(1)
+        setFont(self.executeBtn)
+        self.saveBtn=PrimaryPushButton("Save Result")
+        setFont(self.saveBtn)
+        # self.saveBtn.clicked.connect(self.save)
+        
+        h.addStretch(1); h.addWidget(self.executeBtn); h.addSpacing(20); h.addWidget(self.saveBtn); h.addStretch(1)
         vBoxLayout.addWidget(self.btnWidget)
         
     def updateUI(self):

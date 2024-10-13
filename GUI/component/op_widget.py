@@ -13,8 +13,9 @@ from importlib.resources import path
 
 from .process_widget import ProcessWidget
 from .hyper_widget import hyperWidget
+from .utility import setFont, getFont, MediumSize, Medium, Normal
 from ..project import Project as Pro
-
+from .check_box import CheckBox_
 class OPWidget(QFrame):
     
     def __init__(self, parent=None):
@@ -50,9 +51,16 @@ class OPWidget(QFrame):
         ###############################################
         self.nextButton=PrimaryPushButton("Next", self)
         self.nextButton.setEnabled(False)
+        setFont(self.nextButton)
         self.nextButton.clicked.connect(self.nextPage)
-        self.nextButton.setMinimumWidth(300)
-        h=QHBoxLayout();h.addStretch(1);h.addWidget(self.nextButton);h.addStretch(1)
+        self.nextButton.setMinimumWidth(150)
+        
+        self.resetBtn=PrimaryPushButton("Reset", self)
+        self.resetBtn.setMinimumWidth(150)
+        self.resetBtn.clicked.connect(self.reset)
+        setFont(self.resetBtn)
+        
+        h=QHBoxLayout();h.addStretch(1);h.addWidget(self.nextButton);h.addSpacing(20);h.addWidget(self.resetBtn);h.addStretch(1)
         vBoxLayout.addLayout(h)
         vBoxLayout.addSpacing(10)
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -61,7 +69,21 @@ class OPWidget(QFrame):
         with path(GUI.qss, "op_widget.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
+                
+    def reset(self):
+        
+        Pro.OPInfos=None
+        Pro.OPResult=None
+        Pro.paraInfos=None
+        Pro.problemInfos=None
+        Pro.objInfos=None
 
+        self.contentWidget.setCurrentIndex(0)
+        self.setupWidget.reset()
+        self.opWidget.reset()
+        self.processWidget.reset()
+        self.INDEX=0
+        
     def nextPage(self):
         
         if self.INDEX==0:
@@ -98,65 +120,95 @@ class SetupWidget(QWidget):
         vBoxLayout=QVBoxLayout(self)
         
         self.objType=None
-        
+        contentWidget=QWidget(self)
         #######################Parameter Path############################
-        gridLayout=QGridLayout()
+        gridLayout=QGridLayout(contentWidget)
         
-        self.paraEdit=ComboBox(self); self.paraEdit.setMinimumWidth(300)
+        label=BodyLabel("Parameter File:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 0, 1, Qt.AlignmentFlag.AlignVCenter)
+    
+        self.paraEdit=ComboBox(self)
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
         self.paraEdit._showComboMenu=self.dynamicShowPara
         self.paraEdit.setPlaceholderText("Click to select parameter file")
-        gridLayout.addWidget(BodyLabel("Parameter File:"), 0, 0, Qt.AlignmentFlag.AlignRight)
-        gridLayout.addWidget(self.paraEdit, 0, 1)
+        gridLayout.addWidget(self.paraEdit, 0, 2, Qt.AlignmentFlag.AlignVCenter)
         
-        gridLayout.addWidget(BodyLabel("Number of Parameters:"), 0, 2, Qt.AlignmentFlag.AlignRight)
-        self.numPara=LineEdit(self); self.numPara.setEnabled(False); self.numPara.setMaximumWidth(50)
-        gridLayout.addWidget(self.numPara, 0, 3)
+        label=BodyLabel("Number of Parameters:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 0, 4, Qt.AlignmentFlag.AlignVCenter)
+        
+        self.numPara=LineEdit(self); self.numPara.setEnabled(False)
+        setFont(self.numPara)
+        gridLayout.addWidget(self.numPara, 0, 5, Qt.AlignmentFlag.AlignVCenter)
         
         ########################Objective Path#######################
         
-        gridLayout.addWidget(BodyLabel("Objective File:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        label=BodyLabel("Objective File:"); label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 1, 1, Qt.AlignmentFlag.AlignVCenter)
+        
         self.objLine=ComboBox(self)
-        self.objLine.setFixedWidth(300)
         self.objLine._showComboMenu=self.dynamicShowObj
         self.objLine.setPlaceholderText("Click to select objective file")
-        gridLayout.addWidget(self.objLine, 1, 1)
+        gridLayout.addWidget(self.objLine, 1, 2, Qt.AlignmentFlag.AlignVCenter)
         
-        gridLayout.addWidget(BodyLabel("Optimization Objectives:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        label=BodyLabel("Optimization Objectives:"); label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 1, 4, Qt.AlignmentFlag.AlignVCenter)
+        
         self.objEdit=RadioWidget([])
         self.objEdit.setEnabled(True)
         self.objLine.currentIndexChanged.connect(self.loadObjFile)
-        gridLayout.addWidget(self.objEdit, 1, 3)
+        gridLayout.addWidget(self.objEdit, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         self.objEdit.sop.connect(self.ensureObj)
         self.objEdit.mop.connect(self.ensureObj)
         
-        gridLayout.addWidget(QWidget(), 0 , 4)
-        gridLayout.addWidget(QWidget(), 1 , 4)
-
-        vBoxLayout.addLayout(gridLayout)
-        vBoxLayout.addSpacing(10)
+        gridLayout.setColumnStretch(0, 1)
+        gridLayout.setColumnStretch(1, 1)
+        gridLayout.setColumnStretch(2, 1)
+        gridLayout.setColumnStretch(3, 1)
+        gridLayout.setColumnStretch(4, 1)
+        gridLayout.setColumnStretch(5, 1)
+        gridLayout.setColumnStretch(6, 1)
         
-        #######################Optimization Method###########################
-        gridLayout=QGridLayout()
-        gridLayout.addWidget(BodyLabel("SOP Method:"), 0, 0, Qt.AlignmentFlag.AlignRight)
+        index=[1, 2, 3, 4, 5]
+        width=[210, 310, 50, 210, 270]
+        for i, w in zip(index, width):
+            qw=QWidget();qw.setFixedHeight(20);qw.setFixedWidth(w)
+            gridLayout.addWidget(qw, 2, i)
+        
+        for i in range(2):
+            qw=QWidget();qw.setFixedHeight(55)
+            gridLayout.addWidget(qw, i, 0)
+            
+        label=BodyLabel("SOP Method:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 3, 1, Qt.AlignmentFlag.AlignVCenter)
+        
         self.sopComBox=ComboBox(self)
         self.sopComBox.addItems(Pro.SOP_METHOD.keys())
         self.SOP_METHOD=list(Pro.SOP_METHOD.keys())
         self.sopComBox.setEnabled(False)
-        self.sopComBox.setFixedWidth(600)
-        gridLayout.addWidget(self.sopComBox, 0, 1)
+        gridLayout.addWidget(self.sopComBox, 3, 2, 1, 3 ,Qt.AlignmentFlag.AlignVCenter)
         
-        gridLayout.addWidget(BodyLabel("MOP Method:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        label=BodyLabel("MOP Method:")
+        setFont(label)
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        gridLayout.addWidget(label, 4, 1, Qt.AlignmentFlag.AlignVCenter)
+        
         self.mopComBox=ComboBox(self)
         self.mopComBox.addItems(Pro.MOP_METHOD.keys())
         self.MOP_METHOD=list(Pro.MOP_METHOD.keys())
-        self.mopComBox.setFixedWidth(600)
         self.mopComBox.setEnabled(False)
-        gridLayout.addWidget(self.mopComBox, 1, 1)
-        gridLayout.addWidget(QWidget(), 0 , 2)
-        gridLayout.addWidget(QWidget(), 1 , 2)
-        vBoxLayout.addLayout(gridLayout)
+        gridLayout.addWidget(self.mopComBox, 4, 2, 1, 3 ,Qt.AlignmentFlag.AlignVCenter)
+        vBoxLayout.addWidget(contentWidget)
+        vBoxLayout.addSpacing(10)
         
+        #######################Connect###########################
         self.objEdit.sop.connect(self.showSOP)
         self.objEdit.mop.connect(self.showMOP)
         self.objEdit.clearBtn.connect(self.clearMethod)
@@ -230,19 +282,25 @@ class SetupWidget(QWidget):
         
         self.sopComBox.setEnabled(False)
         self.mopComBox.setEnabled(False)
+        self.sopComBox.setCurrentIndex(-1)
+        self.mopComBox.setCurrentIndex(-1)
+        self.sopComBox.setPlaceholderText("")
+        self.mopComBox.setPlaceholderText("")
         self.clearHyper()
         
     def showSOP(self):
         
         self.objType='SOP'
         self.sopComBox.setEnabled(True)
-        self.updateHyper()
+        self.sopComBox.setCurrentIndex(-1)
+        self.sopComBox.setPlaceholderText("Click here to select algorithm")
         
     def showMOP(self):
         
         self.objType='MOP'
         self.mopComBox.setEnabled(True)
-        self.updateHyper()
+        self.mopComBox.setCurrentIndex(-1)
+        self.mopComBox.setPlaceholderText("Click here to select algorithm")
         
     def updateUI(self):
         
@@ -280,6 +338,25 @@ class SetupWidget(QWidget):
         
         Pro.objInfos=objInfos
 
+    def reset(self):
+        
+        self.objLine.clear()
+        self.paraEdit.clear()
+        self.objEdit.clear()
+        self.numPara.clear()
+        
+        self.objLine.setPlaceholderText("Click to select objective file")
+        self.paraEdit.setPlaceholderText("Click to select parameter file")
+        
+        self.sopComBox.setCurrentIndex(-1)
+        self.sopComBox.setPlaceholderText("")
+        self.sopComBox.setEnabled(False)
+        self.mopComBox.setCurrentIndex(-1)
+        self.mopComBox.setPlaceholderText("")
+        self.mopComBox.setEnabled(False)
+        self.hyperStack.setCurrentIndex(0)
+        
+        
 class OptimizationWidget(QWidget):
     
     nextBtn=pyqtSignal(bool)
@@ -291,35 +368,64 @@ class OptimizationWidget(QWidget):
         vBoxLayout=QVBoxLayout(self); vBoxLayout.setContentsMargins(0, 0, 0, 0)
         
         ##################################Process Bar#####################################
-        formLayout=QFormLayout()
-        formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        h=QHBoxLayout()
         self.FEsBar=ProgressBar(self)
         self.FEsBar.setValue(0)
-        formLayout.addRow(BodyLabel("Function Evaluations:"), self.FEsBar)
-    
-        self.iterBar=ProgressBar(self)
-        self.iterBar.setValue(0)
-        formLayout.addRow(BodyLabel("Iterations:"), self.iterBar)
+        h.setContentsMargins(20, 0, 20, 0)
+        h.addWidget(self.FEsBar)
+        vBoxLayout.addLayout(h)
+        
+        self.FEsLabel=BodyLabel("NA/NA FEs")
+        self.FEsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(self.FEsLabel)
+        h=QHBoxLayout()
+        h.addStretch(1);h.addWidget(self.FEsLabel);h.addSpacing(20)
+        vBoxLayout.addLayout(h)
         
         h=QHBoxLayout()
-        h.addSpacing(20);h.addLayout(formLayout);h.addSpacing(20)
+        self.itersBar=ProgressBar(self)
+        self.itersBar.setValue(0)
+        h.setContentsMargins(20, 0, 20, 0)
+        h.addWidget(self.itersBar)
         vBoxLayout.addLayout(h)
+           
+        self.itersLabel=BodyLabel("NA/NA Iters")
+        self.itersLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(self.itersLabel)
+        h=QHBoxLayout()
+        h.addStretch(1);h.addWidget(self.itersLabel);h.addSpacing(20)
+        vBoxLayout.addLayout(h)
+        
         vBoxLayout.addSpacing(10)
 
         ###################################################
-        h=QHBoxLayout(); h.addSpacing(20)
+        formLayout=QFormLayout()
+        formLayout.setContentsMargins(20, 0, 0, 0)
+        formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         self.label=BodyLabel("SWAT Execution:")
-        self.swatEdit=ComboBox(self); self.swatEdit.setMinimumWidth(400)
+        self.label.setMinimumWidth(100)
+        setFont(self.label)
         
+        self.swatEdit=ComboBox(self)
+        
+        self.swatEdit.setMaximumWidth(200)
+        setFont(self.swatEdit, MediumSize, Normal)
         self.swatEdit.currentIndexChanged.connect(self.swatChanged)
-        h.addWidget(self.label); h.addWidget(self.swatEdit); h.addStretch(1)
-        vBoxLayout.addLayout(h)
-        ######################################################
-        h=QHBoxLayout(); h.addSpacing(20)
+        
+        formLayout.addRow(self.label, self.swatEdit)
+        
+        ##################################
+
         self.label2=BodyLabel("SWAT Parallel:")
-        self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(5)
-        h.addWidget(self.label2); h.addWidget(self.parallelEdit); h.addStretch(1)
-        vBoxLayout.addLayout(h)
+        self.label2.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(self.label2)
+        
+        self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(1)
+        setFont(self.parallelEdit, MediumSize, Normal)
+        self.parallelEdit.setMaximumWidth(200)
+        formLayout.addRow(self.label2, self.parallelEdit)
+        
+        vBoxLayout.addLayout(formLayout)
         
         #################Verbose################
         h=QHBoxLayout()
@@ -335,14 +441,23 @@ class OptimizationWidget(QWidget):
         btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
         h=QHBoxLayout(btnWidget); h.setContentsMargins(0, 5, 0, 5)
         self.initializeBtn=PrimaryPushButton("Initialize"); self.initializeBtn.clicked.connect(self.initialize)
+        setFont(self.initializeBtn)
         self.optimizationBtn=PrimaryPushButton("Optimizing"); self.optimizationBtn.clicked.connect(self.optimizing)
+        setFont(self.optimizationBtn)
         self.optimizationBtn.setEnabled(False)
-        h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.optimizationBtn); h.addStretch(1)
+        self.cancelBtn=PrimaryPushButton("Break")
+        setFont(self.cancelBtn)
+        self.cancelBtn.setEnabled(False)
+        self.cancelBtn.clicked.connect(self.cancel)
+        
+        h.addStretch(1);h.addWidget(self.initializeBtn);h.addSpacing(30);h.addWidget(self.optimizationBtn); h.addSpacing(30);h.addWidget(self.cancelBtn);h.addStretch(1)
         
         vBoxLayout.addWidget(btnWidget)
         
     def updateUI(self):
+        
         self.swatEdit.addItems(Pro.findSwatExe())
+        self.swatEdit.setCurrentIndex(0)
         
     def swatChanged(self):
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
@@ -361,12 +476,44 @@ class OptimizationWidget(QWidget):
     def optimizing(self):
         
         self.optimizationBtn.setEnabled(False)
-        Pro.optimizing(self.FEsBar, self.iterBar, self.verbose, self.finish)
+        self.cancelBtn.setEnabled(True)
+        Pro.optimizing(self.FEsBar, self.itersBar, self.FEsLabel, self.itersLabel, self.verbose, self.finish, self.unfinish)
+
+    def unfinish(self):
+        
+        self.itersLabel.setText("NA/NA Iters")
+        self.FEsLabel.setText("NA/NA FEs")
+        self.initializeBtn.setEnabled(True)
+        self.cancelBtn.setEnabled(False)
+        self.FEsBar.setValue(0)
+        self.itersBar.setValue(0)
+        self.swatEdit.setEnabled(True)
+        self.parallelEdit.setEnabled(True)
+        self.verbose.append("Simulation has been canceled by user.\n")
     
+    def reset(self):
+        
+        self.itersLabel.setText("NA/NA Iters")
+        self.FEsLabel.setText("NA/NA FEs")
+        self.initializeBtn.setEnabled(True)
+        self.cancelBtn.setEnabled(False)
+        self.FEsBar.setValue(0)
+        self.itersBar.setValue(0)
+        self.swatEdit.setEnabled(True)
+        self.parallelEdit.setEnabled(True)
+        self.verbose.clear()
+        
+    def cancel(self):
+        
+        self.cancelBtn.setEnabled(False)
+        Pro.cancelOpt()
+        self.verbose.append("Canceling... Please wait!\n")
+        
     def finish(self):
         
         self.verbose.append("Optimization Finished! Please click the next button to proceed.")
         self.nextBtn.emit(True)
+        self.cancelBtn.setEnabled(False)
 
 class ConclusionWidget(QWidget):
     
@@ -377,7 +524,6 @@ class ConclusionWidget(QWidget):
         vBoxLayout=QVBoxLayout(self); vBoxLayout.setContentsMargins(0, 0, 0, 0)
         
         ######################################
-        
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
         font = QFont("Consolas")  
@@ -392,6 +538,7 @@ class ConclusionWidget(QWidget):
         
         h=QHBoxLayout()
         self.applyBtn=PrimaryPushButton("Apply optimal parameters to SWAT")
+        setFont(self.applyBtn)
         h.addStretch(1); h.addWidget(self.applyBtn); h.addStretch(1)
         vBoxLayout.addLayout(h)
         vBoxLayout.addSpacing(10)
@@ -399,7 +546,6 @@ class ConclusionWidget(QWidget):
     def updateUI(self):
         
         self.verbose.setText("")
-        # Pro.OPResult['verbose']=[]
         self.verbose.setText("".join(Pro.OPResult['verbose']))
             
 class RadioWidget(QWidget):
@@ -416,10 +562,9 @@ class RadioWidget(QWidget):
         super().__init__(parent)
         
         self.radios=[]
-        self.setMinimumWidth(250)
         self.hBoxLayout=QHBoxLayout(self)
         for obj in objs:
-            radio=CheckBox(obj, self)
+            radio=CheckBox_(obj, self)
             self.radios.append(radio)
             radio.stateChanged.connect(self.ensureType)
             self.hBoxLayout.addWidget(radio)
@@ -437,7 +582,7 @@ class RadioWidget(QWidget):
     def addObjs(self, objs):
         
         for obj in objs:
-            radio=CheckBox(obj, self)
+            radio=CheckBox_(obj, self)
             radio.setChecked(False)
             radio.toggled.connect(self.ensureType)
             self.radios.append(radio)

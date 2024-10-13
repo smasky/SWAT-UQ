@@ -96,6 +96,7 @@ class SelctProject(MessageBoxBase):
         self.comBox=ComboBox(self)
         self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
+        self.comBox.setCurrentIndex(0)
         self.comBox.setFont_(18, QFont.Medium)
         
         self.yesButton.setText("Open")

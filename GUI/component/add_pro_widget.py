@@ -1,5 +1,5 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, PushButton,
+from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, PushButton,FluentStyleSheet, getStyleSheet,
                             SpinBox, ComboBox, DoubleSpinBox, TableWidget, DatePicker, InfoBar, 
                             InfoBarIcon, InfoBarPosition, LineEdit)
 
@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QWidget,  QFileDialog,
                              QTableWidgetItem, QFormLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QDate
 from ..project import Project as Pro
-
+from .utility import setFont, Medium, MediumSize, substitute, Normal
 import numpy as np
 class AddProWidget(FramelessDialog):
     
@@ -20,6 +20,7 @@ class AddProWidget(FramelessDialog):
         
         ################Problem Define##################
         label=BodyLabel(str("Problem Define"), self)
+        setFont(label, 20)
         self.vBoxLayout.addWidget(label)
         
         self.contentWidget=QWidget(self)
@@ -35,36 +36,49 @@ class AddProWidget(FramelessDialog):
         self.serIDEdit=SpinBox(self)
         self.serIDEdit.setValue(int(default['serID']))
         self.serIDEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Series ID:"), self.serIDEdit)
+        setFont(self.serIDEdit, MediumSize, Normal)
+        label=BodyLabel("Series ID:"); setFont(label)
+        formLayout.addRow(label, self.serIDEdit)
         
         self.objIDEdit=SpinBox(self)
         self.objIDEdit.setValue(int(default['objID']))
         self.objIDEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Objective ID:"), self.objIDEdit)
+        setFont(self.objIDEdit, MediumSize, Normal)
+        label=BodyLabel("Objective ID:"); setFont(label)
+        formLayout.addRow(label, self.objIDEdit)
         
         self.reachIDEdit=SpinBox(self)
         self.reachIDEdit.setValue(int(default['reachID']))
         self.reachIDEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Reach ID:"), self.reachIDEdit)
+        setFont(self.reachIDEdit, MediumSize, Normal)
+        label=BodyLabel("Reach ID:"); setFont(label)
+        formLayout.addRow(label, self.reachIDEdit)
+        
         
         self.objTypeEdit=ComboBox(self)
         self.objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys()))
         self.objTypeEdit.setCurrentIndex(default['objType'])
         self.objTypeEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Objective Type:"), self.objTypeEdit)
+        setFont(self.objTypeEdit, MediumSize, Normal)
+        label=BodyLabel("Objective Type:"); setFont(label)
+        formLayout.addRow(label, self.objTypeEdit)
         
         self.varEdit=ComboBox(self)
-        self.varEdit.setCurrentIndex(default['varType'])
         self.varEdit.addItems(list(Pro.VAR_INT.keys()))
+        self.varEdit.setCurrentIndex(default['varType'])
         self.varEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Variable:"), self.varEdit)
+        setFont(self.varEdit, MediumSize, Normal)
+        label=BodyLabel("Variable:"); setFont(label)
+        formLayout.addRow(label, self.varEdit)
         
         self.weightEdit=DoubleSpinBox(self)
         self.weightEdit.setValue(float(default['weight']))
         self.weightEdit.setSingleStep(0.1)
         self.weightEdit.setRange(0.0, 10.0)
         self.weightEdit.setMaximumWidth(200)
-        formLayout.addRow(BodyLabel("Weight:"), self.weightEdit)
+        setFont(self.weightEdit, MediumSize, Normal)
+        label=BodyLabel("Weight:"); setFont(label)
+        formLayout.addRow(label, self.weightEdit)
         
         lbDate=Pro.modelInfos['beginRecord']
         ubDate=Pro.modelInfos['endDate']
@@ -79,22 +93,25 @@ class AddProWidget(FramelessDialog):
             beginQDate=lbQDate
             endQDate=ubQDate
         
-        self.beginDataEdit=DatePicker(self, isMonthTight=True)
+        self.beginDataEdit=DatePicker_(self, isMonthTight=True)
         self.beginDataEdit.setDate(beginQDate)
         self.beginDataEdit.dateChanged.connect(self.reCalNum)
         self.beginDataEdit.setMaximumWidth(100)
-        formLayout.addRow(BodyLabel("Start Date:"), self.beginDataEdit)
+        label=BodyLabel("Start Date:"); setFont(label, MediumSize, Medium)
+        formLayout.addRow(label, self.beginDataEdit)
         
-        self.endDataEdit=DatePicker(self, isMonthTight=True)
+        self.endDataEdit=DatePicker_(self, isMonthTight=True)
         self.endDataEdit.setDate(endQDate)
         self.endDataEdit.dateChanged.connect(self.reCalNum)
         self.endDataEdit.setMaximumWidth(100)
-        formLayout.addRow(BodyLabel("End Date:"), self.endDataEdit)
+        label=BodyLabel("End Date:"); setFont(label, MediumSize, Medium)
+        formLayout.addRow(label, self.endDataEdit)
         
         self.numDisplay=LineEdit(self); self.numDisplay.setEnabled(False)
         self.numDisplay.setText(str(self.calDeltaNum(self.beginDataEdit.date, self.endDataEdit.date)))
         self.numDisplay.setMaximumWidth(100)
-        formLayout.addRow(BodyLabel("Size of Data required:"), self.numDisplay)
+        label=BodyLabel("Size of Data required:"); setFont(label, MediumSize, Medium)
+        formLayout.addRow(label, self.numDisplay)
         
         if 'observeData' in default:
             data=default['observeData']
@@ -103,7 +120,9 @@ class AddProWidget(FramelessDialog):
         self.buttonGroup=QWidget(self)
         self.vBoxLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton("Confirm", self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
+        setFont(self.yesButton)
         self.cancelButton=PushButton("Cancel", self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        setFont(self.cancelButton)
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
@@ -123,15 +142,18 @@ class AddProWidget(FramelessDialog):
     def initDataWidget(self, layout):
         
         vBoxLayout=QVBoxLayout()
-        self.dataTable=TableWidget(self); 
+        self.dataTable=TableWidget_(self); 
         self.dataTable.setBorderRadius(8); self.dataTable.setBorderVisible(True)
         self.dataTable.setColumnCount(5)
         self.dataTable.setHorizontalHeaderLabels([self.tr('Index'), self.tr('Year'), self.tr('Month'), 
                                                   self.tr('Day'), self.tr('Value')])
+        
         self.dataTable.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.dataTable.horizontalHeader().setVisible(True)
+        self.dataTable.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
         self.dataTable.verticalHeader().setVisible(True)
-        self.dataTable.setRowCount(5)
+        self.dataTable.setRowCount(1)
+        
         vBoxLayout.addWidget(self.dataTable)
         
         hBoxLayout=QHBoxLayout()
@@ -153,7 +175,7 @@ class AddProWidget(FramelessDialog):
         
         self.dataTable.clearContents()
        
-        self.dataTable.setRowCount(5)
+        self.dataTable.setRowCount(1)
     
     def importData(self):
         
@@ -201,22 +223,27 @@ class AddProWidget(FramelessDialog):
             item=QTableWidgetItem(f"{index:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            setFont(item, MediumSize, Normal)
             self.dataTable.setItem(i, 0, item)
             item=QTableWidgetItem(f"{year:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.dataTable.setItem(i, 1, item)
+            setFont(item, MediumSize, Normal)
             item=QTableWidgetItem(f"{month:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.dataTable.setItem(i, 2, item)
+            setFont(item, MediumSize, Normal)
             item=QTableWidgetItem(f"{day:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.dataTable.setItem(i, 3, item)
+            setFont(item, MediumSize, Normal)
             item=QTableWidgetItem(f"{value:.2f}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.dataTable.setItem(i, 4, item)
+            setFont(item, MediumSize, Normal)
              
         self.observeData=data
         
@@ -276,3 +303,30 @@ class AddProWidget(FramelessDialog):
     def cancel_clicked(self):
         
         self.reject()
+        
+class DatePicker_(DatePicker):
+    MM_DD_YYYY = 0
+    YYYY_MM_DD = 1
+    def __init__(self, parent=None, format=MM_DD_YYYY, isMonthTight=True):
+        super().__init__(parent, format, isMonthTight)
+        
+        qss=getStyleSheet(FluentStyleSheet.TIME_PICKER)
+        replace={'ItemMaskWidget': {'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"},
+                 'PickerBase' : {'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"},
+                 'pickerButton' : {'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"}
+                 }
+        qss=substitute(qss, replace)
+        
+        self.setStyleSheet(qss)
+        
+
+class TableWidget_(TableWidget):
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
+        qss=substitute(qss, {'QTableView': { 'font': " 18px 'Segoe UI', 'Microsoft YaHei'"}, 'QHeaderView::section':{'font': " 18px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
+        self.setStyleSheet(qss)
+        
+        
