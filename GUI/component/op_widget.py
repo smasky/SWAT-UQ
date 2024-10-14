@@ -125,6 +125,7 @@ class SetupWidget(QWidget):
         contentWidget=QWidget(self)
         #######################Parameter Path############################
         gridLayout=QGridLayout(contentWidget)
+        gridLayout.setVerticalSpacing(10)
         gridLayout.setContentsMargins(0, 0, 0, 0)
         
         label=BodyLabel("Parameter File:")

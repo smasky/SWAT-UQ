@@ -17,6 +17,8 @@ class hyperWidget(QWidget):
         self.widgets=[]
         self.relatedWidgets=[]
         
+        mainLayout.setVerticalSpacing(10)
+        
         mainLayout.setColumnStretch(0, 1)
         mainLayout.setColumnStretch(1 ,1)
         mainLayout.setColumnStretch(2, 1)

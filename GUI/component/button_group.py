@@ -13,7 +13,7 @@ class ButtonGroup(QFrame):
         self.btns=[]
         self.group=QButtonGroup(self)
         layout=FlowLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 10, 0, 10)
         for i, content in enumerate(contents):
             btn=RadioButton_(content, self)
             self.btns.append(btn)

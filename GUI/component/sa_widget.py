@@ -123,6 +123,7 @@ class SetupWidget(QWidget):
         contentWidget=QWidget(self)
         #######################Parameter Path############################
         gridLayout=QGridLayout(contentWidget)
+        gridLayout.setVerticalSpacing(10)
         gridLayout.setContentsMargins(0, 0, 0, 0)
         
         self.paraEdit=ComboBox(self )
@@ -202,7 +203,7 @@ class SetupWidget(QWidget):
         
         self.saBtnGroup=ButtonGroup(Pro.SA_METHOD.keys(), False, self)
         self.SA_METHOD=list(Pro.SA_METHOD.keys())
-        gridLayout.addWidget(self.saBtnGroup, 3, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
+        gridLayout.addWidget(self.saBtnGroup, 3, 2, 1, 4, Qt.AlignmentFlag.AlignVCenter)
         
         # w=QWidget();w.setFixedHeight(1);w.setMinimumWidth(300)
         # gridLayout.addWidget(w, 4, 2)
@@ -214,10 +215,10 @@ class SetupWidget(QWidget):
         
         self.smBtnGroup=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
         self.SAMPLE_METHOD=list(Pro.SAMPLE_METHOD.keys())
-        gridLayout.addWidget(self.smBtnGroup, 4, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
+        gridLayout.addWidget(self.smBtnGroup, 4, 2, 1, 4, Qt.AlignmentFlag.AlignVCenter)
         
         vBoxLayout.addWidget(contentWidget)
-        vBoxLayout.addSpacing(5)
+        vBoxLayout.addSpacing(10)
         
         self.hyperStack=QStackedWidget(self)
         self.hyperStack.setContentsMargins(0, 0, 0, 0)
