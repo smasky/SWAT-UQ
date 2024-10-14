@@ -36,7 +36,8 @@ class ProcessWidget(QFrame):
         self.widgets=[]
         self.btns=[]
         self.hBoxLayout=QHBoxLayout(self)
-        self.setMaximumHeight(90)
+        self.setFixedHeight(95)
+        self.hBoxLayout.setContentsMargins(0, 5, 0, 0)
         
     def addStep(self, i, content):
         

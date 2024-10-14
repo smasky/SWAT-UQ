@@ -1,15 +1,16 @@
 from PyQt5.QtCore import Qt
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import (BodyLabel,  PushButton, ComboBox,
+from qfluentwidgets import (BodyLabel,  PushButton, ComboBox, FluentStyleSheet, getStyleSheet,
                             LineEdit, PrimaryToolButton, FluentIcon, MessageBoxBase, SubtitleLabel,
-                            PrimaryPushButton, getFont, setFont)
+                            PrimaryPushButton)
 import glob
 import os
 from importlib.resources import path
 import GUI.qss
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFormLayout, QSizePolicy
 from PyQt5.QtGui import QFont
-
+from .utility import getFont, setFont, Normal, MediumSize, substitute
+from .combox_ import ComboBox_
 class NewProject(FramelessDialog):
     projectName=None
     projectPath=None
@@ -24,6 +25,7 @@ class NewProject(FramelessDialog):
         self.vMainLayout.addStretch(1)
         
         self.contentWidget=QWidget(self)
+        self.contentWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.contentLayout=QFormLayout(self.contentWidget)
         self.contentLayout.setLabelAlignment(Qt.AlignRight)
         self.vMainLayout.addWidget(self.contentWidget)
@@ -31,32 +33,41 @@ class NewProject(FramelessDialog):
         self.nameEdit=LineEdit(self.contentWidget)
         self.nameEdit.setMaximumWidth(400)
         self.nameEdit.textChanged.connect(self.checkNull)
-        self.nameEdit.setFont(getFont(18, 60))
-        self.contentLayout.addRow(BodyLabel(self.tr("Project Name:")), self.nameEdit)
+        setFont(self.nameEdit, MediumSize, Normal)
+        
+        label=BodyLabel(self.tr("Project Name:"))
+        setFont(label)
+        self.contentLayout.addRow(label, self.nameEdit)
         
         self.pathEdit=LineEditWithPath(self.contentWidget)
         self.pathEdit.LineEdit.textChanged.connect(self.checkNull)
-        self.pathEdit.LineEdit.setFont(getFont(18, 60))
-        self.contentLayout.addRow(BodyLabel("Project Path:"), self.pathEdit)
+        # setFont(self.pathEdit, MediumSize, Normal)
+        
+        label=BodyLabel(self.tr("Project Path:"))
+        setFont(label)
+        self.contentLayout.addRow(label, self.pathEdit)
         
         self.swatPathEdit=LineEditWithPath(self.contentWidget)
         self.swatPathEdit.LineEdit.textChanged.connect(self.checkNull)
-        self.swatPathEdit.LineEdit.setFont(getFont(18, 60))
-        self.contentLayout.addRow(BodyLabel("SWAT File Path:"), self.swatPathEdit)
+        # setFont(self.swatPathEdit, MediumSize, Normal)
+        
+        label=BodyLabel(self.tr("SWAT File Path:"))
+        setFont(label)
+        self.contentLayout.addRow(label, self.swatPathEdit)
         
         self.vMainLayout.addStretch(1)
         self.buttonGroup=QWidget(self)
         self.vMainLayout.addWidget(self.buttonGroup)
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
-        self.yesButton.setEnabled(False); self.yesButton.setFont(getFont(18, QFont.Medium))
+        self.yesButton.setEnabled(False); setFont(self.yesButton)
         self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
-        self.cancelButton.setFont(getFont(18, QFont.Medium))
+        setFont(self.cancelButton)
         
         self.buttonLayout=QHBoxLayout(self.buttonGroup)
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(618, 250)
+        self.setFixedSize(700, 400)
         self.titleBar.hide()
     
     def checkNull(self):
@@ -94,34 +105,35 @@ class NewProject(FramelessDialog):
         
 class AskForExistingProject(MessageBoxBase):
     def __init__(self, files, parent=None):
+        
         super().__init__(parent)
         
         self.titleLabel=SubtitleLabel("There are existing projects in this directory.", self)
+        setFont(self.titleLabel)
         self.contentLabel=BodyLabel("Do you want to open a following existing project or continue?", self)
+        setFont(self.contentLabel, MediumSize, Normal)
         
-        self.comBox=ComboBox(self)
+        self.comBox=ComboBox_(self)
         self.comBox.setFixedHeight(40)
         self.comBox.addItems(files)
         self.comBox.setCurrentIndex(0)
-        setFont(self.comBox, 18)
+        setFont(self.comBox)
         
         self.yesButton.setText("Open existing project")
         self.yesButton.clicked.connect(self.open_existing_project)
-        self.yesButton.setFont(getFont(18, QFont.Medium))
-        self.yesButton.setFixedHeight(50)
+        setFont(self.yesButton)
+        self.yesButton.setFixedHeight(40)
         
-        self.cancelButton.setText("Continue to create")
-        self.cancelButton.clicked.connect(self.continue_to_create)
-        self.cancelButton.setFont(getFont(18, QFont.Medium))
-        self.cancelButton.setFixedHeight(50)
+        self.buttonLayout.removeWidget(self.cancelButton)
+        self.cancelButton=PushButton(self.tr("Continue to create"), self.buttonGroup)
+        self.cancelButton.clicked.connect(self.reject)
+        self.cancelButton.setFixedHeight(40)
+        self.buttonLayout.addWidget(self.cancelButton)
+        setFont(self.cancelButton)
         
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.contentLabel)
         self.viewLayout.addWidget(self.comBox)
-
-        with path(GUI.qss, "messagebox.qss") as qss_path:
-            with open(qss_path) as f:
-                self.setStyleSheet(f.read())
         
     def open_existing_project(self):
         self.accept()
@@ -141,6 +153,7 @@ class LineEditWithPath(QWidget):
         
         self.LineEdit=LineEdit(self)
         self.LineEdit.setMinimumWidth(400)
+        setFont(self.LineEdit, MediumSize, Normal)
         self.btn=PrimaryToolButton(FluentIcon.FOLDER, self)
         self.btn.clicked.connect(self.setText)
 

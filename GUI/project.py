@@ -301,7 +301,7 @@ class Project:
                 initHyper[name]=value
         
         initHyper['verboseFreq']=1
-        initHyper['verbose']=False
+        initHyper['verbose']=True
         
         optimizer=eval(opClass)(**initHyper)
         

@@ -10,7 +10,7 @@ from importlib.resources import path
 
 from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
-from .utility import getFont, Medium
+from .utility import getFont, Medium, setFont, Normal, MediumSize
 from ..project import Project as Pro
 class ParaTable(QFrame):
     
@@ -22,14 +22,14 @@ class ParaTable(QFrame):
         self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
         
         label=SubtitleLabel("Parameter Information List")
-        label.setFont(getFont(25, Medium))
+        setFont(label, 25)
         
         label.setAlignment(Qt.AlignCenter)
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         
         
         addButton=PrimaryPushButton("Add", self); addButton.setFixedHeight(30)
-        addButton.setFont(getFont(18, Medium))
+        setFont(addButton)
         
         self.addButton=addButton; addButton.clicked.connect(self.addPara)
         
@@ -55,12 +55,12 @@ class ParaTable(QFrame):
         hBoxLayout=QHBoxLayout();
         importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
-        importButton.setFont(getFont(18, Medium))
+        setFont(importButton)
         
         hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
         self.generateButton=PrimaryPushButton("Save Current Parameters", self)
         self.generateButton.setFixedSize(300, 40); self.generateButton.clicked.connect(self.saveParFile)
-        self.generateButton.setFont(getFont(18, Medium))
+        setFont(self.generateButton)
         
         hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)
@@ -71,8 +71,11 @@ class ParaTable(QFrame):
         with path(GUI.qss, "para_table.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-        self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
-        
+                
+        self.table.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
+        self.table.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
+        self.table.resizeColumnsToContents()
+
     def addPara(self):
         
         modelInfos=Pro.modelInfos

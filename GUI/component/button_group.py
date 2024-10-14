@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QButtonGroup, QHBoxLayout, QSizePolicy, QGridLayout
+from PyQt5.QtWidgets import QWidget, QFrame,QButtonGroup, QHBoxLayout, QSizePolicy, QGridLayout
 from PyQt5.QtCore import Qt
 from qfluentwidgets import RadioButton, FluentStyleSheet, getStyleSheet
 from qfluentwidgets import FlowLayout
@@ -6,14 +6,14 @@ from qfluentwidgets import FlowLayout
 import GUI.data
 from importlib.resources import path
 from .utility import substitute, MediumSize, Medium
-class ButtonGroup(QWidget):
+class ButtonGroup(QFrame):
     currentIndex=None
     def __init__(self, contents, bool, parent=None):
         super().__init__(parent)
         self.btns=[]
         self.group=QButtonGroup(self)
         layout=FlowLayout(self)
-
+        layout.setContentsMargins(0, 0, 0, 0)
         for i, content in enumerate(contents):
             btn=RadioButton_(content, self)
             self.btns.append(btn)
@@ -22,7 +22,6 @@ class ButtonGroup(QWidget):
             btn.setEnabled(bool)
             
         self.group.idClicked.connect(self.setCurrentIndex)
-    
     def reset(self):
         
         for btn in self.group.buttons():

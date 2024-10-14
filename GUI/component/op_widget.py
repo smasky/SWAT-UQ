@@ -2,9 +2,9 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFor
                              QStackedWidget, QWidget, QButtonGroup, QFileDialog, QTextEdit)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont
-from qfluentwidgets import (BodyLabel, ComboBox, CheckBox, FlowLayout,
-                            RadioButton, SpinBox, DoubleSpinBox, TextEdit,
-                            CheckBox, PrimaryPushButton, LineEdit, ProgressBar)
+from qfluentwidgets import (BodyLabel,
+                             SpinBox,  TextEdit,
+                             PrimaryPushButton, LineEdit)
 import os
 import copy
 import GUI.qss
@@ -16,6 +16,8 @@ from .hyper_widget import hyperWidget
 from .utility import setFont, getFont, MediumSize, Medium, Normal
 from ..project import Project as Pro
 from .check_box import CheckBox_
+from .combox_ import ComboBox_ as ComboBox
+from .progress_bar import ProgressBar_ as ProgressBar
 class OPWidget(QFrame):
     
     def __init__(self, parent=None):
@@ -118,11 +120,12 @@ class SetupWidget(QWidget):
         super().__init__(parent)
         
         vBoxLayout=QVBoxLayout(self)
-        
+        vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.objType=None
         contentWidget=QWidget(self)
         #######################Parameter Path############################
         gridLayout=QGridLayout(contentWidget)
+        gridLayout.setContentsMargins(0, 0, 0, 0)
         
         label=BodyLabel("Parameter File:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -133,6 +136,7 @@ class SetupWidget(QWidget):
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
         self.paraEdit._showComboMenu=self.dynamicShowPara
         self.paraEdit.setPlaceholderText("Click to select parameter file")
+        setFont(self.paraEdit)
         gridLayout.addWidget(self.paraEdit, 0, 2, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("Number of Parameters:")
@@ -151,6 +155,7 @@ class SetupWidget(QWidget):
         gridLayout.addWidget(label, 1, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.objLine=ComboBox(self)
+        setFont(self.objLine)
         self.objLine._showComboMenu=self.dynamicShowObj
         self.objLine.setPlaceholderText("Click to select objective file")
         gridLayout.addWidget(self.objLine, 1, 2, Qt.AlignmentFlag.AlignVCenter)
@@ -179,10 +184,6 @@ class SetupWidget(QWidget):
         for i, w in zip(index, width):
             qw=QWidget();qw.setFixedHeight(20);qw.setFixedWidth(w)
             gridLayout.addWidget(qw, 2, i)
-        
-        for i in range(2):
-            qw=QWidget();qw.setFixedHeight(55)
-            gridLayout.addWidget(qw, i, 0)
             
         label=BodyLabel("SOP Method:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -190,6 +191,7 @@ class SetupWidget(QWidget):
         gridLayout.addWidget(label, 3, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.sopComBox=ComboBox(self)
+        setFont(self.sopComBox)
         self.sopComBox.addItems(Pro.SOP_METHOD.keys())
         self.SOP_METHOD=list(Pro.SOP_METHOD.keys())
         self.sopComBox.setEnabled(False)
@@ -201,6 +203,7 @@ class SetupWidget(QWidget):
         gridLayout.addWidget(label, 4, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.mopComBox=ComboBox(self)
+        setFont(self.mopComBox)
         self.mopComBox.addItems(Pro.MOP_METHOD.keys())
         self.MOP_METHOD=list(Pro.MOP_METHOD.keys())
         self.mopComBox.setEnabled(False)
@@ -231,12 +234,14 @@ class SetupWidget(QWidget):
         
         self.paraEdit.clear()
         self.paraEdit.addItems(Pro.findParaFile())
+        self.paraEdit.setCurrentIndex(0)
         super(ComboBox, self.paraEdit)._showComboMenu()
     
     def dynamicShowObj(self):
         
         self.objLine.clear()
         self.objLine.addItems(Pro.findProFile())
+        self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
     
     def nextEmit(self):
@@ -356,7 +361,6 @@ class SetupWidget(QWidget):
         self.mopComBox.setEnabled(False)
         self.hyperStack.setCurrentIndex(0)
         
-        
 class OptimizationWidget(QWidget):
     
     nextBtn=pyqtSignal(bool)
@@ -369,6 +373,7 @@ class OptimizationWidget(QWidget):
         
         ##################################Process Bar#####################################
         h=QHBoxLayout()
+        h.setContentsMargins(0, 0, 0, 0)
         self.FEsBar=ProgressBar(self)
         self.FEsBar.setValue(0)
         h.setContentsMargins(20, 0, 20, 0)
@@ -379,10 +384,12 @@ class OptimizationWidget(QWidget):
         self.FEsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(self.FEsLabel)
         h=QHBoxLayout()
+        h.setContentsMargins(0, 0, 0, 0)
         h.addStretch(1);h.addWidget(self.FEsLabel);h.addSpacing(20)
         vBoxLayout.addLayout(h)
         
         h=QHBoxLayout()
+        h.setContentsMargins(0, 0, 0, 0)
         self.itersBar=ProgressBar(self)
         self.itersBar.setValue(0)
         h.setContentsMargins(20, 0, 20, 0)
@@ -393,44 +400,42 @@ class OptimizationWidget(QWidget):
         self.itersLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(self.itersLabel)
         h=QHBoxLayout()
+        h.setContentsMargins(0, 0, 0, 0)
         h.addStretch(1);h.addWidget(self.itersLabel);h.addSpacing(20)
         vBoxLayout.addLayout(h)
         
-        vBoxLayout.addSpacing(10)
+        
 
         ###################################################
         formLayout=QFormLayout()
         formLayout.setContentsMargins(20, 0, 0, 0)
+        formLayout.setSpacing(5)
         formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         self.label=BodyLabel("SWAT Execution:")
         self.label.setMinimumWidth(100)
         setFont(self.label)
-        
+      
         self.swatEdit=ComboBox(self)
-        
+        setFont(self.swatEdit)
         self.swatEdit.setMaximumWidth(200)
         setFont(self.swatEdit, MediumSize, Normal)
         self.swatEdit.currentIndexChanged.connect(self.swatChanged)
-        
         formLayout.addRow(self.label, self.swatEdit)
         
         ##################################
-
         self.label2=BodyLabel("SWAT Parallel:")
         self.label2.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(self.label2)
-        
         self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(1)
         setFont(self.parallelEdit, MediumSize, Normal)
         self.parallelEdit.setMaximumWidth(200)
         formLayout.addRow(self.label2, self.parallelEdit)
-        
         vBoxLayout.addLayout(formLayout)
         
         #################Verbose################
-        h=QHBoxLayout()
+        h=QHBoxLayout(); h.setContentsMargins(0, 0, 0, 0)
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas")  
+        font = QFont("Consolas", pointSize=5)  
         font.setStyleHint(QFont.Monospace)  
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -563,6 +568,8 @@ class RadioWidget(QWidget):
         
         self.radios=[]
         self.hBoxLayout=QHBoxLayout(self)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        
         for obj in objs:
             radio=CheckBox_(obj, self)
             self.radios.append(radio)

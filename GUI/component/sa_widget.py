@@ -2,9 +2,9 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFor
                              QStackedWidget, QWidget,  QFileDialog)
 from PyQt5.QtCore import  Qt, pyqtSignal
 from PyQt5.QtGui import QFont
-from qfluentwidgets import (BodyLabel, ComboBox, 
+from qfluentwidgets import (BodyLabel,
                              SpinBox,TextEdit,
-                             PrimaryPushButton, LineEdit, ProgressBar)
+                             PrimaryPushButton, LineEdit)
 import os
 import copy
 import GUI.qss
@@ -13,7 +13,9 @@ from importlib.resources import path
 from .process_widget import ProcessWidget
 from .button_group import ButtonGroup
 from .hyper_widget import hyperWidget
+from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
+from .progress_bar import ProgressBar_ as ProgressBar
 from .utility import setFont, Normal, Medium, MediumSize
 class SAWidget(QFrame):
     INDEX=0
@@ -117,13 +119,17 @@ class SetupWidget(QWidget):
         super().__init__(parent)
         
         vBoxLayout=QVBoxLayout(self)
+        vBoxLayout.setContentsMargins(0,0,0,0)
         contentWidget=QWidget(self)
         #######################Parameter Path############################
         gridLayout=QGridLayout(contentWidget)
+        gridLayout.setContentsMargins(0, 0, 0, 0)
+        
         self.paraEdit=ComboBox(self )
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
         self.paraEdit.currentIndexChanged.connect(self.activateSABtn)
         self.paraEdit._showComboMenu=self.dynamicShowPara
+        setFont(self.paraEdit)
         self.paraEdit.setPlaceholderText("Click to select parameter file")
         
         label=BodyLabel("Parameter File:")
@@ -147,6 +153,7 @@ class SetupWidget(QWidget):
         gridLayout.addWidget(label, 1, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.objLine=ComboBox(self)
+        setFont(self.objLine)
         self.objLine._showComboMenu=self.dynamicShowObj
         self.objLine.setPlaceholderText("Click to select objective file")
      
@@ -161,19 +168,24 @@ class SetupWidget(QWidget):
         
         self.objEdit=ComboBox(self)
         self.objEdit.setEnabled(True)
-        
+        setFont(self.objEdit)
         self.objEdit.currentIndexChanged.connect(self.ensureObj)
         gridLayout.addWidget(self.objEdit, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         
-        index=[1, 2, 3, 4, 5]
+        index=[ 1, 2, 3, 4, 5]
         width=[210, 310, 50, 210, 270]
         for i, w in zip(index, width):
-            qw=QWidget();qw.setFixedHeight(20);qw.setFixedWidth(w)
+            qw=QWidget();qw.setFixedHeight(10);qw.setFixedWidth(w)
             gridLayout.addWidget(qw, 2, i)
         
         for i in range(2):
-            qw=QWidget();qw.setFixedHeight(55)
+            qw=QWidget();qw.setFixedHeight(45)
             gridLayout.addWidget(qw, i, 0)
+            
+        # for i in range(3, 5):
+        #     qw=QWidget();qw.setFixedHeight(45)
+        #     gridLayout.addWidget(qw, i, 0)
+        #     qw.setStyleSheet("background-color: red")
 
         gridLayout.setColumnStretch(0, 1)
         gridLayout.setColumnStretch(1, 1)
@@ -192,20 +204,20 @@ class SetupWidget(QWidget):
         self.SA_METHOD=list(Pro.SA_METHOD.keys())
         gridLayout.addWidget(self.saBtnGroup, 3, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         
-        w=QWidget();w.setFixedHeight(10);w.setMinimumWidth(300)
-        gridLayout.addWidget(w, 4, 2)
+        # w=QWidget();w.setFixedHeight(1);w.setMinimumWidth(300)
+        # gridLayout.addWidget(w, 4, 2)
         label=BodyLabel("Sampling Method:")
         
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(label)
-        gridLayout.addWidget(label, 5, 1, Qt.AlignmentFlag.AlignVCenter)
+        gridLayout.addWidget(label, 4, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.smBtnGroup=ButtonGroup(Pro.SAMPLE_METHOD.keys(), False, self)
         self.SAMPLE_METHOD=list(Pro.SAMPLE_METHOD.keys())
-        gridLayout.addWidget(self.smBtnGroup, 5, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
+        gridLayout.addWidget(self.smBtnGroup, 4, 2, 1, 5, Qt.AlignmentFlag.AlignVCenter)
         
         vBoxLayout.addWidget(contentWidget)
-        vBoxLayout.addSpacing(20)
+        vBoxLayout.addSpacing(5)
         
         self.hyperStack=QStackedWidget(self)
         self.hyperStack.setContentsMargins(0, 0, 0, 0)
@@ -234,7 +246,7 @@ class SetupWidget(QWidget):
         self.smBtnGroup.group.idClicked.connect(self.updateHyper)
         self.saBtnGroup.group.buttonClicked.connect(self.updateNextButton)
         
-        vBoxLayout.setContentsMargins(0,0,0,0)
+        
     
     def activateSABtn(self):
         
@@ -285,20 +297,22 @@ class SetupWidget(QWidget):
         
         self.paraEdit.clear()
         self.paraEdit.addItems(Pro.findParaFile())
-        self.paraEdit.setCurrentIndex(-1)
+        self.paraEdit.setCurrentIndex(0)
         super(ComboBox, self.paraEdit)._showComboMenu()
 
     def dynamicShowObj(self):
         
         self.objLine.clear()
         self.objLine.addItems(Pro.findProFile())
-        self.objLine.setCurrentIndex(-1)
+        self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
     
     def reset(self):
         
         self.objLine.clear()
+        self.objLine.setPlaceholderText("Click to select objective file")
         self.paraEdit.clear()
+        self.paraEdit.setPlaceholderText("Click to select parameter file")
         self.objEdit.clear()
         self.numPara.clear()
         self.numLine.clear()
@@ -389,8 +403,9 @@ class SimulationWidget(QWidget):
         
         h1=QHBoxLayout()
         
-        self.statistics=BodyLabel()
+        self.statistics=BodyLabel("NA/NA FEs")
         setFont(self.statistics, MediumSize, Medium)
+        
         h1.addStretch(1)
         h1.addWidget(self.statistics); h1.addSpacing(20)
         
@@ -433,7 +448,7 @@ class SimulationWidget(QWidget):
         #################Verbose################
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=13)  # 或者使用 "Courier New"
+        font = QFont("Consolas", pointSize=5)  # 或者使用 "Courier New"
         font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -461,7 +476,7 @@ class SimulationWidget(QWidget):
         
         self.swatEdit.clear()
         self.objLine.addItems(Pro.findProFile())
-        self.objLine.setCurrentIndex(-1)
+        self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
     
     def reset(self):
@@ -473,6 +488,7 @@ class SimulationWidget(QWidget):
         self.samplingBtn.setEnabled(False)
         self.cancelBtn.setEnabled(False)
         self.verbose.clear()
+        self.statistics.setText("NA/NA FEs")
         
     def updateUI(self):
         self.swatEdit.addItems(Pro.findSwatExe())
@@ -515,6 +531,7 @@ class SimulationWidget(QWidget):
         self.initializeBtn.setEnabled(True)
         self.resetBtn.emit(True)
         self.processBar.setValue(0)
+        self.statistics.setText("NA/NA FEs")
         self.verbose.append("Simulation has been canceled by user.\n")
     
     def cancel(self):

@@ -29,7 +29,7 @@ class AddParaWidget(FramelessDialog):
         self.yesButton=PrimaryPushButton(self.tr("Confirm"), self.buttonGroup); self.yesButton.clicked.connect(self.confirm_clicked)
         setFont(self.yesButton, 18, Medium)
         
-        self.cancelButton=PushButton(self.tr("Cancel (set all)"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
+        self.cancelButton=PushButton(self.tr("Cancel"), self.buttonGroup); self.cancelButton.clicked.connect(self.cancel_clicked)
         setFont(self.cancelButton, 18, Medium)
         
         self.buttonLayout=QHBoxLayout(self.buttonGroup)

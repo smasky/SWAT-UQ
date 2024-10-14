@@ -10,7 +10,8 @@ import GUI.data
 from importlib.resources import path
 from .line_box import LineBox
 from ..project import Project as Pro
-from .utility import setFont, getFont, Medium, substitute
+from .utility import setFont, getFont, Medium, substitute, MediumSize, Normal
+from .combox_ import ComboBox_
 
 class TableWidgetPara(TableWidget):
     
@@ -18,9 +19,9 @@ class TableWidgetPara(TableWidget):
         
         super().__init__(parent)
         
-        qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
-        qss=substitute(qss, {'QTableView': { 'font': " 16px 'Segoe UI', 'Microsoft YaHei';"}, 'QHeaderView::section':{'font': " 18px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
-        self.setStyleSheet(qss)
+        # qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
+        # qss=substitute(qss, {'QTableView': { 'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei';"}, 'QHeaderView::section':{'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
+        # self.setStyleSheet(qss)
         
     def addRow(self, content):
         
@@ -33,19 +34,19 @@ class TableWidgetPara(TableWidget):
             
             item=QTableWidgetItem(str(value));item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            item.setFont(getFont(18))
+            setFont(item, weight=Normal)
             self.setItem(row, col, item)
             col+=1
         
         widget=QWidget()
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        tuneType=ComboBox(); tuneType.addItems(['Relative', 'Value', 'Add'])
-        tuneType.setFont_(16)
+        tuneType=ComboBox_(); tuneType.addItems(['Relative', 'Value', 'Add'])
+        setFont(tuneType, weight=Normal)
         tuneType.setCurrentIndex(1)
         tuneType.setFixedHeight(30)
         
-        layout.addWidget(tuneType); widget.core=tuneType
+        layout.addWidget(tuneType, Qt.AlignmentFlag.AlignHCenter); widget.core=tuneType
         self.setCellWidget(row, col, widget)
         col+=1
         
@@ -53,8 +54,9 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         lowerBox=DoubleSpinBox(self); lowerBox.setMaximum(1000); lowerBox.setFixedHeight(30)
+        setFont(lowerBox, weight=Normal)
         lowerBox.setRange(-100, 1000)
-        layout.addWidget(lowerBox); widget.core=lowerBox
+        layout.addWidget(lowerBox, Qt.AlignmentFlag.AlignHCenter); widget.core=lowerBox
         self.setCellWidget(row, col, widget)
         col+=1
         
@@ -62,8 +64,9 @@ class TableWidgetPara(TableWidget):
         layout=QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         upperBox=DoubleSpinBox(self); upperBox.setMaximum(1000); upperBox.setFixedHeight(30)
+        setFont(upperBox, weight=Normal)
         upperBox.setRange(-100, 10000)
-        layout.addWidget(upperBox); widget.core=upperBox
+        layout.addWidget(upperBox, Qt.AlignmentFlag.AlignHCenter); widget.core=upperBox
         self.setCellWidget(row, col, widget)
         col+=1
         
@@ -97,10 +100,11 @@ class TableWidgetPara(TableWidget):
         else:
             line2 = LineBox({'bsn':[]}, self)
         
+        setFont(line2, weight=Normal)
         line2.setFixedHeight(30)
         line2.setMinimumWidth(50)
         line2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        layout.addWidget(line2); widget.core=line2
+        layout.addWidget(line2, Qt.AlignmentFlag.AlignHCenter); widget.core=line2
         
         self.setCellWidget(row, col, widget)
         col+=1

@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QWidget,  QFileDialog,
                              QTableWidgetItem, QFormLayout, QSizePolicy)
 from PyQt5.QtCore import Qt, QDate
 from ..project import Project as Pro
+from .combox_ import ComboBox_
 from .utility import setFont, Medium, MediumSize, substitute, Normal
 import numpy as np
 class AddProWidget(FramelessDialog):
@@ -25,6 +26,7 @@ class AddProWidget(FramelessDialog):
         
         self.contentWidget=QWidget(self)
         self.vBoxLayout.addWidget(self.contentWidget)
+        
         hBoxLayout=QHBoxLayout(self.contentWidget)
         
         formLayout=QFormLayout()
@@ -44,6 +46,7 @@ class AddProWidget(FramelessDialog):
         self.objIDEdit.setValue(int(default['objID']))
         self.objIDEdit.setMaximumWidth(200)
         setFont(self.objIDEdit, MediumSize, Normal)
+        
         label=BodyLabel("Objective ID:"); setFont(label)
         formLayout.addRow(label, self.objIDEdit)
         
@@ -51,11 +54,11 @@ class AddProWidget(FramelessDialog):
         self.reachIDEdit.setValue(int(default['reachID']))
         self.reachIDEdit.setMaximumWidth(200)
         setFont(self.reachIDEdit, MediumSize, Normal)
+        
         label=BodyLabel("Reach ID:"); setFont(label)
         formLayout.addRow(label, self.reachIDEdit)
         
-        
-        self.objTypeEdit=ComboBox(self)
+        self.objTypeEdit=ComboBox_(self)
         self.objTypeEdit.addItems(list(Pro.OBJTYPE_INT.keys()))
         self.objTypeEdit.setCurrentIndex(default['objType'])
         self.objTypeEdit.setMaximumWidth(200)
@@ -63,11 +66,12 @@ class AddProWidget(FramelessDialog):
         label=BodyLabel("Objective Type:"); setFont(label)
         formLayout.addRow(label, self.objTypeEdit)
         
-        self.varEdit=ComboBox(self)
+        self.varEdit=ComboBox_(self)
         self.varEdit.addItems(list(Pro.VAR_INT.keys()))
         self.varEdit.setCurrentIndex(default['varType'])
         self.varEdit.setMaximumWidth(200)
         setFont(self.varEdit, MediumSize, Normal)
+        
         label=BodyLabel("Variable:"); setFont(label)
         formLayout.addRow(label, self.varEdit)
         
@@ -110,6 +114,7 @@ class AddProWidget(FramelessDialog):
         self.numDisplay=LineEdit(self); self.numDisplay.setEnabled(False)
         self.numDisplay.setText(str(self.calDeltaNum(self.beginDataEdit.date, self.endDataEdit.date)))
         self.numDisplay.setMaximumWidth(100)
+        setFont(self.numDisplay)
         label=BodyLabel("Size of Data required:"); setFont(label, MediumSize, Medium)
         formLayout.addRow(label, self.numDisplay)
         
@@ -127,7 +132,7 @@ class AddProWidget(FramelessDialog):
         self.buttonLayout.addWidget(self.yesButton)
         self.buttonLayout.addWidget(self.cancelButton)
         
-        self.setFixedSize(1100, 500)
+        self.setFixedSize(1200, 600)
         self.titleBar.hide()
     
     def createRightLabel(self, text):
@@ -154,19 +159,29 @@ class AddProWidget(FramelessDialog):
         self.dataTable.verticalHeader().setVisible(True)
         self.dataTable.setRowCount(1)
         
+        self.dataTable.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
+        self.dataTable.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
+        self.dataTable.verticalHeader().setFixedWidth(30)
+        
         vBoxLayout.addWidget(self.dataTable)
         
         hBoxLayout=QHBoxLayout()
         importButton=PrimaryPushButton(self.tr("Import Observe Data"))
         importButton.setMaximumWidth(250); importButton.clicked.connect(self.importData)
+        setFont(importButton)
         hBoxLayout.addWidget(importButton)
         
         clearButton=PushButton(self.tr("Clear Data"))
         clearButton.setMaximumWidth(250)
         clearButton.clicked.connect(self.clearAndResetTable)
+        setFont(clearButton)
         hBoxLayout.addWidget(clearButton)
         
-        
+        for column in range(0, self.dataTable.columnCount()):
+            self.dataTable.setColumnWidth(column, 110)  # 默认宽度
+            self.dataTable.horizontalHeader().setMinimumSectionSize(50)  # 最小宽度
+            self.dataTable.horizontalHeader().setMaximumSectionSize(110)  # 最大宽度
+
         vBoxLayout.addLayout(hBoxLayout)
         
         layout.addLayout(vBoxLayout, 4)

@@ -1,4 +1,4 @@
-from qfluentwidgets import StrongBodyLabel, SubtitleLabel,PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
+from qfluentwidgets import SubtitleLabel,PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
 
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog,
                              QHeaderView, QFrame, QTableWidgetItem, QWidget, QDialog)
@@ -54,7 +54,6 @@ class ObjTable(QFrame):
             self.tr('Obj Type'), self.tr('Variable'), self.tr('Weight'), 
             self.tr('Operation')])
         
-        
         importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40)
         setFont(importButton, 18, Medium)
         self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
@@ -73,8 +72,10 @@ class ObjTable(QFrame):
         with path(GUI.qss, "obj_table.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-        self.table.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
-    
+        
+        self.table.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
+        self.table.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
+
     def importProFile(self):
         
         path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
@@ -215,20 +216,25 @@ class ObjTable(QFrame):
     def addOperation(self, row):
         
         operation=QWidget()
+        # v=QVBoxLayout(operation)
         
         hBoxLayout=QHBoxLayout(operation)
         editButton=PrimaryToolButton(FluentIcon.EDIT)
         editButton.setFixedSize(24,24)
         editButton.setProperty('row', row)
         editButton.clicked.connect(self.editPro)
-        hBoxLayout.addWidget(editButton)
+        hBoxLayout.addWidget(editButton, Qt.AlignmentFlag.AlignHCenter)
         
         delButton=PrimaryToolButton(FluentIcon.DELETE)
         delButton.setFixedSize(24,24)
         delButton.setProperty('row', row)
-        hBoxLayout.addWidget(delButton)
+        hBoxLayout.addWidget(delButton, Qt.AlignmentFlag.AlignHCenter)
         operation.delBtn=delButton
         delButton.clicked.connect(self.delete_row)
+        
+        # v.addLayout(hBoxLayout, Qt.AlignmentFlag.AlignHCenter)
+        # v.setContentsMargins(0, 0, 0, 0)
+        hBoxLayout.setContentsMargins(0,0,0,0)
         return operation
     
     def editPro(self):

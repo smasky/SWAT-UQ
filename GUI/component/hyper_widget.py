@@ -89,7 +89,7 @@ class hyperWidget(QWidget):
             w.setFixedSize(200, 10)
             mainLayout.addWidget(w, row, col)
 
-        mainLayout.setContentsMargins(0, 20, 0, 20)
+        mainLayout.setContentsMargins(0, 15, 0, 15)
         
     def changedEvent(self):
         
@@ -149,8 +149,4 @@ class hyperWidget(QWidget):
         bottom = self.layout().cellRect(self.layout().rowCount() - 1, 5).bottom() + margin
         
         # Draw the rounded rectangle
-        painter.drawRoundedRect(left-10, top-10, right - left+20, bottom - top+20, 15, 15)
-        
-
-        
-        
+        painter.drawRoundedRect(left-5, top-5, right - left+5, bottom - top+5, 15, 15)
