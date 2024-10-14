@@ -93,6 +93,7 @@ class OpenProject(FramelessDialog):
         self.reject()
 
 class SelctProject(MessageBoxBase):
+    
     def __init__(self, files, parent=None):
         super().__init__(parent)
         self.titleLabel=SubtitleLabel("There exists more than one project files in this directory.", self)
@@ -127,7 +128,6 @@ class SelctProject(MessageBoxBase):
         with path(GUI.qss, "messagebox.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-        
         
     def open_existing_project(self):
         self.accept()

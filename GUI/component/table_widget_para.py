@@ -19,9 +19,9 @@ class TableWidgetPara(TableWidget):
         
         super().__init__(parent)
         
-        # qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
-        # qss=substitute(qss, {'QTableView': { 'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei';"}, 'QHeaderView::section':{'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
-        # self.setStyleSheet(qss)
+        qss=getStyleSheet(FluentStyleSheet.TABLE_VIEW)
+        qss=substitute(qss, {'QTableView': { 'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei';"}, 'QHeaderView::section':{'font': f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'", 'font-weight': ' 500'}})
+        self.setStyleSheet(qss)
         
     def addRow(self, content):
         

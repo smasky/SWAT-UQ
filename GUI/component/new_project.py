@@ -135,6 +135,10 @@ class AskForExistingProject(MessageBoxBase):
         self.viewLayout.addWidget(self.contentLabel)
         self.viewLayout.addWidget(self.comBox)
         
+        with path(GUI.qss, "messagebox.qss") as qss_path:
+            with open(qss_path) as f:
+                self.setStyleSheet(f.read())
+        
     def open_existing_project(self):
         self.accept()
     
