@@ -1,8 +1,6 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import BodyLabel, PushButton,  PrimaryPushButton, getFont
+from qfluentwidgets import BodyLabel, PushButton,  PrimaryPushButton
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 
 from .double_tree_widget import DoubleTreeWidget
 from .utility import getFont, Medium, setFont

@@ -1,16 +1,12 @@
-from qfluentwidgets import (TableWidget, PrimaryToolButton, FluentIcon, DoubleSpinBox, ComboBox,
+from qfluentwidgets import (TableWidget, PrimaryToolButton, FluentIcon, DoubleSpinBox,
                             FluentStyleSheet, getStyleSheet)
 
-from PyQt5.QtWidgets import QTableWidgetItem, QSizePolicy, QHBoxLayout, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QTableWidgetItem, QSizePolicy, QHBoxLayout, QWidget
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 
-import GUI.qss
-import GUI.data
-from importlib.resources import path
 from .line_box import LineBox
 from ..project import Project as Pro
-from .utility import setFont, getFont, Medium, substitute, MediumSize, Normal
+from .utility import setFont, substitute, MediumSize, Normal
 from .combox_ import ComboBox_
 
 class TableWidgetPara(TableWidget):

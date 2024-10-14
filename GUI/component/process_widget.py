@@ -1,4 +1,4 @@
-from qfluentwidgets import PillToolButton, BodyLabel, FluentIcon, SubtitleLabel
+from qfluentwidgets import PillToolButton, FluentIcon, SubtitleLabel
 
 from PyQt5.QtWidgets import QHBoxLayout, QFrame, QVBoxLayout
 from PyQt5.QtCore import Qt, QPoint

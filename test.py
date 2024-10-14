@@ -27,7 +27,7 @@ if __name__ == "__main__":
     height = screen.height()
     
     scaler=calculate_scale_factor(width, height)
-    scaler="2"
+
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"  # 禁用 Qt 自动缩放
     os.environ["QT_SCALE_FACTOR"] = f"{scaler}"  # 禁用 Qt 自动缩放
     

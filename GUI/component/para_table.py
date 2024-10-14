@@ -1,4 +1,4 @@
-from qfluentwidgets import (PrimaryToolButton, FluentIcon, SubtitleLabel,
+from qfluentwidgets import (SubtitleLabel,
                             PrimaryPushButton, InfoBar, InfoBarPosition)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QSizePolicy, QHeaderView, QFrame, QFileDialog
@@ -10,7 +10,8 @@ from importlib.resources import path
 
 from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
-from .utility import getFont, Medium, setFont, Normal, MediumSize
+from .info_bar import InfoBar_ as InfoBar
+from .utility import  setFont, MediumSize
 from ..project import Project as Pro
 class ParaTable(QFrame):
     
@@ -57,12 +58,21 @@ class ParaTable(QFrame):
         self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         setFont(importButton)
         
-        hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
+        clearButton=PrimaryPushButton("Clear All", self); clearButton.setFixedSize(300, 40)
+        setFont(clearButton)
+        self.clearButton=clearButton; self.clearButton.clicked.connect(self.clearAll)
+        
+        
         self.generateButton=PrimaryPushButton("Save Current Parameters", self)
-        self.generateButton.setFixedSize(300, 40); self.generateButton.clicked.connect(self.saveParFile)
+        self.generateButton.setFixedSize(300, 40); 
+        self.generateButton.clicked.connect(self.saveParFile)
         setFont(self.generateButton)
         
-        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
+        hBoxLayout.setSpacing(30)
+        hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); 
+        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addWidget(self.clearButton)
+        hBoxLayout.addStretch(1)
+        
         self.vBoxLayout.addLayout(hBoxLayout)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
@@ -74,7 +84,7 @@ class ParaTable(QFrame):
                 
         self.table.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
         self.table.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
-        self.table.resizeColumnsToContents()
+        self.table.verticalHeader().setFixedWidth(30)
 
     def addPara(self):
         
@@ -142,3 +152,6 @@ class ParaTable(QFrame):
             parent=self.parent()
         )
     
+    def clearAll(self):
+        
+        self.table.setRowCount(0)

@@ -1,10 +1,7 @@
-from qfluentwidgets import LineEdit, Dialog, BodyLabel, PrimaryPushButton, PrimaryToolButton, PushButton
+from qfluentwidgets import LineEdit, Dialog, BodyLabel, PrimaryPushButton, PushButton
 from qframelesswindow import FramelessDialog
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
-from PyQt5.QtGui import QFont
-from .add_para_widget import AddParaWidget
 from .utility import setFont, getFont, Medium
 from .double_tree_widget import DoubleTreeWidget
 class LineBox(LineEdit):

@@ -1,6 +1,6 @@
-from qfluentwidgets import  ComboBox,FluentStyleSheet, getStyleSheet
+from qfluentwidgets import  ComboBox
 from qfluentwidgets.components.widgets.combo_box import ComboBoxMenu, ComboItem
-from .utility import getFont, setFont, Normal, MediumSize, substitute
+from .utility import MediumSize
 
 class ComboBoxMenu_(ComboBoxMenu):
     

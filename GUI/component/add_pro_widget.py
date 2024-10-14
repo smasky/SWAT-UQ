@@ -1,6 +1,6 @@
 from qframelesswindow import FramelessDialog
 from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, PushButton,FluentStyleSheet, getStyleSheet,
-                            SpinBox, ComboBox, DoubleSpinBox, TableWidget, DatePicker, InfoBar, 
+                            SpinBox, DoubleSpinBox, TableWidget, DatePicker,
                             InfoBarIcon, InfoBarPosition, LineEdit)
 
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QWidget,  QFileDialog,
@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QWidget,  QFileDialog,
 from PyQt5.QtCore import Qt, QDate
 from ..project import Project as Pro
 from .combox_ import ComboBox_
+from .info_bar import InfoBar_ as InfoBar
 from .utility import setFont, Medium, MediumSize, substitute, Normal
 import numpy as np
 class AddProWidget(FramelessDialog):
@@ -99,15 +100,23 @@ class AddProWidget(FramelessDialog):
             endQDate=ubQDate
         
         self.beginDataEdit=DatePicker_(self, isMonthTight=True)
+        self.beginDataEdit.setObjectName("beginDataEdit")
+        self.beginDataEdit.beginDate=lbQDate
+        self.beginDataEdit.endDate=ubQDate
         self.beginDataEdit.setDate(beginQDate)
-        self.beginDataEdit.dateChanged.connect(self.reCalNum)
+        self.beginDataEdit.previousDate=beginQDate
+        self.beginDataEdit.dateChanged.connect(self.checkValidDate)
         self.beginDataEdit.setMaximumWidth(100)
         label=BodyLabel("Start Date:"); setFont(label, MediumSize, Medium)
         formLayout.addRow(label, self.beginDataEdit)
         
         self.endDataEdit=DatePicker_(self, isMonthTight=True)
+        self.endDataEdit.setObjectName("endDataEdit")
+        self.endDataEdit.beginDate=lbDate
+        self.endDataEdit.endDate=ubDate 
         self.endDataEdit.setDate(endQDate)
-        self.endDataEdit.dateChanged.connect(self.reCalNum)
+        self.endDataEdit.previousDate=endQDate
+        self.endDataEdit.dateChanged.connect(self.checkValidDate)
         self.endDataEdit.setMaximumWidth(100)
         label=BodyLabel("End Date:"); setFont(label, MediumSize, Medium)
         formLayout.addRow(label, self.endDataEdit)
@@ -158,7 +167,6 @@ class AddProWidget(FramelessDialog):
         self.dataTable.horizontalHeader().setVisible(True)
         self.dataTable.horizontalHeader().setStyleSheet("QHeaderView::section { color: black; }")
         self.dataTable.verticalHeader().setVisible(True)
-        self.dataTable.setRowCount(1)
         
         self.dataTable.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
         self.dataTable.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
@@ -189,9 +197,7 @@ class AddProWidget(FramelessDialog):
     
     def clearAndResetTable(self):
         
-        self.dataTable.clearContents()
-       
-        self.dataTable.setRowCount(1)
+        self.dataTable.setRowCount(0)
     
     def importData(self):
         
@@ -206,12 +212,12 @@ class AddProWidget(FramelessDialog):
             infoBar = InfoBar(
                 icon=InfoBarIcon.WARNING,
                 title=self.tr('Warning'),
-                content=f"The project need {num} sets of data for the project, but only {n} have been provided. Please check the data.",
+                content=f"The project need {num} sets of data for the project, but only {n} have been provided. \n Please check the data.",
                 orient=Qt.Vertical,
                 isClosable=True,
                 duration=-1,
                 position=InfoBarPosition.TOP_RIGHT,
-                parent=self
+                parent=self.window()
             )
             infoBar.show()
             
@@ -226,15 +232,17 @@ class AddProWidget(FramelessDialog):
 
     def inputData(self, data):
         
+        self.dataTable.setRowCount(0)
+        
         m = len(data)
         
-        n = self.dataTable.rowCount()
+        # n = self.dataTable.rowCount()
         
         for i in range(m):
             index, year, month, day, value = data[i]
             
-            if i>=n:  
-                self.dataTable.insertRow(i)
+            # if i>=n:  
+            self.dataTable.insertRow(i)
                 
             item=QTableWidgetItem(f"{index:d}")
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -319,10 +327,44 @@ class AddProWidget(FramelessDialog):
     def cancel_clicked(self):
         
         self.reject()
+    
+    def checkValidDate(self):
+        
+        picker=self.sender()
+        ifInfo=False
+        if picker.objectName()=="beginDataEdit":
+            
+            if picker.date > self.endDataEdit.date:
+                
+                ifInfo=True
+        else:
+            if self.beginDataEdit.date > picker.date:
+                
+                ifInfo=True
+        if ifInfo:
+            InfoBar.error(
+                title=self.tr('Error'),
+                content="The date is earlier than the begin date or later than the end date. \n Please check the date.",
+                orient=Qt.Vertical,
+                isClosable=True,
+                duration=-1,
+                position=InfoBarPosition.TOP_RIGHT,
+                parent=self.window()
+            )
+            picker.setDate(picker.previousDate)
+        else:
+            self.reCalNum()
+            picker.previousDate=picker.date
+                
         
 class DatePicker_(DatePicker):
+    
     MM_DD_YYYY = 0
     YYYY_MM_DD = 1
+    
+    beginDate=None
+    endDate=None
+    previousDate=None
     def __init__(self, parent=None, format=MM_DD_YYYY, isMonthTight=True):
         super().__init__(parent, format, isMonthTight)
         
@@ -334,8 +376,41 @@ class DatePicker_(DatePicker):
         qss=substitute(qss, replace)
         
         self.setStyleSheet(qss)
-        
 
+        self.dateChanged.connect(self.checkValidDate)
+        
+    def checkValidDate(self):
+        
+        if self.date < self.beginDate:
+            
+            self.setDate(self.beginDate)
+            
+            InfoBar.error(
+                title=self.tr('Error'),
+                content="The date is earlier than the begin date of the project. \n The date has set to the begin date.",
+                orient=Qt.Vertical,
+                isClosable=True,
+                duration=-1,
+                position=InfoBarPosition.TOP_RIGHT,
+                parent=self.window()
+            )
+            
+        
+        elif self.date > self.endDate:
+            
+            self.setDate(self.endDate)
+            
+            InfoBar.error(
+                title=self.tr('Error'),
+                content="The date is later than the end date of the project. \n The date has set to the end date.",
+                orient=Qt.Vertical,
+                isClosable=True,
+                duration=-1,
+                position=InfoBarPosition.TOP_RIGHT,
+                parent=self.window()
+            )
+        
+            
 class TableWidget_(TableWidget):
     
     def __init__(self, parent=None):

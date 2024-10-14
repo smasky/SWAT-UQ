@@ -1,8 +1,8 @@
-from qfluentwidgets import SubtitleLabel,PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBar, InfoBarPosition
+from qfluentwidgets import SubtitleLabel,PrimaryToolButton, FluentIcon, PrimaryPushButton, InfoBarPosition
 
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSizePolicy, QFileDialog,
                              QHeaderView, QFrame, QTableWidgetItem, QWidget, QDialog)
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtCore import Qt
 
 import GUI.qss
 import GUI.data
@@ -11,6 +11,7 @@ from importlib.resources import path
 from .table_widget_pro import TableWidgetPro
 from .add_pro_widget import AddProWidget
 from ..project import Project as Pro
+from .info_bar import InfoBar_ as InfoBar
 from .utility import setFont, Medium, MediumSize, Normal
 OBJTYPE={ "NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4 }
 VARIABLE={ "Flow":0 }
@@ -57,12 +58,17 @@ class ObjTable(QFrame):
         importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40)
         setFont(importButton, 18, Medium)
         self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
-        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
+        
         self.generateButton=PrimaryPushButton("Save Current File", self)
         self.generateButton.setFixedSize(300, 40)
         self.generateButton.clicked.connect(self.saveProFile)
         setFont(self.generateButton, 18, Medium)
-        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addStretch(1)
+        
+        self.clearButton=PrimaryPushButton("Clear All", self); self.clearButton.setFixedSize(300, 40)
+        setFont(self.clearButton)
+        
+        hBoxLayout=QHBoxLayout(); hBoxLayout.addStretch(1);hBoxLayout.addWidget(self.importButton); hBoxLayout.setSpacing(30)
+        hBoxLayout.addWidget(self.generateButton); hBoxLayout.addWidget(self.clearButton); hBoxLayout.addStretch(1)
         self.vBoxLayout.addLayout(hBoxLayout)
         
         self.vBoxLayout.setAlignment(self.generateButton, Qt.AlignCenter)
@@ -75,7 +81,8 @@ class ObjTable(QFrame):
         
         self.table.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
         self.table.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
-
+        self.table.verticalHeader().setFixedWidth(30)
+        
     def importProFile(self):
         
         path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")

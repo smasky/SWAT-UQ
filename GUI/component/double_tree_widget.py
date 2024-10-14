@@ -1,11 +1,9 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,QTreeWidgetItem, QCompleter,
-                             QPushButton)
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,QTreeWidgetItem, QCompleter)
 from qfluentwidgets import TreeWidget, PrimaryToolButton, FluentIcon, BodyLabel, LineEdit, FluentStyleSheet, getStyleSheet
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
 from .utility import setFont, Medium, substitute, getFont
-import GUI.qss
 from importlib.resources import path
 class DoubleTreeWidget(QWidget):
     

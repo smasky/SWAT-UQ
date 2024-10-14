@@ -1,9 +1,8 @@
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import (BodyLabel, PushButton, LineEdit, PrimaryToolButton, SubtitleLabel, ComboBox,
+from qfluentwidgets import (BodyLabel, PushButton, LineEdit, PrimaryToolButton, SubtitleLabel,
                             FluentIcon, PrimaryPushButton, MessageBoxBase)
 
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-from PyQt5.QtGui import QFont
 import glob
 import os
 from importlib.resources import path
@@ -128,7 +127,7 @@ class SelctProject(MessageBoxBase):
         with path(GUI.qss, "messagebox.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-        
+
     def open_existing_project(self):
         self.accept()
     

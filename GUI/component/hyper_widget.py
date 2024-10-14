@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGridLayout, QFormLayout, QFrame
+from PyQt5.QtWidgets import QWidget, QGridLayout
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QPainter, QPen, QColor
-from qfluentwidgets import BodyLabel, SpinBox, DoubleSpinBox, CheckBox, FluentStyleSheet, getStyleSheet
+from qfluentwidgets import BodyLabel, SpinBox, DoubleSpinBox
 
-from .utility import setFont, Medium, MediumSize, Normal, substitute
+from .utility import setFont, MediumSize, Normal, substitute
 from .check_box import CheckBox_
 class hyperWidget(QWidget):
     
