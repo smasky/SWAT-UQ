@@ -116,7 +116,7 @@ class TableWidgetPara(TableWidget):
         button.setProperty('row', row); widget.btn=button
         button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) 
         button.setFixedSize(25, 25)
-        layout.addStretch(1);layout.addWidget(button);layout.addStretch(1)
+        layout.addStretch(1);layout.addWidget(button, Qt.AlignmentFlag.AlignVCenter);layout.addStretch(1)
         self.setCellWidget(row, col, widget)
         
         if len(content)>2:

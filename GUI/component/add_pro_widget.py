@@ -30,6 +30,7 @@ class AddProWidget(FramelessDialog):
         hBoxLayout=QHBoxLayout(self.contentWidget)
         
         formLayout=QFormLayout()
+        formLayout.setVerticalSpacing(20)
         hBoxLayout.addLayout(formLayout, 3)
         self.initDataWidget(hBoxLayout)
         

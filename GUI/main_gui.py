@@ -13,14 +13,18 @@ from .para_setting import ParaSetting
 from .pro_define import ProDefine
 from .sensitivity_analysis import SenAnalysis
 from .optimization import Optimization
-
 from .project import Project as Pro
+
+from .component.utility import setFont
+
 class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
         
         self.initWindow()
 
+        self.stackedWidget.view.ifAni=False
+        
         self.get_start = GetStart(self)
         self.get_start.setObjectName("GetStart")
 
@@ -44,7 +48,7 @@ class MainWindow(FluentWindow):
         self.setStyleSheet(qss)
         
     def initNavigation(self):
-             
+        
         Pro.btnSets.append(self.addSubInterface(self.get_start, FIF.HOME, self.tr('Get Start')))
         
         self.navigationInterface.addSeparator()
@@ -58,7 +62,12 @@ class MainWindow(FluentWindow):
         Pro.btnSets.append(self.addSubInterface(self.optimization, FIF.ALBUM, self.tr('Problem Optimization')))
         
         for btn in Pro.btnSets:
-            btn.setFont(getFont(16, QFont.Medium))
+            setFont(btn, 16)
+    
+    def switchTo(self, interface):
+        
+        self.stackedWidget.setCurrentWidget(interface, popOut=False)
+    
            
     def initWindow(self):
         

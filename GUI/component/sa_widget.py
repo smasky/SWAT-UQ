@@ -119,7 +119,7 @@ class SetupWidget(QWidget):
         super().__init__(parent)
         
         vBoxLayout=QVBoxLayout(self)
-        vBoxLayout.setContentsMargins(0,0,0,0)
+        vBoxLayout.setContentsMargins(0,15,0,0)
         contentWidget=QWidget(self)
         #######################Parameter Path############################
         gridLayout=QGridLayout(contentWidget)
