@@ -1,20 +1,22 @@
-from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog,
+from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog, QLabel, QPushButton,
                              QVBoxLayout, QHBoxLayout, QSizePolicy,
                              QGridLayout)
 
-from qfluentwidgets import BodyLabel, PrimaryPushButton, SpinBox, DoubleSpinBox
+from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, 
+                            SpinBox, DoubleSpinBox, ColorDialog,
+                            FluentStyleSheet, getStyleSheet)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 from PyQt5.QtCore import Qt, QSize, QEvent, pyqtSignal
-
+from PyQt5.QtGui import QColor
 import numpy as np
 import GUI.qss
 import GUI.data
 from importlib.resources import path
 
-from .utility import setFont
+from .utility import setFont, substitute
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
 
@@ -26,7 +28,9 @@ class DisplaySA(QFrame):
         
         super().__init__(parent)
         
-        vMainLayout=QVBoxLayout(self)
+        hBoxLayout=QHBoxLayout(self)
+        
+        vMainLayout=QVBoxLayout()
         vMainLayout.setContentsMargins(0, 20, 0, 20)
         
         h=QHBoxLayout()
@@ -54,10 +58,9 @@ class DisplaySA(QFrame):
    
         self.w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
-        h=QHBoxLayout()
+        vMainLayout.addWidget(self.w)
+       
         self.operation=Operation(self.canvas, self)
-        h.addWidget(self.w); h.addWidget(self.operation)
-        vMainLayout.addLayout(h)
         
         self.canvas.ratioEmit.connect(self.operation.setRatio)
         
@@ -75,6 +78,8 @@ class DisplaySA(QFrame):
         self.saveFigBtn.clicked.connect(self.saveFig)
         
         vMainLayout.addLayout(h)
+        
+        hBoxLayout.addLayout(vMainLayout); hBoxLayout.addWidget(self.operation)
         
         with path(GUI.qss, "display.qss") as qss_path:
             with open(qss_path, 'r') as f:
@@ -104,6 +109,8 @@ class DisplaySA(QFrame):
 
         
 class Operation(QWidget):
+    
+    color=QColor('#1f77b4')
     
     def __init__(self, picture, parent=None):
         super().__init__(parent)
@@ -144,6 +151,21 @@ class Operation(QWidget):
         vMainLayout.addWidget(label, 1, 0, Qt.AlignmentFlag.AlignVCenter)
         vMainLayout.addWidget(self.boxWidth, 1, 1, Qt.AlignmentFlag.AlignVCenter)
         
+        label=BodyLabel("Bar Color:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        self.barColor=ColorButton(self.color, self)
+        self.barColor.clicked.connect(self.showColorDialog)
+        setFont(self.barColor)
+        self.controls.append(self.barColor)
+        self.barColor.setProperty('name', 'barColor')
+        self.barColor.setProperty('type', 'txt')
+        self.barColor.setStyleSheet(f"background-color: {self.color.name()}; border: 1px solid rbga(0, 0, 0, 0.073); border-radius: 5px; outline: none;")
+        
+        
+        vMainLayout.addWidget(label, 2, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.barColor, 2, 1, Qt.AlignmentFlag.AlignVCenter)
+        
         label=BodyLabel("Bar Width:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(label)
@@ -156,8 +178,8 @@ class Operation(QWidget):
         self.controls.append(self.barWidth)
         setFont(self.barWidth)
         
-        vMainLayout.addWidget(label, 2, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barWidth, 2, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 3, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.barWidth, 3, 1, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("Bar Spacing:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -171,8 +193,8 @@ class Operation(QWidget):
         self.controls.append(self.barSpacing)
         setFont(self.barSpacing)
         
-        vMainLayout.addWidget(label, 3, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barSpacing, 3, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 4, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.barSpacing, 4, 1, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("Edge Width:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -184,14 +206,14 @@ class Operation(QWidget):
         self.controls.append(self.edgeWidth)
         setFont(self.edgeWidth)
         
-        vMainLayout.addWidget(label, 4, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.edgeWidth, 4, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 5, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.edgeWidth, 5, 1, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("yMaxLimit:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(label)
         self.yMaxLimit=DoubleSpinBox(self)
-        self.yMaxLimit.setRange(0.1, 1.0)
+        self.yMaxLimit.setRange(0.1, 1.3)
         self.yMaxLimit.setSingleStep(0.1)
         self.yMaxLimit.setProperty('name', 'yMaxLimit')
         self.yMaxLimit.setProperty('type', 'float')
@@ -199,8 +221,8 @@ class Operation(QWidget):
         self.controls.append(self.yMaxLimit)
         setFont(self.yMaxLimit)
         
-        vMainLayout.addWidget(label, 5, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.yMaxLimit, 5, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 6, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.yMaxLimit, 6, 1, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("Label Rotation:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -213,8 +235,8 @@ class Operation(QWidget):
         self.controls.append(self.xRotation)
         setFont(self.xRotation)
         
-        vMainLayout.addWidget(label, 6, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.xRotation, 6, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 7, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.xRotation, 7, 1, Qt.AlignmentFlag.AlignVCenter)
         
         label=BodyLabel("Figure Ratio:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -228,18 +250,38 @@ class Operation(QWidget):
         self.controls.append(self.figWidth)
         setFont(self.figWidth)
         
-        vMainLayout.addWidget(label, 7, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.figWidth, 7, 1, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(label, 8, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.figWidth, 8, 1, Qt.AlignmentFlag.AlignVCenter)
+        
+        label=BodyLabel("Value Text:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        self.valueText=ComboBox(self)
+        self.valueText.addItems(['True', 'False'])
+        self.valueText.setCurrentIndex(0)
+        self.valueText.setProperty('name', 'ifText')
+        self.valueText.setProperty('type', 'bool')
+        setFont(self.valueText)
+        self.controls.append(self.valueText)
+        
+        vMainLayout.addWidget(label, 9, 0, Qt.AlignmentFlag.AlignVCenter)
+        vMainLayout.addWidget(self.valueText, 9, 1, Qt.AlignmentFlag.AlignVCenter)
         
         self.refreshBtn=PrimaryPushButton("Refresh", self)
         setFont(self.refreshBtn)
         self.refreshBtn.clicked.connect(self.refresh)
-        vMainLayout.addWidget(self.refreshBtn, 8, 0, 1, 2)
+        vMainLayout.addWidget(self.refreshBtn, 10, 0, 1, 2)
     
     def setRatio(self, value):
         
         self.figWidth.setValue(value)
 
+    def showColorDialog(self):
+        
+        w=ColorDialog(self.color, "Choose color", self.parent().parent().parent())
+        w.exec()
+        self.color=w.color
+        self.barColor.setColor(self.color)
         
     def refresh(self):
         
@@ -250,6 +292,10 @@ class Operation(QWidget):
             type=control.property('type')
             if type=='int' or type=='float':
                 hyper[control.property('name')] = control.value()
+            elif type=='txt':
+                hyper[control.property('name')] = control.text()
+            elif type=='bool':
+                hyper[control.property('name')] = control.currentText() == 'True'
                 
         self.picture.plot_parameters(self.data, **hyper)
         self.parent().w.update()
@@ -266,13 +312,9 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(self.fig)
         
     def plot_parameters(self, SAData, barWidth=0.5, boxWidth=2, yMaxLimit=1.0, barSpacing=1.0,
-                        labelSize=12, edgeWidth=1, xRotation=0, figRatio=1.0):
+                        labelSize=12, edgeWidth=1, xRotation=0, figRatio=1.0, barColor='#1f77b4', ifText=True):
         
-        # w, h=self.fig.get_size_inches()
-        # h=w/(self.ratio/figRatio)
-        # self.fig.set_size_inches(w, h)
-        # self.draw()
-        self.axes.clear()  # Clear existing plot
+        self.axes.clear() 
         
         name=list(SAData.keys())
         value=list(SAData.values())
@@ -284,13 +326,15 @@ class MplCanvas(FigureCanvas):
         spacing = barSpacing
         indices = np.arange(len(labels)) * (bar_width + spacing)
 
-        self.axes.bar(indices, heights, width=bar_width, tick_label=labels, edgecolor='black', linewidth=edgeWidth)
+        bars=self.axes.bar(indices, heights, color=barColor, width=bar_width, tick_label=labels, edgecolor='black', linewidth=edgeWidth)
         self.axes.set_ylim(0, yMaxLimit) 
 
         self.axes.set_xlim(-bar_width, max(indices) + bar_width)
         
         self.axes.tick_params(axis='both', direction='in', width=2, 
                               labelsize=labelSize)
+        
+        self.axes.tick_params(axis='x', which='both', bottom=False, top=False)
 
         for spine in self.axes.spines.values():
             spine.set_linewidth(boxWidth)
@@ -298,21 +342,44 @@ class MplCanvas(FigureCanvas):
         self.axes.set_xticklabels(labels, rotation=xRotation, fontweight='bold')
         plt.setp(self.axes.get_yticklabels(), fontweight='bold')
         
-        delta=(1.1-figRatio)/2
-        self.axes.set_position([0.05, delta, 0.9, figRatio-0.1])
+        if ifText:
+            for bar, height in zip(bars, heights):
+                self.axes.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    height,  
+                    f'{height:.2f}',  
+                    ha='center',  
+                    va='bottom',  
+                    fontsize=int(labelSize/1.2),  
+                    fontweight='bold' 
+                )
+        
+        delta=(1.3-figRatio)/2
+        self.axes.set_position([0.15, delta, 0.7, figRatio-0.3])
         self.figure.canvas.draw_idle()
-        # self.fig.tight_layout()
-        # self.draw()
               
     def saveFig(self, path, suffix):
         
         self.fig.savefig(path, format=suffix, dpi=self.saveDpi)
     
     def resizeEvent(self, event):
-
+        
         self.canvas_width, self.canvas_height=self.get_width_height()
         self.ratio=self.canvas_width/self.canvas_height
-        self.ratioEmit.emit(1.0) 
         super(MplCanvas, self).resizeEvent(event)
         
+class ColorButton(PushButton):
+    
+    def __init__(self, color, parent=None):
         
+        super().__init__(parent)
+        
+        self.setColor(color)
+        self.setFixedHeight(30)
+    def setColor(self, color):
+        
+        qss=getStyleSheet(FluentStyleSheet.BUTTON)
+        qss=substitute(qss, {"PushButton, ToolButton, ToggleButton, ToggleToolButton": {"background" : f" {color.name()}"}})
+        self.setStyleSheet(qss)
+        self.setText(color.name())
+        self.update()
