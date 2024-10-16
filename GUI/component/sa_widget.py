@@ -10,6 +10,7 @@ import copy
 import GUI.qss
 import GUI.data
 from importlib.resources import path
+from UQPyL.utility import Verbose
 from .process_widget import ProcessWidget
 from .button_group import ButtonGroup
 from .hyper_widget import hyperWidget
@@ -182,11 +183,6 @@ class SetupWidget(QWidget):
         for i in range(2):
             qw=QWidget();qw.setFixedHeight(45)
             gridLayout.addWidget(qw, i, 0)
-            
-        # for i in range(3, 5):
-        #     qw=QWidget();qw.setFixedHeight(45)
-        #     gridLayout.addWidget(qw, i, 0)
-        #     qw.setStyleSheet("background-color: red")
 
         gridLayout.setColumnStretch(0, 1)
         gridLayout.setColumnStretch(1, 1)
@@ -247,8 +243,6 @@ class SetupWidget(QWidget):
         self.smBtnGroup.group.idClicked.connect(self.updateHyper)
         self.saBtnGroup.group.buttonClicked.connect(self.updateNextButton)
         
-        
-    
     def activateSABtn(self):
         
         i=self.paraEdit.currentIndex()
@@ -449,7 +443,7 @@ class SimulationWidget(QWidget):
         #################Verbose################
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=5)  # 或者使用 "Courier New"
+        font = QFont("Consolas", pointSize=8)  # 或者使用 "Courier New"
         font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -490,6 +484,7 @@ class SimulationWidget(QWidget):
         self.cancelBtn.setEnabled(False)
         self.verbose.clear()
         self.statistics.setText("NA/NA FEs")
+        self.processBar.setValue(0)
         
     def updateUI(self):
         self.swatEdit.addItems(Pro.findSwatExe())
@@ -499,6 +494,9 @@ class SimulationWidget(QWidget):
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
     
     def initialize(self):
+        
+        Pro.window=self.parent().parent().parent()
+        Verbose.total_width=self.verbose.document().idealWidth()
         
         numParallel=int(self.parallelEdit.value())
         Pro.projectInfos['numParallel']=numParallel
@@ -512,11 +510,13 @@ class SimulationWidget(QWidget):
         
     def sampling(self):
         
-        Pro.sampling()
-        self.verbose.append("Sampling Done. Please start simulation!\n")
+        success=Pro.sampling()
         
-        self.samplingBtn.setEnabled(False)
-        self.simBtn.setEnabled(True)
+        if success:
+            self.verbose.append("Sampling Done. Please start simulation!\n")
+            
+            self.samplingBtn.setEnabled(False)
+            self.simBtn.setEnabled(True)
 
     def simulation(self):
         
@@ -552,7 +552,7 @@ class AnalysisWidget(QWidget):
         vBoxLayout=QVBoxLayout(self)
         
         self.textWidget=TextEdit(self); self.textWidget.setReadOnly(True)
-        font = QFont("Consolas", pointSize=12)  
+        font = QFont("Consolas", pointSize=8)  
         font.setStyleHint(QFont.Monospace) 
         self.textWidget.setFont(font)
         vBoxLayout.addWidget(self.textWidget)
@@ -564,11 +564,11 @@ class AnalysisWidget(QWidget):
         self.executeBtn=PrimaryPushButton("Execute Analysis")
         self.executeBtn.clicked.connect(self.execute)
         setFont(self.executeBtn)
-        self.saveBtn=PrimaryPushButton("Save Result")
-        setFont(self.saveBtn)
+        # self.saveBtn=PrimaryPushButton("Save Result")
+        # setFont(self.saveBtn)
         # self.saveBtn.clicked.connect(self.save)
         
-        h.addStretch(1); h.addWidget(self.executeBtn); h.addSpacing(20); h.addWidget(self.saveBtn); h.addStretch(1)
+        h.addStretch(1); h.addWidget(self.executeBtn); h.addSpacing(20);  h.addStretch(1)
         vBoxLayout.addWidget(self.btnWidget)
         
     def updateUI(self):

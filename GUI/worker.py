@@ -613,6 +613,7 @@ class RunWorker(QObject):
         self.swatExe=projectInfos['swatExe']
         self.objInfos=objInfos
         self.nRch=modelInfos['nRch']
+        self.nOutput=problemInfos['nOutput']
         
         self.workPath=queue.Queue()
         for dir in swatDirs:
@@ -685,9 +686,10 @@ class RunWorker(QObject):
     def evaluate(self, X):
     
         n = X.shape[0]
-        Y = np.zeros((n, 1))
         
-        self._subprocess(X[0, :], 0)
+        Y = np.full((n, self.nOutput), np.nan)
+        
+        self.updateProcess.emit(self.count)
         
         with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
@@ -696,7 +698,6 @@ class RunWorker(QObject):
                 
                 if not self.stop:
                     idx, obj_value = future.result()
-                    
                     
                     for i, value in enumerate(obj_value):
                         Y[idx, i] = value
@@ -777,7 +778,7 @@ class IterEmit(QObject):
     def __init__(self, parent=None):
         
         super().__init__(parent)
-        
+    
     def send(self):
         
         self.iterSend.emit(self.iterCount)

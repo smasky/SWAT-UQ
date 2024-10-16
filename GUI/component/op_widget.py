@@ -436,7 +436,7 @@ class OptimizationWidget(QWidget):
         #################Verbose################
         h=QHBoxLayout(); h.setContentsMargins(0, 0, 0, 0)
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=5)  
+        font = QFont("Consolas", pointSize=8)  
         font.setStyleHint(QFont.Monospace)  
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -532,7 +532,7 @@ class ConclusionWidget(QWidget):
         ######################################
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas")  
+        font = QFont("Consolas", pointSize=8)  
         font.setStyleHint(QFont.Monospace)  
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)

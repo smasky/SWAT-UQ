@@ -19,7 +19,7 @@ if __name__ == "__main__":
     
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # 使能高 DPI 缩放
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)  # 使得图片元素也遵循缩放
-    QApplication.setAttribute(Qt.AA_UseOpenGLES)
+
     app = QApplication(sys.argv)
 
     screen = QDesktopWidget().screenGeometry()

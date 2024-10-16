@@ -34,7 +34,7 @@ class ProgressBar_(ProgressBar):
               
         if percentage>3:
             painter.setPen(Qt.white)
-            font = QFont("Arial", 6, QFont.Bold)
+            font = QFont("Arial", 10, QFont.Bold)
             painter.setFont(font)
             text_width = painter.fontMetrics().width(text)
             text_height = painter.fontMetrics().height()

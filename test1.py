@@ -1,56 +1,83 @@
-import re
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox, QGridLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import numpy as np
 
-css_string = """
-QHeaderView::section {
-    background-color: transparent;
-    color: rgb(96, 96, 96);
-    padding-left: 5px;
-    padding-right: 5px;
-    border: 1px solid rgba(0, 0, 0, 15);
-    font: 13px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
-}
+class MplCanvas(FigureCanvas):
+    def __init__(self, width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+        super(MplCanvas, self).__init__(self.fig)
 
-OtherSection {
-    font: 12px 'Times New Roman';
-}
-"""
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
 
-# 定义要替换的 CSS 类名、属性名称和属性值
-css_updates = {
-    "QHeaderView::section": {
-        "font": " 14px 'Arial', sans-serif",
-        "color": "rgb(128, 128, 128)",
-        "new-property": "new-value"
-    },
-    "OtherSection": {
-        "font": " 12px 'Times New Roman'",
-        "new-property": "new-value"
-    }
-}
+        self.setWindowTitle("Bar Chart with Selectable Parameters")
 
-# 遍历字典，进行替换或添加
-for css_class, properties in css_updates.items():
-    # 构建正则表达式模式
-    pattern = rf"({css_class}\s*\{{[^}}]*\}})"
-    
-    # 使用 lambda 函数进行替换或添加
-    def replace_or_add_properties(match):
-        content = match.group(1)
-        for property_name, new_value in properties.items():
-            # 检查属性是否存在
-            existing_match = re.search(rf"{property_name}:\s*[^;]+;", content)
-            if existing_match:
-                # 替换现有属性值
-                content = re.sub(rf"({property_name}:\s*)([^;]+)(;)", rf"\1{new_value}\3", content)
-            else:
-                # 添加新属性
-                # if not content.endswith(';'):
-                #     content = content.rstrip('}') + ';\n'
-                content = content.rstrip('}') + f"    {property_name}: {new_value};\n}}"
-        return content
-    
-    css_string = re.sub(pattern, replace_or_add_properties, css_string)
+        # Create a canvas to draw the plot
+        self.canvas = MplCanvas(width=5, height=4, dpi=100)
 
-# 打印最终结果
-print("Final CSS string:")
-print(css_string)
+        # Generate random data for 10 parameters
+        self.parameter_count = 10
+        self.data = np.random.rand(self.parameter_count)  # 10 random values between 0 and 1
+
+        # Plot all parameters initially
+        self.plot_parameters([True] * self.parameter_count)
+
+        # Create a layout and add the canvas
+        layout = QVBoxLayout()
+        layout.addWidget(self.canvas)
+
+        # Create a grid layout for checkboxes
+        checkbox_layout = QGridLayout()
+
+        # Create checkboxes for each parameter
+        self.checkboxes = []
+        for i in range(self.parameter_count):
+            checkbox = QCheckBox(f"Parameter {i+1}")
+            checkbox.setChecked(True)
+            checkbox.stateChanged.connect(self.update_plot)
+            self.checkboxes.append(checkbox)
+            checkbox_layout.addWidget(checkbox, i // 5, i % 5)  # Arrange in two rows
+
+        # Add checkbox layout to the main layout
+        layout.addLayout(checkbox_layout)
+
+        # Create a central widget and set the layout
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
+    def plot_parameters(self, show_params):
+        self.canvas.axes.clear()  # Clear existing plot
+
+        # Filter data and labels based on checkbox state
+        visible_indices = [i for i, show in enumerate(show_params) if show]
+        heights = [self.data[i] for i in visible_indices]
+        labels = [f"P{i+1}" for i in visible_indices]
+
+        # Fixed bar width
+        bar_width = 0.5
+
+        # Calculate positions for bars with dynamic spacing
+        spacing = 1.0  # Base spacing between bars
+        indices = np.arange(len(visible_indices)) * (bar_width + spacing)
+
+        self.canvas.axes.bar(indices, heights, width=bar_width, tick_label=labels)
+        self.canvas.axes.set_ylim(0, 1)  # Set y-axis range
+
+        # Adjust x-axis limits to fit the bars and show spacing
+        self.canvas.axes.set_xlim(-bar_width, max(indices) + bar_width)
+
+        self.canvas.draw()
+
+    def update_plot(self):
+        show_params = [checkbox.isChecked() for checkbox in self.checkboxes]
+        self.plot_parameters(show_params)
+
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+app.exec_()

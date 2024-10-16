@@ -2,6 +2,7 @@ import os
 import glob
 import numpy as np
 import sys
+import h5py
 from datetime import datetime
 from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
                     VerboseWorker, RunWorker, EvaluateThread)
@@ -14,11 +15,10 @@ from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
 from UQPyL.utility.verbose import Verbose
 from PyQt5.QtCore import QDate, Qt
-from qfluentwidgets import InfoBar, InfoBarPosition
+from .component.info_bar import InfoBar_ as InfoBar, InfoBarPosition
+
 class Project:
-    
-    
-    
+
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
     INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
     INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
@@ -30,7 +30,7 @@ class Project:
     
     SA_SAMPLE={'Sobol': ['Sobol Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
     
-    SA_HYPER={'Sobol': {'Z-score':{'type':'bool', 'class': 'Sobol', 'method': '__init__' ,'default': ''}, 'calSecondOrder':{'type':'bool', 'class': 'Sobol','method': '__init__', 'default': '0'}}, 
+    SA_HYPER={'Sobol': {'Z-score':{'type':'bool', 'class': 'Sobol', 'method': '__init__' ,'default': ''}}, 
               'Delta Test': {'Z-score':{'decs':'Z-score' , 'class': 'Delta_Test','method': '__init__', 'type':'bool', 'default': '0'}, 'nNeighbors':{'type':'int', 'class': 'Delta_Test','method': '__init__','default': '2'}},
               'FAST': {'Z-score':{'type':'bool', 'method': '__init__', 'class': 'FAST','default': ''}},
               'RBD-FAST': {'Z-score':{'type':'bool', 'class': 'RBD_FAST','method': '__init__', 'default': ''}, 'M':{'type':'int', 'method': '__init__', 'class': 'RBD_FAST', 'default': '4'}},
@@ -40,15 +40,16 @@ class Project:
     SAMPLE_HYPER={'Full Factorial Design': {'levels': {'dec': 'Number of Factors *', 'method': '__init__', 'class': 'FFD','type': 'int', 'related': '*','default': '5'}},
               'Latin Hyper Sampling' : {'nt': {'dec': 'Number for sampling *', 'method' : 'sample', 'type': 'int', 'class' : 'LHS', 'related': '*', 'default': '500'}},
               'Random' : {'nt': {'dec': 'Number for sampling *', 'class' : 'Random', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '500'}},
-              'Fast Sequence' : { 'M' : {'dec': 'M', 'class' : 'FAST_Sequence' ,'method': '__init__', 'type': 'int', 'default': '5'},
+              'Fast Sequence' : { 'M' : {'dec': 'M', 'class' : 'FAST_Sequence', 'method' : '__init__', 'type': 'int', 'default': '5', 'share': '__init__'},
                                   'nt' : {'dec': 'Number for sampling *', 'class' : 'FAST_Sequence','method': 'sample', 'type': 'int', 'related' : '*' ,'default': '500'}
                                 },
-              'Morris Sequence' : { 'num_levels': {'dec': 'Number of Level', 'class' : 'Morris_Sequence','method': '__init__', 'type': 'int', 'default': '5'},
+              'Morris Sequence' : { 'numLevels': {'dec': 'Number of Level', 'class' : 'Morris_Sequence','method': '__init__', 'type': 'int', 'default': '5', 'share' : '__init__'},
                                     'nt' : {'dec': 'Number of Trajectory *', 'class' : 'Morris_Sequence', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '100'}
                                   },
               'Sobol Sequence' : {'nt': { 'dec': 'Number for sampling *', 'class' : 'Sobol_Sequence', 'method': 'sample', 'type': 'int', 'related' : '*', 'default': '100'},
                                   'skipValue' : {'dec': 'Skip Values', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'int', 'default': '5'},
-                                  'scramble' : {'dec' : 'Scramble', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False'}
+                                  'scramble' : {'dec' : 'Scramble', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False'},
+                                  'calSecondOrder' : {'dec': 'SecondOrder', 'class': 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False', 'share': '__init__', 'related' : '*'}
                                   }
             }
     
@@ -69,7 +70,7 @@ class Project:
              'Random' : 'nt',
              'Fast Sequence' : 'nt*nInput',  
              'Morris Sequence' : 'nt*(nInput+1)',
-             'Sobol Sequence' : '(nt+2)*nInput'
+             'Sobol Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
     
     window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
@@ -120,7 +121,28 @@ class Project:
         cls.thread.finished.connect(cls.thread.deleteLater)
         cls.thread.occurError.connect(reject)
         cls.thread.start()
+    
+    @classmethod
+    def loadSAFile(cls, path):
         
+        def h5_to_dict(h5_obj):
+            result = {}
+            for key, item in h5_obj.items():
+                if isinstance(item, h5py.Dataset):
+                    result[key] = item[()]
+                elif isinstance(item, h5py.Group):
+                    result[key] = h5_to_dict(item)
+            return result
+        
+        path=os.path.join(cls.projectInfos['projectPath']+"\\Result\\Data", path)
+        
+        with h5py.File(path, 'r') as file:
+            
+            SAData= h5_to_dict(file)
+        
+        return SAData
+    
+    
     @classmethod
     def calDate(cls, observeDate):
         
@@ -186,12 +208,23 @@ class Project:
         
         with open(path, 'w') as f:
             f.writelines(lines)
+    
+    @classmethod
+    def findResultFile(cls):
         
+        path=os.path.join(cls.projectInfos['projectPath'], "Result\\Data")
+        res_files=glob.glob(os.path.join(path, "*.hdf"))
+        
+        files=[os.path.basename(file_path) for file_path in res_files]
+        
+        return files
+    
     @classmethod
     def findParaFile(cls):
         
         par_files = glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.par"))
         files=[os.path.basename(file_path) for file_path in par_files]
+        
         return files
     
     @classmethod
@@ -199,10 +232,12 @@ class Project:
         
         pro_files=glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.pro"))
         files=[os.path.basename(file_path) for file_path in pro_files]
+        
         return files
     
     @classmethod#TODO find
     def findSwatExe(cls):
+        
         swatPath=cls.projectInfos['swatPath']
         exe_name= glob.glob(os.path.join(swatPath, "*.exe"))
         name=[os.path.basename(file_path) for file_path in exe_name]
@@ -237,25 +272,35 @@ class Project:
         
         sampler=eval(smName)(**initHyper)
         
-        X=sampler.sample(**sampleHyper)
+        try:
+            
+            X=sampler.sample(**sampleHyper) 
+            X=X*(ub-lb)+lb
+            cls.SAResult={}
+            cls.SAResult['X']=X
+            
+            return True
         
-        X=X*(ub-lb)+lb
-        
-        cls.SAResult={}
-        cls.SAResult['X']=X
-    
+        except Exception as e:
+            
+            cls.showError(f"Sampling failed, please check the hyperparameters!\n The error is {e}")
+            
+            return False
+            
     @classmethod 
     def simulation(cls, processBar, statistics, finish, unfinish):
         
         tolN=cls.SAResult['X'].shape[0]
         
         def update_progress(value):
+            
             percent=value/tolN*100
-            statistics.setText(f"{int(value)}/{tolN}")
+            statistics.setText(f"{int(value)}/{tolN} FEs")
             processBar.setValue(percent)
         
         def accept(Y):
-            cls.SAResult['Y']=Y
+            
+            cls.SAResult['Y']=abs(Y)
         
         cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
         cls.worker.result.connect(accept)
@@ -285,7 +330,6 @@ class Project:
         cls.OPResult['verbose']=[]
         
         opInfos=cls.OPInfos
-        
         
         opClass=opInfos['opClass']
         opHyper=opInfos['opHyper']
@@ -329,6 +373,7 @@ class Project:
             
             Verbose.isStop=False
             Verbose.iterEmit=None
+            Verbose.verboseEmit=None
         
         def saveResult():
             
@@ -358,9 +403,11 @@ class Project:
     def initProject(cls, verboseWidget, btn):
         
         cls.projectInfos["numThreads"]=12 
-    
+
         cls.worker = InitWorker()
         cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
+        
+        Verbose.workDir=cls.projectInfos['projectPath']
         
         def accept(infos):
             
@@ -386,11 +433,27 @@ class Project:
     
     @classmethod
     def sensibility_analysis(cls, verboseWidget):
+        
         SAInfos=cls.SAInfos
         initHyper={}
         analyzeHyper={}
         saClass=SAInfos['saClass']
         saHyper=SAInfos['saHyper']
+        smHyper=SAInfos['smHyper']
+        
+        for hyper in smHyper:
+            
+            if 'share' in hyper:
+                
+                name=hyper['name']
+                func=hyper['share']
+                value=hyper['value']
+               
+                if func=="__init__":
+                    initHyper[name]=value
+                else:
+                    analyzeHyper[name]=value 
+        
         
         for hyper in saHyper:
             name=hyper['name']
@@ -398,19 +461,26 @@ class Project:
             value=hyper['value']
             
             if name=="Z-score":
+                
                 if value:
                     value=(StandardScaler(0,1), StandardScaler(0,1))
                 else:
                     value=(None, None)
+                    
                 initHyper["scalers"]=value
+                
                 continue
             
             if func=="__init__":
+                
                 initHyper[name]=value
+                
             else:
+                
                 analyzeHyper[name]=value
         
         initHyper['verbose']=True
+        initHyper['saveFlag']=True
         sa=eval(saClass)(**initHyper)
         
         analyzeHyper['X']=cls.SAResult['X']
@@ -454,6 +524,7 @@ class Project:
     
     @classmethod
     def clearAll(cls):
+        
         cls.window=None
         cls.projectInfos=None
         cls.modelInfos=None
@@ -467,5 +538,6 @@ class Project:
         cls.OPResult=None
 
         btnSets=Project.btnSets
+        
         for btn in btnSets[1:]:
             btn.setEnabled(False)

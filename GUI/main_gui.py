@@ -14,6 +14,7 @@ from .pro_define import ProDefine
 from .sensitivity_analysis import SenAnalysis
 from .optimization import Optimization
 from .project import Project as Pro
+from .display import DisplayWidget
 
 from .component.utility import setFont
 
@@ -40,6 +41,9 @@ class MainWindow(FluentWindow):
         self.optimization = Optimization(self)
         self.optimization.setObjectName("Optimization")
         
+        self.display = DisplayWidget(self)
+        self.display.setObjectName("Display")
+        
         self.initNavigation()
         
         qss=getStyleSheet(FluentStyleSheet.FLUENT_WINDOW)
@@ -61,6 +65,11 @@ class MainWindow(FluentWindow):
         Pro.btnSets.append(self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr('Sensitivity Analysis')))
         Pro.btnSets.append(self.addSubInterface(self.optimization, FIF.ALBUM, self.tr('Problem Optimization')))
         
+        self.navigationInterface.addSeparator()
+        
+        Pro.btnSets.append(self.addSubInterface(self.display, FIF.LAYOUT, self.tr('Result Visualization')))
+        
+        
         for btn in Pro.btnSets:
             setFont(btn, 16)
     
@@ -68,7 +77,6 @@ class MainWindow(FluentWindow):
         
         self.stackedWidget.setCurrentWidget(interface, popOut=False)
     
-           
     def initWindow(self):
         
         self.setWindowTitle("SWAT-UQ")
