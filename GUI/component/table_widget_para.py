@@ -108,11 +108,14 @@ class TableWidgetPara(TableWidget):
         #DeleteButton
         widget=QWidget()
         layout=QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         button=PrimaryToolButton(FluentIcon.DELETE, self); button.clicked.connect(self.delete_row)
         button.setProperty('row', row); widget.btn=button
         button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) 
         button.setFixedSize(25, 25)
+        widget.setFixedHeight(30)
         layout.addStretch(1);layout.addWidget(button, Qt.AlignmentFlag.AlignVCenter);layout.addStretch(1)
+        
         self.setCellWidget(row, col, widget)
         
         if len(content)>2:

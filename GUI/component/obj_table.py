@@ -223,24 +223,25 @@ class ObjTable(QFrame):
     def addOperation(self, row):
         
         operation=QWidget()
-        # v=QVBoxLayout(operation)
         
         hBoxLayout=QHBoxLayout(operation)
+
         editButton=PrimaryToolButton(FluentIcon.EDIT)
         editButton.setFixedSize(24,24)
         editButton.setProperty('row', row)
         editButton.clicked.connect(self.editPro)
-        hBoxLayout.addWidget(editButton, Qt.AlignmentFlag.AlignHCenter)
+        hBoxLayout.addWidget(editButton, Qt.AlignmentFlag.AlignCenter)
         
         delButton=PrimaryToolButton(FluentIcon.DELETE)
         delButton.setFixedSize(24,24)
         delButton.setProperty('row', row)
-        hBoxLayout.addWidget(delButton, Qt.AlignmentFlag.AlignHCenter)
+        hBoxLayout.addWidget(delButton, Qt.AlignmentFlag.AlignCenter)
         operation.delBtn=delButton
         delButton.clicked.connect(self.delete_row)
         
         # v.addLayout(hBoxLayout, Qt.AlignmentFlag.AlignHCenter)
         # v.setContentsMargins(0, 0, 0, 0)
+        operation.setFixedHeight(30)
         hBoxLayout.setContentsMargins(0,0,0,0)
         return operation
     

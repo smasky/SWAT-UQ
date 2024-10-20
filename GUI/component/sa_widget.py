@@ -470,9 +470,9 @@ class SimulationWidget(QWidget):
     def dynamicShowExe(self):
         
         self.swatEdit.clear()
-        self.objLine.addItems(Pro.findProFile())
-        self.objLine.setCurrentIndex(0)
-        super(ComboBox, self.objLine)._showComboMenu()
+        self.swatEdit.addItems(Pro.findSwatExe())
+        self.swatEdit.setCurrentIndex(0)
+        super(ComboBox, self.swatEdit)._showComboMenu()
     
     def reset(self):
         

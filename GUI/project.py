@@ -8,7 +8,7 @@ from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThr
                     VerboseWorker, RunWorker, EvaluateThread)
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
-from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random
+from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random, Saltelli_Sequence
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
 from UQPyL.optimization import GA, DE, SCE_UA, PSO
 from UQPyL.problems import PracticalProblem
@@ -24,11 +24,11 @@ class Project:
     INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
     
     SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
-    SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Sobol Sequence': 'Sobol_Sequence'}
+    SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Saltelli Sequence': 'Saltelli_Sequence'}
     SOP_METHOD={'Genetic Algorithm (GA)': 'GA', 'Particle Swarm Optimization (PSO)': 'PSO', 'Differential Evolution (DE)': 'DE', 'Artificial Bee Colony (ABC)': 'ABC', 'Cooperation Search Algorithm (CSA)': 'CSA', 'Shuffled Complex Evolution-UA (SCE-UA)':'SCE_UA'}
     MOP_METHOD={'Reference Vector guided Evolutionary Algorithm (RVEA)': 'RVEA', 'Non-dominated Sorting Genetic Algorithm II (NSGA-II)': 'NSGAII', 'MultiObjective Evolutionary Algorithm based on Decomposition (MOEA/D)' : 'MOEAD'}
     
-    SA_SAMPLE={'Sobol': ['Sobol Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
+    SA_SAMPLE={'Sobol': ['Saltelli Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
     
     SA_HYPER={'Sobol': {'Z-score':{'type':'bool', 'class': 'Sobol', 'method': '__init__' ,'default': ''}}, 
               'Delta Test': {'Z-score':{'decs':'Z-score' , 'class': 'Delta_Test','method': '__init__', 'type':'bool', 'default': '0'}, 'nNeighbors':{'type':'int', 'class': 'Delta_Test','method': '__init__','default': '2'}},
@@ -46,10 +46,10 @@ class Project:
               'Morris Sequence' : { 'numLevels': {'dec': 'Number of Level', 'class' : 'Morris_Sequence','method': '__init__', 'type': 'int', 'default': '5', 'share' : '__init__'},
                                     'nt' : {'dec': 'Number of Trajectory *', 'class' : 'Morris_Sequence', 'method' : 'sample', 'type': 'int', 'related' : '*','default': '100'}
                                   },
-              'Sobol Sequence' : {'nt': { 'dec': 'Number for sampling *', 'class' : 'Sobol_Sequence', 'method': 'sample', 'type': 'int', 'related' : '*', 'default': '100'},
-                                  'skipValue' : {'dec': 'Skip Values', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'int', 'default': '5'},
-                                  'scramble' : {'dec' : 'Scramble', 'class' : 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False'},
-                                  'calSecondOrder' : {'dec': 'SecondOrder', 'class': 'Sobol_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False', 'share': '__init__', 'related' : '*'}
+              'Saltelli Sequence' : {'nt': { 'dec': 'Number for sampling *', 'class' : 'Saltelli_Sequence', 'method': 'sample', 'type': 'int', 'related' : '*', 'default': '100'},
+                                  'skipValue' : {'dec': 'Skip Values', 'class' : 'Saltelli_Sequence', 'method': '__init__', 'type': 'int', 'default': '5'},
+                                  'scramble' : {'dec' : 'Scramble', 'class' : 'Saltelli_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False'},
+                                  'calSecondOrder' : {'dec': 'SecondOrder', 'class': 'Saltelli_Sequence', 'method': '__init__', 'type': 'bool', 'default': 'False', 'share': '__init__', 'related' : '*'}
                                   }
             }
     
@@ -70,7 +70,7 @@ class Project:
              'Random' : 'nt',
              'Fast Sequence' : 'nt*nInput',  
              'Morris Sequence' : 'nt*(nInput+1)',
-             'Sobol Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
+             'Saltelli Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
     
     window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
@@ -142,6 +142,25 @@ class Project:
         
         return SAData
     
+    @classmethod
+    def loadOPFile(cls, path):
+        
+        def h5_to_dict(h5_obj):
+            result = {}
+            for key, item in h5_obj.items():
+                if isinstance(item, h5py.Dataset):
+                    result[key] = item[()]
+                elif isinstance(item, h5py.Group):
+                    result[key] = h5_to_dict(item)
+            return result
+        
+        path=os.path.join(cls.projectInfos['projectPath']+"\\Result\\Data", path)
+        
+        with h5py.File(path, 'r') as file:
+            
+            OPData= h5_to_dict(file)
+        
+        return OPData
     
     @classmethod
     def calDate(cls, observeDate):

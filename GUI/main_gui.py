@@ -1,20 +1,20 @@
-from qfluentwidgets import FluentWindow, getFont, FluentStyleSheet, getStyleSheet
+from qfluentwidgets import FluentWindow, FluentStyleSheet, getStyleSheet
 from qfluentwidgets import FluentIcon as FIF
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QIcon
 
 from importlib.resources import path
 import GUI.picture
 
-from .component import setFont, getFont, Medium, substitute
+from .component import setFont, substitute
 from .get_start import GetStart
 from .para_setting import ParaSetting
 from .pro_define import ProDefine
 from .sensitivity_analysis import SenAnalysis
 from .optimization import Optimization
 from .project import Project as Pro
-from .display import DisplayWidget
+from .displayA import DisplayWidgetA
+from .displayB import DisplayWidgetB
 
 from .component.utility import setFont
 
@@ -41,8 +41,12 @@ class MainWindow(FluentWindow):
         self.optimization = Optimization(self)
         self.optimization.setObjectName("Optimization")
         
-        self.display = DisplayWidget(self)
-        self.display.setObjectName("Display")
+        self.displayA = DisplayWidgetA(self)
+        self.displayA.setObjectName("DisplayA")
+        
+        self.displayB = DisplayWidgetB(self)
+        self.displayB.setObjectName("DisplayB")
+        
         
         self.initNavigation()
         
@@ -67,8 +71,8 @@ class MainWindow(FluentWindow):
         
         self.navigationInterface.addSeparator()
         
-        Pro.btnSets.append(self.addSubInterface(self.display, FIF.LAYOUT, self.tr('Result Visualization')))
-        
+        Pro.btnSets.append(self.addSubInterface(self.displayA, FIF.LAYOUT, self.tr('Result Visualization A')))
+        Pro.btnSets.append(self.addSubInterface(self.displayB, FIF.LAYOUT, self.tr('Result Visualization B')))
         
         for btn in Pro.btnSets:
             setFont(btn, 16)
