@@ -1,16 +1,15 @@
-from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog, QLabel, QPushButton,
-                             QVBoxLayout, QHBoxLayout, QSizePolicy,
-                             QGridLayout, QFormLayout)
+from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog, QApplication, QStackedWidget, QLabel,
+                             QVBoxLayout, QHBoxLayout, QSizePolicy, QGridLayout)
 
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, 
-                            SpinBox, DoubleSpinBox, ColorDialog,
+from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, Pivot,
+                            SpinBox, DoubleSpinBox, ColorDialog, LineEdit,
                             FluentStyleSheet, getStyleSheet)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-from PyQt5.QtCore import Qt, QSize, QEvent, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QColor
 import numpy as np
 import GUI.qss
@@ -29,8 +28,6 @@ class DisplaySA(QFrame):
     def __init__(self, parent=None):
         
         super().__init__(parent)
-        
-        # hBoxLayout=QHBoxLayout(self)
         
         vMainLayout=QVBoxLayout(self)
         vMainLayout.setContentsMargins(0, 20, 0, 20)
@@ -61,7 +58,7 @@ class DisplaySA(QFrame):
         self.w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         vMainLayout.addWidget(self.w)
-       
+
         # self.operation=Operation(self.canvas, self)
         
         # self.canvas.ratioEmit.connect(self.operation.setRatio)
@@ -109,7 +106,7 @@ class DisplaySA(QFrame):
     
     def showConfigPanel(self):
         
-        configPanel=ConfigPanel(self)
+        configPanel=ConfigPanel(self.canvas, self)
         configPanel.show()
     
     def drawResult(self):
@@ -132,14 +129,132 @@ class DisplaySA(QFrame):
 
 class ConfigPanel(FramelessDialog):
     
-    def __init__(self, parent=None):
+    Nav=Pivot
+    
+    def __init__(self, canvas, parent=None):
+        
+        self.canvas=canvas
+        
         super().__init__(parent)
         
-        self.setFixedSize(400, 500)
-        self.setWindowTitle("Config Panel")
+        width = 400
+        height = parent.window().height()
+        
+        self.setFixedSize(width, height)
+        self.titleBar.setFixedWidth(width)
+        
+        parent_window = parent.window()
+        parent_geometry = parent_window.geometry()
+        
+        new_x = parent_geometry.x() + parent_geometry.width()
+        new_y = parent_geometry.y()
+        
+        screen_geometry = QApplication.desktop().availableGeometry(parent_window)
+        
+        if new_x + width > screen_geometry.width():
+            new_x = parent_geometry.x() + parent_geometry.width() - width
+        
+        self.move(new_x, new_y)
+        
+        self.initUI()
+    
+    def initUI(self):
+        
+        vMainLayout=QVBoxLayout(self)
+        
+        vMainLayout.setContentsMargins(0, 32, 0, 0)
+        
+        title=BodyLabel("Config Panel")
+        
+        setFont(title)
+        self.titleBar.hBoxLayout.insertWidget(0, title)
+        self.titleBar.hBoxLayout.setContentsMargins(20, 0, 0, 0)
+        
+class SubPanel(QWidget):
+    
+    def __init__(self, dicts, parent = None):
+        super().__init__(parent)
+        
+        self.widgets=[]
+        
+        self.vBoxLayout = QVBoxLayout(self)
+        title=BodyLabel("Basic Settings")
+        setFont(title)
+        title.setAlignment(Qt.AlignCenter)
+        self.vBoxLayout.addWidget(title, Qt.AlignmentFlag.AlignCenter)
+        
+        mainGridLayout=QGridLayout()
+        
+        count=0
+        for key, dict in dicts.items():
+            
+            label=BodyLabel(key)
+            setFont(label)
+            
+            type=dict['type']
+            name=dict['name']
+            default=dict['default']
+            
+            if type=="int":
+                
+                widget=SpinBox(self)
+                widget.setRange(dict['range'][0], dict['range'][1])
+                widget.setValue(default)
+                setFont(widget)
+                widget.setProperty("get", widget.value)
+                
+            elif type=="float":
+                
+                widget=DoubleSpinBox(self)
+                widget.setRange(dict['range'][0], dict['range'][1])
+                widget.setValue(default)
+                setFont(widget)
+                widget.setProperty("get", widget.value)
+                
+            elif type=="bool":
+                
+                widget=ComboBox(self)
+                widget.addItems(['True', 'False'])
+                widget.setCurrentIndex(default)
+                setFont(widget)
+                widget.setProperty("get", lambda: widget.currentText()=='True')
+            
+            elif type=="text":
+                
+                widget=LineEdit(self)
+                widget.setText(default)
+                setFont(widget)
+                widget.setProperty("get", widget.text)
+                
+            elif type=="object":
+                
+                tooltip=dict['tooltip']
+                widget=PushButton(tooltip, self)
+                widget.clicked.connect(dict['func'])
+                widget.setProperty("get", dict['get'])
+            
+            widget.setProperty('name', name)
+            widget.setProperty('type', type)
+        
+        
+                
+                
+                
+                
+
+            
+                
+                
+                
+                
+                
+        
+        
+        
         
     
-  
+        
+
 class Operation(QWidget):
     
     color=QColor('#1f77b4')
@@ -470,37 +585,27 @@ class MplCanvas(FigureCanvas):
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
         
-        print(f"Original size: {original_size}, original dpi: {original_dpi}")
-        
         if scale is not None:
             width=original_size[0]/original_dpi*scale*2
             height=original_size[1]/original_dpi*scale*2
         
         if dpi is None:
             dpi=self.saveDpi
-
-        # 调试输出：确保输入的宽高和 DPI 是正确的
-        print(f"Setting figure size to width={width} inches, height={height} inches at {dpi} dpi")
-            
-        # 尝试检查除法是否正确
+     
         self.fig.set_size_inches(width, height)
         
         try:
-            # 检查图像大小和 dpi
-            print(f"Saving figure with size {self.fig.get_size_inches()} inches at {dpi} dpi")
+            
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
         
         finally:
-            # 恢复原来的尺寸
             restored_width = original_size[0] / original_dpi *2
             restored_height = original_size[1] / original_dpi *2
-           # 恢复图像尺寸和 DPI
+    
             self.fig.set_size_inches(restored_width, restored_height)
-            self.fig.dpi = original_dpi  # 恢复原始 DPI
+            self.fig.dpi = original_dpi
             
-            # 手动刷新渲染器以确保图像显示正确
             self.fig.canvas.draw()
-            # self.fig.dpi = original_dpi
 
         
 class ColorButton(PushButton):
