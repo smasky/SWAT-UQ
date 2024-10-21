@@ -523,13 +523,11 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).resizeEvent(event)
     
     def save_figure_with_size(self, filename, format='png', scale=None, dpi=None):
-        
-        
-        
+    
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
         scaling=original_dpi/self.originDpi
-        self.multiply =  scale
+        self.multiply = scale / (dpi/original_dpi)
         
         if scale is not None:
             width=original_size[0]/original_dpi*scale
