@@ -393,7 +393,8 @@ class MplCanvas(FigureCanvas):
     def __init__(self, width=16, height=9, dpi=300):
         
         self.saveDpi=dpi
-        self.fig = Figure(figsize=(width, height), dpi=100)
+        self.originDpi=100
+        self.fig = Figure(figsize=(width, height), dpi=self.originDpi)
         self.axes = self.fig.add_subplot(111)
         super(MplCanvas, self).__init__(self.fig)
         self.clear_plot()
@@ -527,8 +528,8 @@ class MplCanvas(FigureCanvas):
         original_dpi = self.fig.dpi
         self.multiply =  scale
         if scale is not None:
-            width=original_size[0]/original_dpi*scale
-            height=original_size[1]/original_dpi*scale
+            width=original_size[0]/self.originDpi*scale
+            height=original_size[1]/self.originDpi*scale
         
         if dpi is None:
             dpi=self.saveDpi
@@ -540,11 +541,11 @@ class MplCanvas(FigureCanvas):
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
         
         finally:
-            restored_width = original_size[0] / original_dpi
-            restored_height = original_size[1] / original_dpi
+            restored_width = original_size[0] / self.originDpi
+            restored_height = original_size[1] / self.originDpi
     
             self.fig.set_size_inches(restored_width, restored_height)
-            self.fig.dpi = original_dpi
+            self.fig.dpi = self.originDpi
             self.plotPic()
             self.fig.canvas.draw()
         
