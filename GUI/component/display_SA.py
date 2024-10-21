@@ -428,7 +428,7 @@ class MplCanvas(FigureCanvas):
         labels=name
         
         barWidth = self.hyper['barWidth'] if not mul else self.hyper['barWidth']*self.multiply
-        spacing = self.hyper['barSpacing']
+        spacing = self.hyper['barSpacing'] if not mul else self.hyper['barSpacing']*self.multiply
         indices = np.arange(len(labels)) * (barWidth + spacing)
 
         edgeWidth = self.hyper['edgeWidth'] if not mul else self.hyper['edgeWidth']*self.multiply
