@@ -21,14 +21,25 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)  # 禁止 Qt 自动创建窗口
 
-    screen = QDesktopWidget().screenGeometry()
-    width = screen.width()
-    height = screen.height()
+    desktop = app.desktop()
     
-    scaler=calculate_scale_factor(width, height)
+    # 获取主屏幕的DPI
+    logical_dpi = desktop.logicalDpiX()  # 水平逻辑 DPI
+    physical_dpi = desktop.physicalDpiX()  # 水平物理 DPI
     
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"  # 禁用 Qt 自动缩放
-    os.environ["QT_SCALE_FACTOR"] = f"{scaler}"  # 禁用 Qt 自动缩放
+    # 计算缩放比例
+    scaling_factor = logical_dpi / 96  # 假设96 DPI为100%
+    
+    os.environ["QT_SCALING_FACTOR"] = str(scaling_factor)  # 启用 Qt 自动缩放
+    
+    # screen = QDesktopWidget().screenGeometry()
+    # width = screen.width()
+    # height = screen.height()
+    
+    # scaler=calculate_scale_factor(width, height)
+    
+    # os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"  # 禁用 Qt 自动缩放
+    # os.environ["QT_SCALE_FACTOR"] = f"{scaler}"  # 禁用 Qt 自动缩放
     
     demo = MainWindow()
     demo.show()

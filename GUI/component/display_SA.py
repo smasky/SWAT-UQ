@@ -15,7 +15,7 @@ import numpy as np
 import GUI.qss
 import GUI.data
 from importlib.resources import path
-
+import os
 from .utility import setFont, substitute, MediumSize
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
@@ -524,12 +524,14 @@ class MplCanvas(FigureCanvas):
     
     def save_figure_with_size(self, filename, format='png', scale=None, dpi=None):
         
+        scalingFactor=float(os.environ.get("QT_SCALING_FACTOR", 1))
+        
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
         self.multiply =  scale
         if scale is not None:
-            width=original_size[0]/self.originDpi*scale
-            height=original_size[1]/self.originDpi*scale
+            width=original_size[0]/original_dpi*scale
+            height=original_size[1]/original_dpi*scale
         
         if dpi is None:
             dpi=self.saveDpi
@@ -541,11 +543,11 @@ class MplCanvas(FigureCanvas):
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
         
         finally:
-            restored_width = original_size[0] / self.originDpi
-            restored_height = original_size[1] / self.originDpi
+            restored_width = original_size[0] / original_dpi * scalingFactor
+            restored_height = original_size[1] / original_dpi * scalingFactor
     
             self.fig.set_size_inches(restored_width, restored_height)
-            self.fig.dpi = self.originDpi
+            self.fig.dpi = original_dpi
             self.plotPic()
             self.fig.canvas.draw()
         
