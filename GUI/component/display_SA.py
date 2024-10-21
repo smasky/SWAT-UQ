@@ -16,7 +16,7 @@ import GUI.qss
 import GUI.data
 from importlib.resources import path
 
-from .utility import setFont, substitute
+from .utility import setFont, substitute, MediumSize
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
 from .check_box import CheckBox_ as CheckBox
@@ -106,8 +106,8 @@ class DisplaySA(QFrame):
     
     def showConfigPanel(self):
         
-        configPanel=ConfigPanel(self.canvas, self)
-        configPanel.show()
+        
+        self.configPanel.show()
     
     def drawResult(self):
         
@@ -117,19 +117,19 @@ class DisplaySA(QFrame):
         try:
             del self.SAData['S1(First Order)']['matrix']
             data=self.SAData['S1(First Order)']
-            self.operation.data=data
             self.canvas.plot_parameters(self.SAData['S1(First Order)'])
             
         except Exception as e:
             
             del self.SAData['S1']['matrix']
             data=self.SAData['S1']
-            self.operation.data=data
             self.canvas.plot_parameters(self.SAData['S1'])
-
+            
+        self.configPanel=ConfigPanel(self.canvas, self)
+        self.configPanel.data=data
 class ConfigPanel(FramelessDialog):
     
-    Nav=Pivot
+    data=None
     
     def __init__(self, canvas, parent=None):
         
@@ -137,7 +137,7 @@ class ConfigPanel(FramelessDialog):
         
         super().__init__(parent)
         
-        width = 400
+        width = 600
         height = parent.window().height()
         
         self.setFixedSize(width, height)
@@ -170,26 +170,74 @@ class ConfigPanel(FramelessDialog):
         self.titleBar.hBoxLayout.insertWidget(0, title)
         self.titleBar.hBoxLayout.setContentsMargins(20, 0, 0, 0)
         
-class SubPanel(QWidget):
+        BasicDicts={ 'Figure Title' : { 'name' : 'figureTitle', 'type' : 'text', 'default' : 'Sensitivity Analysis Result'},
+                'Title Size' : { 'name' : 'titleSize', 'type' : 'int', 'default' : 16, 'range' : (8, 32), 'step' : 1},
+                'X Label Size' : { 'name' : 'xLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'X Label' : { 'name' : 'xLabel', 'type' : 'text', 'default' : 'Parameter'},
+                'Y Label Size' : { 'name' : 'yLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'X Rotation' : { 'name' : 'xRotation', 'type' : 'int', 'default' : 0, 'range' : (0, 90), 'step' : 1},
+                'Y Label' : { 'name' : 'yLabel', 'type' : 'text', 'default' : 'Value'},
+                'Y Maximum' : { 'name' : 'yMax', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1e6), 'step' : 1},
+                'Legend Size' : { 'name' : 'legendSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'Box Width' : { 'name' : 'boxWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
+                'Figure Ratio' : { 'name' : 'figureRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
+        }
+        
+        vMainLayout.addSpacing(5)
+        basicPanel=SubPanel('Basic Setting', BasicDicts, self)
+        vMainLayout.addWidget(basicPanel)
+        
+        barDicts={ 'Bar Width' : { 'name' : 'barWidth', 'type' : 'float', 'default' : 0.5, 'range' : (0.1, 1.0), 'step' : 0.1},
+                   'Bar Spacing' : {'name' : 'barSpacing', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.1},
+                   'Bar Color' : { 'name' : 'barColor', 'type' : 'color', 'default' : '#1f77b4', 'tooltip': 'click to select color'},
+                   'Edge Width' : { 'name' : 'edgeWidth', 'type': 'int', 'default': 2, 'range' : (1, 8), 'step' : 1},
+                   'Value Text' : { 'name' : 'ifValueText', 'type' : 'bool', 'default': 'True'},
+                   'Text Size' : { 'name' : 'textSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                   'Normalize' : { 'name' : 'normalize', 'type' : 'bool', 'default' : 'False'},
+                   'Bar Select' : { 'name' : 'barSelect', 'type' : 'object', 'default' : None, 'data': self.data, 'key': None},
+        }
+        
+        barPanel=SubPanel('Bar Setting', barDicts, self)
+        vMainLayout.addWidget(barPanel)
+        vMainLayout.addStretch(1)
+        
+    def showColorDialog(self):
+        
+        w=ColorDialog(self.color, "Choose color", self.window())
+        w.exec()
+        w.deleteLater()
+
+class ColorDialog_(ColorDialog):
     
-    def __init__(self, dicts, parent = None):
+    colorEmit=pyqtSignal(str)
+    
+    def __init__(self, color, title: str, parent=None, enableAlpha=False):
+        super().__init__(color, title, parent, enableAlpha)
+        
+        self.yesButton.clicked.connect(lambda: self.colorEmit.emit(self.color.name()))
+
+class SubPanel(QFrame):
+    
+    def __init__(self, titleText, dicts, parent = None):
         super().__init__(parent)
         
         self.widgets=[]
-        
+        self.setObjectName("SubPanel")
         self.vBoxLayout = QVBoxLayout(self)
-        title=BodyLabel("Basic Settings")
+        title=BodyLabel(titleText)
+        title.setFixedHeight(30)
         setFont(title)
-        title.setAlignment(Qt.AlignCenter)
-        self.vBoxLayout.addWidget(title, Qt.AlignmentFlag.AlignCenter)
+        title.setAlignment(Qt.AlignHCenter)
+        self.vBoxLayout.addWidget(title, Qt.AlignmentFlag.AlignHCenter)
         
         mainGridLayout=QGridLayout()
-        
+        self.vBoxLayout.addLayout(mainGridLayout)
+        self.vBoxLayout.addStretch(1)
         count=0
         for key, dict in dicts.items():
             
-            label=BodyLabel(key)
-            setFont(label)
+            label=BodyLabel(key+":")
+            setFont(label, MediumSize-5)
             
             type=dict['type']
             name=dict['name']
@@ -200,61 +248,120 @@ class SubPanel(QWidget):
                 widget=SpinBox(self)
                 widget.setRange(dict['range'][0], dict['range'][1])
                 widget.setValue(default)
-                setFont(widget)
-                widget.setProperty("get", widget.value)
+                widget.setSingleStep(dict['step'])
+                
+                widget.get=widget.value
                 
             elif type=="float":
                 
                 widget=DoubleSpinBox(self)
                 widget.setRange(dict['range'][0], dict['range'][1])
                 widget.setValue(default)
-                setFont(widget)
-                widget.setProperty("get", widget.value)
+                widget.setSingleStep(dict['step'])
+                
+                widget.get=widget.value
                 
             elif type=="bool":
                 
                 widget=ComboBox(self)
+                widget.menuFontsize=MediumSize-5
                 widget.addItems(['True', 'False'])
-                widget.setCurrentIndex(default)
-                setFont(widget)
-                widget.setProperty("get", lambda: widget.currentText()=='True')
+                widget.setCurrentText(dict['default'])
+                
+                widget.get=lambda: widget.currentText()=='True'
             
             elif type=="text":
                 
                 widget=LineEdit(self)
                 widget.setText(default)
-                setFont(widget)
-                widget.setProperty("get", widget.text)
                 
-            elif type=="object":
+                widget.get=widget.text
+                
+            elif type=="color":
                 
                 tooltip=dict['tooltip']
-                widget=PushButton(tooltip, self)
-                widget.clicked.connect(dict['func'])
-                widget.setProperty("get", dict['get'])
+                value=dict['default']
+                widget=ColorPushButton(tooltip, value, self)
+                widget.clicked.connect(self.showColorDialog)
+                
+                widget.get=widget.text
             
+            elif type=='object':
+                
+                data=dict['data']
+                name=dict['name']
+                key=dict['default']
+                # widget=BarSelector(data, key, self.window())
+                widget=PushButton('Click to Select Bars', self)
+                widget.setProperty('name', name)
+                widget.setProperty('data', data)
+                widget.setProperty('key', key)
+                widget.clicked.connect(self.showBarSelector)
+                
+                widget.get=lambda: widget.property('key')
+                
+            
+            setFont(widget, MediumSize-5)
             widget.setProperty('name', name)
             widget.setProperty('type', type)
+            widget.setFixedWidth(200)
         
+            row=count//2
+            col=1 if count%2==0 else 3
+            count+=1
+            mainGridLayout.addWidget(label, row, col-1, Qt.AlignmentFlag.AlignRight)
+            mainGridLayout.addWidget(widget, row, col, Qt.AlignmentFlag.AlignLeft)
         
-                
-                
-                
-                
-
-            
-                
-                
-                
-                
-                
-        
-        
-        
-        
+        self.setStyleSheet( "#SubPanel {border-top: 1px solid rgba(0, 0, 0, 0.15);} " )      
     
+    def showColorDialog(self):
         
+        widget=self.sender()
+        w=ColorDialog_(widget.color, "Choose color", self.window())
+        res=w.exec()
+        if res:
+            widget.color=w.color.name()
+            widget.setColor(widget.color)
+    
+    def showBarSelector(self):
+        
+        widget=self.sender()
+        data=widget.property('data')
+        key=widget.property('key')
+        
+        w=BarSelector(self.parent().data, key, self.window())
+        res=w.exec()
 
+        if res:
+            widget.setProperty('key', w.keys)
+            
+        
+    def getValue(self):
+        
+        hyper={}
+        
+        for widget in self.widgets:
+            name=widget.property('name')
+            value=widget.property('get')()
+            hyper[name]=value 
+
+class ColorPushButton(PushButton):
+    
+    def __init__(self, text, color, parent=None):
+        
+        super().__init__(parent)
+        self.setText(text)
+        self.setFixedHeight(30)
+        self.setColor(color)
+        
+    def setColor(self, color):
+        self.color=color
+        qss=getStyleSheet(FluentStyleSheet.BUTTON)
+        qss=substitute(qss, {"PushButton, ToolButton, ToggleButton, ToggleToolButton": {"background" : f" {color}"}})
+        self.setStyleSheet(qss)
+        self.setText(color)
+        self.update()
+        
 class Operation(QWidget):
     
     color=QColor('#1f77b4')
@@ -428,7 +535,7 @@ class Operation(QWidget):
         vMainLayout.addWidget(label, 10, 0, Qt.AlignmentFlag.AlignVCenter)
         vMainLayout.addWidget(self.barBtn, 10, 1, Qt.AlignmentFlag.AlignVCenter)
         
-        label=BodyLabel("Normalization:")
+        label=BodyLabel("c")
         setFont(label)
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.norm=ComboBox(self)
@@ -458,14 +565,7 @@ class Operation(QWidget):
         
         self.figWidth.setValue(value)
 
-    def showColorDialog(self):
-        
-        w=ColorDialog(self.color, "Choose color", self.window())
-        w.exec()
-        self.color=w.color
-        self.barColor.setColor(self.color)
-        
-        w.deleteLater()
+
         
     def refresh(self):
         
@@ -606,7 +706,6 @@ class MplCanvas(FigureCanvas):
             self.fig.dpi = original_dpi
             
             self.fig.canvas.draw()
-
         
 class ColorButton(PushButton):
     
@@ -626,7 +725,6 @@ class ColorButton(PushButton):
 
 class BarSelector(FramelessDialog):
     keys=[]
-    ACCEPTED=pyqtSignal(list)
     def __init__(self, data, keys, parent=None):
         
         super().__init__(parent)
@@ -634,7 +732,7 @@ class BarSelector(FramelessDialog):
         self.vMainLayout=QVBoxLayout(self)
         
         titleLabel=BodyLabel("Select Bar")
-        setFont(titleLabel)
+        setFont(titleLabel, MediumSize-3)
         self.vMainLayout.addWidget(titleLabel)
         self.vMainLayout.addStretch(1)
         
@@ -646,6 +744,8 @@ class BarSelector(FramelessDialog):
         col=4
         for i, (key, value) in enumerate(data.items()):
             box=CheckBox(key+f"_{value: .2f}")
+            box.fontSize=MediumSize-3
+            box.setFont_()
             if keys is not None:
                 if key in keys:
                     box.setChecked(True)
@@ -660,10 +760,10 @@ class BarSelector(FramelessDialog):
         
         self.yesBtn=PrimaryPushButton("Confirm", self)
         self.yesBtn.clicked.connect(self.confirm)
-        setFont(self.yesBtn)
+        setFont(self.yesBtn, MediumSize-3)
         self.cancelBtn=PushButton("Cancel", self)
         self.cancelBtn.clicked.connect(self.cancel)
-        setFont(self.cancelBtn)
+        setFont(self.cancelBtn,  MediumSize-3)
         
         h=QHBoxLayout()
         h.addStretch(1); h.addWidget(self.yesBtn); h.addSpacing(20); h.addWidget(self.cancelBtn); h.addStretch(1)
@@ -679,9 +779,9 @@ class BarSelector(FramelessDialog):
             if box.isChecked():
                 self.keys.append(box.property('key'))
         
-        self.ACCEPTED.emit(self.keys)
-        self.close()
+        # self.ACCEPTED.emit(self.keys)
+        self.accept()
     
     def cancel(self):
-        self.close()
+        self.reject()
         

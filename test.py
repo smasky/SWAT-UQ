@@ -8,10 +8,9 @@ def calculate_scale_factor(target_width, target_height, base_width=3072, base_he
     
     width_ratio = target_width / base_width
     height_ratio = target_height / base_height
-    
     scale_ratio = min(width_ratio, height_ratio)
-    
     new_scale = base_scale * scale_ratio
+    
     return new_scale
 
 if __name__ == "__main__":
