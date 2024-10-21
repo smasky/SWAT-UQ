@@ -524,11 +524,13 @@ class MplCanvas(FigureCanvas):
     
     def save_figure_with_size(self, filename, format='png', scale=None, dpi=None):
         
-        scaling=float(os.environ.get('QT_SCALING_FACTOR'))
+        
         
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
+        scaling=original_dpi/self.originDpi
         self.multiply =  scale
+        
         if scale is not None:
             width=original_size[0]/original_dpi*scale
             height=original_size[1]/original_dpi*scale

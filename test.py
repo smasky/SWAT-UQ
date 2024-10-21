@@ -4,20 +4,6 @@ import sys
 from GUI import MainWindow
 import os
 
-def get_screen_scaling_factor(app):
-    # 获取主屏幕
-    screen = app.primaryScreen()
-    
-    # 获取逻辑 DPI 和物理 DPI
-    logical_dpi = screen.logicalDotsPerInch()
-    physical_dpi = screen.physicalDotsPerInch()
-    
-    # 计算缩放比例
-    scaling_factor = (logical_dpi / 96)
-    
-    os.environ['QT_SCALING_FACTOR'] = str(scaling_factor)  # 设置环境变量 QT_SCALE_FACTOR
-    
-    return scaling_factor
 
 if __name__ == "__main__":
     
@@ -26,9 +12,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)  # 禁止 Qt 自动创建窗口
-    
-    get_screen_scaling_factor(app)
-    
     
     demo = MainWindow()
     demo.show()
