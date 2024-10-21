@@ -23,8 +23,6 @@ from .check_box import CheckBox_ as CheckBox
 
 class DisplaySA(QFrame):
     
-    ratioEmit=pyqtSignal(float)
-    
     def __init__(self, parent=None):
         
         super().__init__(parent)
@@ -58,10 +56,6 @@ class DisplaySA(QFrame):
         self.w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         vMainLayout.addWidget(self.w)
-
-        # self.operation=Operation(self.canvas, self)
-        
-        # self.canvas.ratioEmit.connect(self.operation.setRatio)
         
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
@@ -106,7 +100,6 @@ class DisplaySA(QFrame):
     
     def showConfigPanel(self):
         
-        
         self.configPanel.show()
     
     def drawResult(self):
@@ -117,20 +110,24 @@ class DisplaySA(QFrame):
         try:
             del self.SAData['S1(First Order)']['matrix']
             data=self.SAData['S1(First Order)']
-            self.canvas.plot_parameters(self.SAData['S1(First Order)'])
-            
         except Exception as e:
             
             del self.SAData['S1']['matrix']
             data=self.SAData['S1']
-            self.canvas.plot_parameters(self.SAData['S1'])
-            
+        
         self.configPanel=ConfigPanel(self.canvas, self)
+        self.configPanel.configEmit.connect(self.canvas.setHyper)
+        self.configPanel.configEmit.connect(self.canvas.refresh)
         self.configPanel.data=data
+        self.canvas.data=data
+        self.configPanel.confirm()
+        self.canvas.plotPic()
+        
 class ConfigPanel(FramelessDialog):
     
     data=None
-    
+    configEmit=pyqtSignal(dict)
+    panels=[]
     def __init__(self, canvas, parent=None):
         
         self.canvas=canvas
@@ -174,10 +171,14 @@ class ConfigPanel(FramelessDialog):
                 'Title Size' : { 'name' : 'titleSize', 'type' : 'int', 'default' : 16, 'range' : (8, 32), 'step' : 1},
                 'X Label Size' : { 'name' : 'xLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'X Label' : { 'name' : 'xLabel', 'type' : 'text', 'default' : 'Parameter'},
-                'Y Label Size' : { 'name' : 'yLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'X Rotation' : { 'name' : 'xRotation', 'type' : 'int', 'default' : 0, 'range' : (0, 90), 'step' : 1},
+                'Y Label Size' : { 'name' : 'yLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'Y Label' : { 'name' : 'yLabel', 'type' : 'text', 'default' : 'Value'},
                 'Y Maximum' : { 'name' : 'yMax', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1e6), 'step' : 1},
+                'X Tick Size' : {'name' : 'xTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'X Tick Width' : {'name' : 'xTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
+                'Y Tick Size' : {'name' : 'yTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'Y Tick Width' : {'name' : 'yTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
                 'Legend Size' : { 'name' : 'legendSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'Box Width' : { 'name' : 'boxWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
                 'Figure Ratio' : { 'name' : 'figureRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
@@ -185,6 +186,7 @@ class ConfigPanel(FramelessDialog):
         
         vMainLayout.addSpacing(5)
         basicPanel=SubPanel('Basic Setting', BasicDicts, self)
+        self.panels.append(basicPanel)
         vMainLayout.addWidget(basicPanel)
         
         barDicts={ 'Bar Width' : { 'name' : 'barWidth', 'type' : 'float', 'default' : 0.5, 'range' : (0.1, 1.0), 'step' : 0.1},
@@ -198,22 +200,44 @@ class ConfigPanel(FramelessDialog):
         }
         
         barPanel=SubPanel('Bar Setting', barDicts, self)
+        self.panels.append(barPanel)
         vMainLayout.addWidget(barPanel)
         vMainLayout.addStretch(1)
+        
+        
+        self.yesBtn=PrimaryPushButton("Confirm", self)
+        self.cancelBtn=PrimaryPushButton("Cancel", self)
+        self.yesBtn.clicked.connect(self.confirm)
+        setFont(self.yesBtn, MediumSize-5)
+        setFont(self.cancelBtn, MediumSize-5)
+        
+        h=QHBoxLayout()
+        h.addStretch(1); h.addWidget(self.yesBtn); h.addSpacing(20); h.addWidget(self.cancelBtn); h.addStretch(1)
+        vMainLayout.addLayout(h)
+        vMainLayout.addSpacing(20)
+        
+    def confirm(self):
+        
+        hyper={}
+        for panel in self.panels:
+            
+            h=panel.getValue() 
+            hyper.update(h)
+        
+        self.configEmit.emit(hyper)
         
     def showColorDialog(self):
         
         w=ColorDialog(self.color, "Choose color", self.window())
         w.exec()
         w.deleteLater()
-
+    
 class ColorDialog_(ColorDialog):
     
     colorEmit=pyqtSignal(str)
     
     def __init__(self, color, title: str, parent=None, enableAlpha=False):
         super().__init__(color, title, parent, enableAlpha)
-        
         self.yesButton.clicked.connect(lambda: self.colorEmit.emit(self.color.name()))
 
 class SubPanel(QFrame):
@@ -265,10 +289,10 @@ class SubPanel(QFrame):
                 
                 widget=ComboBox(self)
                 widget.menuFontsize=MediumSize-5
-                widget.addItems(['True', 'False'])
+                widget.addItems(["True", "False"])
                 widget.setCurrentText(dict['default'])
                 
-                widget.get=lambda: widget.currentText()=='True'
+                widget.get = (lambda w=widget: w.currentText() == "True")
             
             elif type=="text":
                 
@@ -291,16 +315,14 @@ class SubPanel(QFrame):
                 data=dict['data']
                 name=dict['name']
                 key=dict['default']
-                # widget=BarSelector(data, key, self.window())
                 widget=PushButton('Click to Select Bars', self)
                 widget.setProperty('name', name)
                 widget.setProperty('data', data)
                 widget.setProperty('key', key)
                 widget.clicked.connect(self.showBarSelector)
                 
-                widget.get=lambda: widget.property('key')
+                widget.get=(lambda w=widget: w.property('key'))
                 
-            
             setFont(widget, MediumSize-5)
             widget.setProperty('name', name)
             widget.setProperty('type', type)
@@ -311,6 +333,7 @@ class SubPanel(QFrame):
             count+=1
             mainGridLayout.addWidget(label, row, col-1, Qt.AlignmentFlag.AlignRight)
             mainGridLayout.addWidget(widget, row, col, Qt.AlignmentFlag.AlignLeft)
+            self.widgets.append(widget)
         
         self.setStyleSheet( "#SubPanel {border-top: 1px solid rgba(0, 0, 0, 0.15);} " )      
     
@@ -326,7 +349,6 @@ class SubPanel(QFrame):
     def showBarSelector(self):
         
         widget=self.sender()
-        data=widget.property('data')
         key=widget.property('key')
         
         w=BarSelector(self.parent().data, key, self.window())
@@ -335,16 +357,17 @@ class SubPanel(QFrame):
         if res:
             widget.setProperty('key', w.keys)
             
-        
     def getValue(self):
         
         hyper={}
         
         for widget in self.widgets:
             name=widget.property('name')
-            value=widget.property('get')()
+            value=widget.get()
             hyper[name]=value 
 
+        return hyper
+    
 class ColorPushButton(PushButton):
     
     def __init__(self, text, color, parent=None):
@@ -362,281 +385,84 @@ class ColorPushButton(PushButton):
         self.setText(color)
         self.update()
         
-class Operation(QWidget):
-    
-    color=QColor('#1f77b4')
-    data=None
-    keys=None
-    def __init__(self, picture, parent=None):
-        super().__init__(parent)
-        
-        self.controls=[]
-        
-        self.picture=picture
-    
-        self.setSizePolicy(QSizePolicy.Fixed,  QSizePolicy.Expanding)
-        
-        vMainLayout=QGridLayout(self)
-        
-        label=BodyLabel("Font Size:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        
-        self.labelSize=SpinBox(self)
-        self.labelSize.setProperty('name', 'labelSize')
-        self.labelSize.setProperty('type', 'int')
-        self.labelSize.setValue(12)
-        self.controls.append(self.labelSize)
-        setFont(self.labelSize)
-        
-        vMainLayout.addWidget(label, 0, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.labelSize, 0, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Box Width:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        
-        self.boxWidth=SpinBox(self)
-        self.boxWidth.setProperty('name', 'boxWidth')
-        self.boxWidth.setValue(2)
-        self.boxWidth.setProperty('type', 'int')
-        self.controls.append(self.boxWidth)
-        setFont(self.boxWidth)
-        
-        vMainLayout.addWidget(label, 1, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.boxWidth, 1, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Bar Color:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.barColor=ColorButton(self.color, self)
-        self.barColor.clicked.connect(self.showColorDialog)
-        setFont(self.barColor)
-        self.controls.append(self.barColor)
-        self.barColor.setProperty('name', 'barColor')
-        self.barColor.setProperty('type', 'txt')
-        self.barColor.setStyleSheet(f"background-color: {self.color.name()}; border: 1px solid rbga(0, 0, 0, 0.073); border-radius: 5px; outline: none;")
-        
-        
-        vMainLayout.addWidget(label, 2, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barColor, 2, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Bar Width:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.barWidth=DoubleSpinBox(self)
-        self.barWidth.setRange(0.1, 1.0)
-        self.barWidth.setSingleStep(0.1)
-        self.barWidth.setValue(0.5)
-        self.barWidth.setProperty('name', 'barWidth')
-        self.barWidth.setProperty('type', 'float')
-        self.controls.append(self.barWidth)
-        setFont(self.barWidth)
-        
-        vMainLayout.addWidget(label, 3, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barWidth, 3, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Bar Spacing:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.barSpacing=DoubleSpinBox(self)
-        self.barSpacing.setRange(0.1, 1.0)
-        self.barSpacing.setSingleStep(0.1)
-        self.barSpacing.setProperty('name', 'barSpacing')
-        self.barSpacing.setProperty('type', 'float')
-        self.barSpacing.setValue(1.0)
-        self.controls.append(self.barSpacing)
-        setFont(self.barSpacing)
-        
-        vMainLayout.addWidget(label, 4, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barSpacing, 4, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Edge Width:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.edgeWidth=SpinBox(self)
-        self.edgeWidth.setProperty('name', 'edgeWidth')
-        self.edgeWidth.setProperty('type', 'int')
-        self.edgeWidth.setValue(1)
-        self.controls.append(self.edgeWidth)
-        setFont(self.edgeWidth)
-        
-        vMainLayout.addWidget(label, 5, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.edgeWidth, 5, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("yMaxLimit:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.yMaxLimit=DoubleSpinBox(self)
-        self.yMaxLimit.setRange(0.1, 1.3)
-        self.yMaxLimit.setSingleStep(0.1)
-        self.yMaxLimit.setProperty('name', 'yMaxLimit')
-        self.yMaxLimit.setProperty('type', 'float')
-        self.yMaxLimit.setValue(1.0)
-        self.controls.append(self.yMaxLimit)
-        setFont(self.yMaxLimit)
-        
-        vMainLayout.addWidget(label, 6, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.yMaxLimit, 6, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Label Rotation:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.xRotation=SpinBox(self)
-        self.xRotation.setRange(0, 90)
-        self.xRotation.setProperty("name", 'xRotation')
-        self.xRotation.setProperty("type", 'int')
-        self.xRotation.setValue(0)
-        self.controls.append(self.xRotation)
-        setFont(self.xRotation)
-        
-        vMainLayout.addWidget(label, 7, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.xRotation, 7, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Figure Ratio:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.figWidth=DoubleSpinBox(self)
-        self.figWidth.setProperty('name', 'figRatio')
-        self.figWidth.setProperty('type', 'float')
-        self.figWidth.setValue(1.0)
-        self.figWidth.setRange(0.0, 2.0)
-        self.figWidth.setSingleStep(0.1)
-        self.controls.append(self.figWidth)
-        setFont(self.figWidth)
-        
-        vMainLayout.addWidget(label, 8, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.figWidth, 8, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Value Text:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.valueText=ComboBox(self)
-        self.valueText.addItems(['True', 'False'])
-        self.valueText.setCurrentIndex(0)
-        self.valueText.setProperty('name', 'ifText')
-        self.valueText.setProperty('type', 'bool')
-        setFont(self.valueText)
-        self.controls.append(self.valueText)
-        
-        vMainLayout.addWidget(label, 9, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.valueText, 9, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("Bar Selection:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        self.barBtn=PushButton("Click to select", self)
-        setFont(self.barBtn)
-        self.barBtn.clicked.connect(self.selectBar)
-        self.barBtn.setProperty('name', 'barIndex')
-        self.barBtn.setProperty('type', 'list')
-        self.controls.append(self.barBtn)
-        
-        vMainLayout.addWidget(label, 10, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.barBtn, 10, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        label=BodyLabel("c")
-        setFont(label)
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.norm=ComboBox(self)
-        self.norm.addItems(['True', 'False'])
-        setFont(self.norm)
-        self.norm.setProperty('name', 'ifNorm')
-        self.norm.setProperty('type', 'bool')
-        self.norm.setCurrentIndex(1)
-        self.controls.append(self.norm)
-        
-        vMainLayout.addWidget(label, 11, 0, Qt.AlignmentFlag.AlignVCenter)
-        vMainLayout.addWidget(self.norm, 11, 1, Qt.AlignmentFlag.AlignVCenter)
-        
-        
-        self.refreshBtn=PrimaryPushButton("Refresh", self)
-        setFont(self.refreshBtn)
-        self.refreshBtn.clicked.connect(self.refresh)
-        vMainLayout.addWidget(self.refreshBtn, 12, 0, 1, 2)
-    
-    def selectBar(self):
-        
-        dialog = BarSelector(self.data, self.keys, self.window())
-        dialog.ACCEPTED.connect(lambda: setattr(self, 'keys', dialog.keys))  # 直接使用 setattr 修改 self.keys
-        dialog.show()
-
-    def setRatio(self, value):
-        
-        self.figWidth.setValue(value)
-
-
-        
-    def refresh(self):
-        
-        hyper={}
-        
-        for control in self.controls:
-            
-            type=control.property('type')
-            if type=='int' or type=='float':
-                hyper[control.property('name')] = control.value()
-            elif type=='txt':
-                hyper[control.property('name')] = control.text()
-            elif type=='bool':
-                hyper[control.property('name')] = control.currentText() == 'True'
-            elif type=='list':
-                hyper[control.property('name')] = self.keys
-            
-        self.picture.plot_parameters(self.data, **hyper)
-        self.parent().w.update()
-        
 class MplCanvas(FigureCanvas):
     
-    ratioEmit=pyqtSignal(float)
-    
+    hyper=None
+    data=None
+    multiply=1
     def __init__(self, width=16, height=9, dpi=300):
-
+        
         self.saveDpi=dpi
         self.fig = Figure(figsize=(width, height), dpi=100)
         self.axes = self.fig.add_subplot(111)
         super(MplCanvas, self).__init__(self.fig)
         self.clear_plot()
         
-    def plot_parameters(self, SAData, barWidth=0.5, boxWidth=2, yMaxLimit=1.0, barSpacing=1.0, ifNorm=False,
-                        labelSize=12, edgeWidth=1, xRotation=0, figRatio=1.0, barColor='#1f77b4', ifText=True, barIndex=None):
+    
+    def setHyper(self, hyper):
+        
+        self.hyper=hyper
+    
+    def refresh(self):
+        
+        self.plotPic()        
+    
+    def plotPic(self, mul=False):
         
         self.axes.clear() 
         
+        barIndex=self.hyper['barSelect']
+        
         if barIndex is None:
-            name=list(SAData.keys())
-            value=list(SAData.values())
+            name=list(self.data.keys())
+            value=list(self.data.values())
         else:
             name=barIndex
-            value=[SAData[key] for key in barIndex]
+            value=[self.data[key] for key in barIndex]
         
-        if ifNorm:
+        if self.hyper['normalize']:
             value=(np.array(value)/np.sum(value)).tolist()
 
         heights= list(map(abs, value))
         labels=name
         
-        bar_width = barWidth
-        spacing = barSpacing
-        indices = np.arange(len(labels)) * (bar_width + spacing)
+        barWidth = self.hyper['barWidth'] if not mul else self.hyper['barWidth']*self.multiply
+        spacing = self.hyper['barSpacing']
+        indices = np.arange(len(labels)) * (barWidth + spacing)
 
-        bars=self.axes.bar(indices, heights, color=barColor, width=bar_width, tick_label=labels, edgecolor='black', linewidth=edgeWidth)
-        self.axes.set_ylim(0, yMaxLimit) 
-
-        self.axes.set_xlim(-bar_width, max(indices) + bar_width)
+        edgeWidth = self.hyper['edgeWidth'] if not mul else self.hyper['edgeWidth']*self.multiply
         
-        self.axes.tick_params(axis='both', direction='in', width=2, 
-                              labelsize=labelSize)
+        bars=self.axes.bar(indices, heights, color=self.hyper['barColor'], width=barWidth, tick_label=labels, edgecolor='black', linewidth=edgeWidth, label="method")
         
-        self.axes.tick_params(axis='x', which='both', bottom=False, top=False)
+        yMaximum=self.hyper['yMax']
+        self.axes.set_ylim(0, yMaximum) 
 
+        self.axes.set_xlim(-barWidth, max(indices) + barWidth)
+        
+        xTickSize=self.hyper['xTickSize'] if not mul else self.hyper['xTickSize']*self.multiply
+        xTickWidth=self.hyper['xTickWidth'] if not mul else self.hyper['xTickWidth']*self.multiply
+        
+        self.axes.tick_params(axis='x', direction='in', width=xTickWidth, which='both', bottom=False, top=False,
+                              labelsize=xTickSize)
+        
+        yTickSize=self.hyper['yTickSize'] if not mul else self.hyper['yTickSize']*self.multiply
+        yTickWidth=self.hyper['yTickWidth'] if not mul else self.hyper['yTickWidth']*self.multiply
+        
+        self.axes.tick_params(axis='y', direction='in', width=yTickWidth, which='both',
+                              labelsize=yTickSize)
+
+        
+        boxWidth=self.hyper['boxWidth'] if not mul else self.hyper['boxWidth']*self.multiply
         for spine in self.axes.spines.values():
             spine.set_linewidth(boxWidth)
         
+        xRotation=self.hyper['xRotation']
         self.axes.set_xticklabels(labels, rotation=xRotation, fontweight='bold')
         plt.setp(self.axes.get_yticklabels(), fontweight='bold')
         
-        if ifText:
+        ifValueText=self.hyper['ifValueText']
+        textSize=self.hyper['textSize'] if not mul else self.hyper['textSize']*self.multiply
+        if ifValueText:
             for bar, height in zip(bars, heights):
                 self.axes.text(
                     bar.get_x() + bar.get_width() / 2,
@@ -644,12 +470,28 @@ class MplCanvas(FigureCanvas):
                     f'{height:.2f}',  
                     ha='center',  
                     va='bottom',  
-                    fontsize=int(labelSize/1.2),  
+                    fontsize=textSize,  
                     fontweight='bold' 
                 )
         
-        delta=(1.3-figRatio)/2
-        self.axes.set_position([0.05, delta, 0.90, figRatio-0.2])
+        figureTitle=self.hyper['figureTitle']
+        titleSize=self.hyper['titleSize'] if not mul else self.hyper['titleSize']*self.multiply
+        self.axes.set_title(figureTitle, fontsize=titleSize, fontweight='bold')
+            
+        xLabel=self.hyper['xLabel']
+        xLabelSize=self.hyper['xLabelSize'] if not mul else self.hyper['xLabelSize']*self.multiply
+        self.axes.set_xlabel(xLabel, fontsize=xLabelSize, fontweight='bold')
+        
+        yLabel=self.hyper['yLabel']
+        yLabelSize=self.hyper['yLabelSize'] if not mul else self.hyper['yLabelSize']*self.multiply
+        self.axes.set_ylabel(yLabel, fontsize=yLabelSize, fontweight='bold')
+        
+        legendSize=self.hyper['legendSize'] if not mul else self.hyper['legendSize']*self.multiply
+        self.axes.legend(fontsize=legendSize) 
+        
+        figureRatio=self.hyper['figureRatio']
+        delta=(1.3-figureRatio)/2
+        self.axes.set_position([0.05, delta, 0.90, figureRatio-0.2])
         self.figure.canvas.draw_idle()
     
     def clear_plot(self):
@@ -669,10 +511,9 @@ class MplCanvas(FigureCanvas):
             spine.set_visible(True)
         self.figure.canvas.draw_idle()
         
-    
     def saveFig(self, path, suffix):
         
-        self.save_figure_with_size(path, format=suffix, scale=2, dpi=300)
+        self.save_figure_with_size(path, format=suffix, scale=1, dpi=300)
     
     def resizeEvent(self, event):
         
@@ -684,10 +525,10 @@ class MplCanvas(FigureCanvas):
         
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
-        
+        self.multiply =  scale
         if scale is not None:
-            width=original_size[0]/original_dpi*scale*2
-            height=original_size[1]/original_dpi*scale*2
+            width=original_size[0]/original_dpi*scale
+            height=original_size[1]/original_dpi*scale
         
         if dpi is None:
             dpi=self.saveDpi
@@ -695,16 +536,16 @@ class MplCanvas(FigureCanvas):
         self.fig.set_size_inches(width, height)
         
         try:
-            
+            self.plotPic(mul=True)
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
         
         finally:
-            restored_width = original_size[0] / original_dpi *2
-            restored_height = original_size[1] / original_dpi *2
+            restored_width = original_size[0] / original_dpi
+            restored_height = original_size[1] / original_dpi
     
             self.fig.set_size_inches(restored_width, restored_height)
             self.fig.dpi = original_dpi
-            
+            self.plotPic()
             self.fig.canvas.draw()
         
 class ColorButton(PushButton):
@@ -779,7 +620,6 @@ class BarSelector(FramelessDialog):
             if box.isChecked():
                 self.keys.append(box.property('key'))
         
-        # self.ACCEPTED.emit(self.keys)
         self.accept()
     
     def cancel(self):
