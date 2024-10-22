@@ -7,6 +7,7 @@ from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, Pivot,
                             FluentStyleSheet, getStyleSheet)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -22,7 +23,7 @@ from ..project import Project as Pro
 from .check_box import CheckBox_ as CheckBox
 
 class DisplaySA(QFrame):
-    
+    configPanel=None
     def __init__(self, parent=None):
         
         super().__init__(parent)
@@ -78,8 +79,6 @@ class DisplaySA(QFrame):
         
         vMainLayout.addLayout(h)
         
-        # hBoxLayout.addLayout(vMainLayout); hBoxLayout.addWidget(self.operation)
-        
         with path(GUI.qss, "displayA.qss") as qss_path:
             with open(qss_path, 'r') as f:
                 self.setStyleSheet(f.read())
@@ -87,7 +86,6 @@ class DisplaySA(QFrame):
     def saveFig(self):
               
         fileName, type = QFileDialog.getSaveFileName(self, "Save Figure", "", "PNG (*.png);;PDF (*.pdf);;SVG (*.svg);;EPS (*.eps)")
-
         suffix = type.split('.')[-1].strip(')')
         self.canvas.saveFig(fileName, suffix)
         
@@ -107,6 +105,7 @@ class DisplaySA(QFrame):
         fileName=self.resultFile.currentText()
         self.SAData=Pro.loadSAFile(fileName)
         self.canvas.show_plot()
+            
         try:
             del self.SAData['S1(First Order)']['matrix']
             data=self.SAData['S1(First Order)']
@@ -114,10 +113,13 @@ class DisplaySA(QFrame):
             
             del self.SAData['S1']['matrix']
             data=self.SAData['S1']
+            
+        if self.configPanel is None:
+            self.configPanel=ConfigPanel(self.canvas, self)
+            self.configPanel.configEmit.connect(self.canvas.setHyper)
+            self.configPanel.configEmit.connect(self.canvas.refresh)
+            self.canvas.saveEmit.connect(self.configPanel.cancel)
         
-        self.configPanel=ConfigPanel(self.canvas, self)
-        self.configPanel.configEmit.connect(self.canvas.setHyper)
-        self.configPanel.configEmit.connect(self.canvas.refresh)
         self.configPanel.data=data
         self.canvas.data=data
         self.configPanel.confirm()
@@ -179,9 +181,12 @@ class ConfigPanel(FramelessDialog):
                 'X Tick Width' : {'name' : 'xTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
                 'Y Tick Size' : {'name' : 'yTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'Y Tick Width' : {'name' : 'yTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
+                'Y Tick Length' : {'name' : 'yTickLength', 'type' : 'int', 'default' : 4, 'range' : (1, 20), 'step' : 1},
+                'Y Tick Interval' : {'name' : 'yTickInterval', 'type' : 'float', 'default' : 0.1, 'range' : (0.01, 1), 'step' : 0.05},
                 'Legend Size' : { 'name' : 'legendSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                 'Box Width' : { 'name' : 'boxWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
-                'Figure Ratio' : { 'name' : 'figureRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
+                'Width Ratio' : { 'name' : 'widthRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
+                'Height Ratio' : { 'name' : 'heightRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
         }
         
         vMainLayout.addSpacing(5)
@@ -197,6 +202,9 @@ class ConfigPanel(FramelessDialog):
                    'Text Size' : { 'name' : 'textSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
                    'Normalize' : { 'name' : 'normalize', 'type' : 'bool', 'default' : 'False'},
                    'Bar Select' : { 'name' : 'barSelect', 'type' : 'object', 'default' : None, 'data': self.data, 'key': None},
+                   'Bar Interval' : {'name' : 'ifBarInterval', 'type' : 'bool', 'default' : 'False'},
+                   'Interval Width' : {'name' : 'intervalWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
+                   'Legend Label' : {'name' : 'legendLabel', 'type' : 'text', 'default' : 'MethodName'},
         }
         
         barPanel=SubPanel('Bar Setting', barDicts, self)
@@ -208,6 +216,7 @@ class ConfigPanel(FramelessDialog):
         self.yesBtn=PrimaryPushButton("Confirm", self)
         self.cancelBtn=PrimaryPushButton("Cancel", self)
         self.yesBtn.clicked.connect(self.confirm)
+        self.cancelBtn.clicked.connect(self.cancel)
         setFont(self.yesBtn, MediumSize-5)
         setFont(self.cancelBtn, MediumSize-5)
         
@@ -225,7 +234,11 @@ class ConfigPanel(FramelessDialog):
             hyper.update(h)
         
         self.configEmit.emit(hyper)
+    
+    def cancel(self):
         
+        self.close()
+    
     def showColorDialog(self):
         
         w=ColorDialog(self.color, "Choose color", self.window())
@@ -390,6 +403,7 @@ class MplCanvas(FigureCanvas):
     hyper=None
     data=None
     multiply=1
+    saveEmit=pyqtSignal()
     def __init__(self, width=16, height=9, dpi=300):
         
         self.saveDpi=dpi
@@ -409,6 +423,9 @@ class MplCanvas(FigureCanvas):
         self.plotPic()        
     
     def plotPic(self, mul=False):
+        
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['font.sans-serif'] = ['Arial']
         
         self.axes.clear() 
         
@@ -433,12 +450,13 @@ class MplCanvas(FigureCanvas):
 
         edgeWidth = self.hyper['edgeWidth'] if not mul else self.hyper['edgeWidth']*self.multiply
         
-        bars=self.axes.bar(indices, heights, color=self.hyper['barColor'], width=barWidth, tick_label=labels, edgecolor='black', linewidth=edgeWidth, label="method")
+        bars=self.axes.bar(indices, heights, color=self.hyper['barColor'], width=barWidth, tick_label=labels, edgecolor='black', linewidth=edgeWidth, label=self.hyper['legendLabel'])
         
         yMaximum=self.hyper['yMax']
         self.axes.set_ylim(0, yMaximum) 
 
-        self.axes.set_xlim(-barWidth, max(indices) + barWidth)
+        interval= barWidth
+        self.axes.set_xlim(-interval, max(indices) + interval)
         
         xTickSize=self.hyper['xTickSize'] if not mul else self.hyper['xTickSize']*self.multiply
         xTickWidth=self.hyper['xTickWidth'] if not mul else self.hyper['xTickWidth']*self.multiply
@@ -448,10 +466,12 @@ class MplCanvas(FigureCanvas):
         
         yTickSize=self.hyper['yTickSize'] if not mul else self.hyper['yTickSize']*self.multiply
         yTickWidth=self.hyper['yTickWidth'] if not mul else self.hyper['yTickWidth']*self.multiply
-        
-        self.axes.tick_params(axis='y', direction='in', width=yTickWidth, which='both',
+        yTickLength=self.hyper['yTickLength'] if not mul else self.hyper['yTickLength']*self.multiply
+        self.axes.tick_params(axis='y', direction='in', length=yTickLength, width=yTickWidth, which='both',
                               labelsize=yTickSize)
-
+        
+        yTickInterval=self.hyper['yTickInterval']
+        self.axes.yaxis.set_major_locator(MultipleLocator(yTickInterval))
         
         boxWidth=self.hyper['boxWidth'] if not mul else self.hyper['boxWidth']*self.multiply
         for spine in self.axes.spines.values():
@@ -488,11 +508,23 @@ class MplCanvas(FigureCanvas):
         self.axes.set_ylabel(yLabel, fontsize=yLabelSize, fontweight='bold')
         
         legendSize=self.hyper['legendSize'] if not mul else self.hyper['legendSize']*self.multiply
-        self.axes.legend(fontsize=legendSize) 
+        self.axes.legend(prop={'weight':'bold', 'size':legendSize}, loc='upper right') 
         
-        figureRatio=self.hyper['figureRatio']
-        delta=(1.3-figureRatio)/2
-        self.axes.set_position([0.05, delta, 0.90, figureRatio-0.2])
+        #adjust size
+        heightRatio=self.hyper['heightRatio']
+        widthRatio=self.hyper['widthRatio']
+        heightDelta=(1.3-heightRatio)/2
+        widthDelta=(1.1-widthRatio)/2
+        self.axes.set_position([widthDelta, heightDelta, widthRatio-0.1, heightRatio-0.2])
+        
+        if self.hyper['ifBarInterval']:
+            
+            intervalWidth=self.hyper['intervalWidth'] if not mul else self.hyper['intervalWidth']*self.multiply
+            
+            for i in range(1, len(indices)):
+                mid_point = (indices[i-1] + indices[i]) / 2
+                self.axes.axvline(x=mid_point, color='gray', linestyle='--', linewidth=intervalWidth) 
+        
         self.figure.canvas.draw_idle()
     
     def clear_plot(self):
@@ -527,7 +559,7 @@ class MplCanvas(FigureCanvas):
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
         scaling=original_dpi/self.originDpi
-        self.multiply = scale / (dpi/original_dpi)
+        self.multiply = scale / (dpi/original_dpi)**2
         
         if scale is not None:
             width=original_size[0]/original_dpi*scale
@@ -550,23 +582,9 @@ class MplCanvas(FigureCanvas):
             self.fig.dpi = original_dpi
             self.plotPic()
             self.fig.canvas.draw()
+            
+            self.saveEmit.emit()
         
-class ColorButton(PushButton):
-    
-    def __init__(self, color, parent=None):
-        
-        super().__init__(parent)
-        
-        self.setColor(color)
-        self.setFixedHeight(30)
-    def setColor(self, color):
-        
-        qss=getStyleSheet(FluentStyleSheet.BUTTON)
-        qss=substitute(qss, {"PushButton, ToolButton, ToggleButton, ToggleToolButton": {"background" : f" {color.name()}"}})
-        self.setStyleSheet(qss)
-        self.setText(color.name())
-        self.update()
-
 class BarSelector(FramelessDialog):
     keys=[]
     def __init__(self, data, keys, parent=None):

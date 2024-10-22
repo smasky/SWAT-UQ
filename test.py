@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QApplication, QDesktopWidget
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 import sys
 from GUI import MainWindow
-import os
 
 
 if __name__ == "__main__":
