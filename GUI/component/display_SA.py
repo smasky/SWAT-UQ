@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog, QApplication, QStackedWidget, QLabel,
+from PyQt5.QtWidgets import (QWidget, QFrame, QFileDialog, QApplication,
                              QVBoxLayout, QHBoxLayout, QSizePolicy, QGridLayout)
 
 from qframelesswindow import FramelessDialog
-from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton, Pivot,
+from qfluentwidgets import (BodyLabel, PushButton, PrimaryPushButton,
                             SpinBox, DoubleSpinBox, ColorDialog, LineEdit,
                             FluentStyleSheet, getStyleSheet)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -11,12 +11,10 @@ from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QColor
 import numpy as np
 import GUI.qss
 import GUI.data
 from importlib.resources import path
-import os
 from .utility import setFont, substitute, MediumSize
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
@@ -64,30 +62,46 @@ class DisplaySA(QFrame):
         self.configBtn=PrimaryPushButton("Config", self)
         self.configBtn.clicked.connect(self.showConfigPanel)
         self.configBtn.setMinimumWidth(150)
+        self.configBtn.setEnabled(False)
         setFont(self.configBtn)
         self.saveFigBtn=PrimaryPushButton("Save Figure", self)
         self.saveFigBtn.setMinimumWidth(150)
+        self.saveFigBtn.setEnabled(False)
         setFont(self.saveFigBtn)
-        self.reset=PrimaryPushButton("Reset", self)
-        self.reset.setMinimumWidth(150)
-        setFont(self.reset)
+        self.resetBtn=PrimaryPushButton("Reset", self)
+        self.resetBtn.setMinimumWidth(150)
+        self.resetBtn.setEnabled(False)
+        setFont(self.resetBtn)
         h.addStretch(1); h.addWidget(self.saveFigBtn)
-        h.addSpacing(20); h.addWidget(self.reset)
+        h.addSpacing(20); h.addWidget(self.resetBtn)
         h.addSpacing(20); h.addWidget(self.configBtn); h.addStretch(1)
         
         self.saveFigBtn.clicked.connect(self.saveFig)
+        self.resetBtn.clicked.connect(self.reset)
         
         vMainLayout.addLayout(h)
         
         with path(GUI.qss, "displayA.qss") as qss_path:
             with open(qss_path, 'r') as f:
                 self.setStyleSheet(f.read())
+    
+    def reset(self):
+        
+        self.resultFile.setCurrentIndex(-1)
+        self.canvas.reset()
+        if self.configPanel is not None:
+            self.configPanel.close()
+        
+        self.saveFigBtn.setEnabled(False)
+        self.resetBtn.setEnabled(False)
+        self.configBtn.setEnabled(False)
         
     def saveFig(self):
               
         fileName, type = QFileDialog.getSaveFileName(self, "Save Figure", "", "PNG (*.png);;PDF (*.pdf);;SVG (*.svg);;EPS (*.eps)")
-        suffix = type.split('.')[-1].strip(')')
-        self.canvas.saveFig(fileName, suffix)
+        if fileName:
+            suffix = type.split('.')[-1].strip(')')
+            self.canvas.saveFig(fileName, suffix)
         
     def dynamicShowFile(self):
         
@@ -107,8 +121,10 @@ class DisplaySA(QFrame):
         self.canvas.show_plot()
             
         try:
+            
             del self.SAData['S1(First Order)']['matrix']
             data=self.SAData['S1(First Order)']
+            
         except Exception as e:
             
             del self.SAData['S1']['matrix']
@@ -124,6 +140,11 @@ class DisplaySA(QFrame):
         self.canvas.data=data
         self.configPanel.confirm()
         self.canvas.plotPic()
+        
+        #update Btn
+        self.saveFigBtn.setEnabled(True)
+        self.resetBtn.setEnabled(True)
+        self.configBtn.setEnabled(True)
         
 class ConfigPanel(FramelessDialog):
     
@@ -413,7 +434,6 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(self.fig)
         self.clear_plot()
         
-    
     def setHyper(self, hyper):
         
         self.hyper=hyper
@@ -584,7 +604,17 @@ class MplCanvas(FigureCanvas):
             self.fig.canvas.draw()
             
             self.saveEmit.emit()
+    
+    def reset(self):
         
+        self.fig.clf()
+        self.axes = self.fig.add_subplot(111)  # 添加一个新的子图
+        self.axes.set_xticks([])
+        self.axes.set_yticks([])
+        for spine in self.axes.spines.values():
+            spine.set_visible(False)
+        self.figure.canvas.draw_idle()
+    
 class BarSelector(FramelessDialog):
     keys=[]
     def __init__(self, data, keys, parent=None):
@@ -645,4 +675,3 @@ class BarSelector(FramelessDialog):
     
     def cancel(self):
         self.reject()
-        
