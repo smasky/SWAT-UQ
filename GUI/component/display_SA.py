@@ -579,7 +579,11 @@ class MplCanvas(FigureCanvas):
         original_size = self.get_width_height()
         original_dpi = self.fig.dpi
         scaling=original_dpi/self.originDpi
-        self.multiply = scale / (dpi/original_dpi)**2
+        
+        if original_dpi==100:
+            self.multiply = scale
+        else:
+            self.multiply = scale / (dpi/original_dpi)**2
         
         if scale is not None:
             width=original_size[0]/original_dpi*scale

@@ -14,6 +14,7 @@ import matplotlib.ticker as ticker
 from PyQt5.QtCore import Qt, QSize, QEvent, pyqtSignal
 from PyQt5.QtGui import QColor
 import numpy as np
+import math
 import GUI.qss
 import GUI.data
 from importlib.resources import path
@@ -22,6 +23,45 @@ from .utility import setFont, substitute, MediumSize
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
 from .check_box import CheckBox_ as CheckBox
+
+BasicDicts={ 'Figure Title' : { 'name' : 'figureTitle', 'type' : 'text', 'default' : 'Optimization Result'},
+                'Title Size' : { 'name' : 'titleSize', 'type' : 'int', 'default' : 16, 'range' : (8, 32), 'step' : 1},
+                'X Label Size' : { 'name' : 'xLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'X Label' : { 'name' : 'xLabel', 'type' : 'text', 'default' : 'Iter'},
+                'Y Label Size' : { 'name' : 'yLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'Y Label' : { 'name' : 'yLabel', 'type' : 'text', 'default' : 'Value'},
+                'Y Maximum' : { 'name' : 'yMax', 'type' : 'float', 'default' : 1.0, 'range' : (-1e6, 1e6), 'step' : 1},
+                'Y Minimum' : {'name' : 'yMin', 'type' : 'float', 'default' : 0.0, 'range' : (-1e6, 1e6), 'step' : 1},
+                'X Maximum' : { 'name' : 'xMax', 'type' : 'float', 'default' : 1.0, 'range' : (-1e6, 1e6), 'step' : 1},
+                'X Tick Size' : {'name' : 'xTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'X Tick Width' : {'name' : 'xTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
+                'Y Tick Size' : {'name' : 'yTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'Y Tick Width' : {'name' : 'yTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
+                'Y Tick Length' : {'name' : 'yTickLength', 'type' : 'int', 'default' : 4, 'range' : (1, 20), 'step' : 1},
+                'Y Tick Interval' : {'name' : 'yTickInterval', 'type' : 'float', 'default' : 10, 'range' : (0.01, 1e6), 'step' : 1},
+                'X Tick Interval' : {'name' : 'xTickInterval', 'type' : 'float', 'default' : 10, 'range' : (0.01, 1e6), 'step' : 1},
+                'Legend Size' : { 'name' : 'legendSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
+                'Box Width' : { 'name' : 'boxWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
+                'Width Ratio' : { 'name' : 'widthRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
+                'Height Ratio' : { 'name' : 'heightRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
+        }
+
+lineDict={
+                'Marker Type' : { 'name' : 'markType', 'type' : 'combox', 'items': ['.', 'o', 's', '^'], 'default' : 'o' },
+                'Marker Frequency' : { 'name' : 'everyMark', 'type' : 'float', 'default' : 0.01, 'range' : (0.00, 1.00), 'step' : 0.01},
+                'Marker Size' : { 'name' : 'markSize', 'type' : 'int', 'default' : 12, 'range' : (1, 32), 'step' : 1},
+                'Face Color' : { 'name' : 'markColor', 'type' : 'color', 'default' : '#ff1f77b4', 'tooltip': 'click to select color'},
+                'Edge Color' : { 'name' : 'edgeColor', 'type' : 'color', 'default' : '#ff1f77b4', 'tooltip': 'click to select color'},
+                'Edge Width' : { 'name' : 'edgeWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
+                'Line Width' : { 'name' : 'lineWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
+                'Line Style' : { 'name' : 'lineStyle', 'type' : 'combox', 'items': ['-', '--', '-.', ':'], 'default' : '-' },
+                'Line Color' : { 'name' : 'lineColor', 'type' : 'color', 'default' : '#ff1f77b4', 'tooltip': 'click to select color'},
+                'Label Name' : { 'name' : 'labelName', 'type' : 'text', 'default' : 'MethodName'},
+                'Grid' : { 'name' : 'ifGrid', 'type' : 'bool', 'default' : 'True'},
+                'Grid Width' : {'name' : 'gridWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 10), 'step' : 1},
+                'Y Inverse' : {'name' : 'ifInverse', 'type' : 'bool', 'default' : 'False'}
+        } 
+
 class DisplayOP(QFrame):
     
     ratioEmit=pyqtSignal(float)
@@ -35,7 +75,7 @@ class DisplayOP(QFrame):
         vMainLayout.setContentsMargins(0, 20, 0, 20)
         
         h=QHBoxLayout()
-        label=BodyLabel("Sensitivity Analysis Result File:")
+        label=BodyLabel("Optimization Result File:")
         setFont(label)
         
         self.resultFile=ComboBox(self)
@@ -66,12 +106,15 @@ class DisplayOP(QFrame):
         h=QHBoxLayout(); h.setContentsMargins(0, 5, 0, 5)
         self.saveFigBtn=PrimaryPushButton("Save Figure", self)
         self.saveFigBtn.setMinimumWidth(150)
+        self.saveFigBtn.setEnabled(False)
         setFont(self.saveFigBtn)
         self.resetBtn=PrimaryPushButton("Reset", self)
         self.resetBtn.setMinimumWidth(150)
+        self.resetBtn.setEnabled(False)
         setFont(self.resetBtn)
         self.configBtn=PrimaryPushButton("Config", self)
         self.configBtn.setMinimumWidth(150)
+        self.configBtn.setEnabled(False)
         setFont(self.configBtn)
         
         h.addStretch(1)
@@ -123,7 +166,32 @@ class DisplayOP(QFrame):
         self.OPData=Pro.loadOPFile(fileName)
         self.canvas.show_plot()
         
+        #Read Data
         data=self.OPData['History_Best'] #TODO
+        xData=[]
+        yData=[]
+        for i, (_, value) in enumerate(data.items()):
+            xData.append(i)
+            yData.append(value['Best Objectives'])
+        
+        #calculate interval
+        def calInterval(value):
+            num_digits = round(math.log10(abs(value)))+1
+            base = 10 ** (num_digits-2)
+            return base
+                
+        yInterval=calInterval(np.max(yData)-np.min(yData))
+        BasicDicts['Y Tick Interval']['default']=yInterval
+        BasicDicts['Y Tick Interval']['step']=yInterval
+        BasicDicts['Y Maximum']['default']=np.max(yData)
+        BasicDicts['Y Minimum']['default']=np.min(yData)
+        
+        xInterval=calInterval(np.max(xData)-np.min(xData))
+        BasicDicts['X Tick Interval']['default']=xInterval
+        BasicDicts['X Tick Interval']['step']=xInterval
+        BasicDicts['X Maximum']['default']=len(xData)
+        
+        data=(xData, yData)
         
         if self.configPanel is None:
             self.configPanel=ConfigPanel(self.canvas, self)
@@ -171,37 +239,27 @@ class MplCanvas(FigureCanvas):
         
         self.axes.clear() 
         
-        xData=[]
-        yData=[]
-        opData=self.data
-        for i, (_, value) in enumerate(opData.items()):
-            xData.append(i)
-            yData.append(value['Best Objectives'])
-        
-        # yData=np.log(yData)
+        xData, yData=self.data
         
         ifInverse=self.hyper['ifInverse'] #TODO
         if ifInverse:
-            yData=-yData
+            yData=-1*np.array(yData)
 
-        min_value, max_value=min(yData), max(yData) #TODO
-        
-        yMaximum=self.hyper['yMax']
-        yMinimum=self.hyper['yMin']
-        
-        self.axes.set_ylim(min_value, max_value) 
-
+        def calRGBA(color):
+            return "#"+color[3:]+color[1:3]
+            
         markType=self.hyper['markType']
         everyMark=self.hyper['everyMark']
         markSize=self.hyper['markSize']
+        edgeWidth=self.hyper['edgeWidth']
         lineWidth=self.hyper['lineWidth']
         lineStyle=self.hyper['lineStyle']
-        lineColor=self.hyper['lineColor']
-        markFaceColor=self.hyper['markColor']
-        markEdgeColor=self.hyper['edgeColor']
+        lineColor=calRGBA(self.hyper['lineColor'])
+        markFaceColor=calRGBA(self.hyper['markColor'])
+        markEdgeColor=calRGBA(self.hyper['edgeColor'])
         labelName=self.hyper['labelName']
         self.axes.plot(xData, yData, marker=markType, markevery=everyMark, markeredgecolor=markEdgeColor, markerfacecolor=markFaceColor,
-                       markersize=markSize, linewidth=lineWidth, linestyle=lineStyle,
+                       markeredgewidth=edgeWidth, markersize=markSize, linewidth=lineWidth, linestyle=lineStyle,
                        color=lineColor, label=labelName)
         
         xLabel=self.hyper['xLabel']
@@ -225,8 +283,11 @@ class MplCanvas(FigureCanvas):
         
         plt.rcParams['axes.labelweight'] = 'bold'  # 
         
-        self.axes.set_xlim(0, len(xData))
-        self.axes.set_ylim(min_value, max_value)
+        yMaximum=self.hyper['yMax']
+        yMinimum=self.hyper['yMin']
+        xMaximum=self.hyper['xMax']
+        self.axes.set_xlim(0, xMaximum)
+        self.axes.set_ylim(yMinimum, yMaximum)
          
         xTickWidth=self.hyper['xTickWidth']
         xTickSize=self.hyper['xTickSize']
@@ -369,61 +430,12 @@ class ConfigPanel(FramelessDialog):
         setFont(title)
         self.titleBar.hBoxLayout.insertWidget(0, title)
         self.titleBar.hBoxLayout.setContentsMargins(20, 0, 0, 0)
-        
-        BasicDicts={ 'Figure Title' : { 'name' : 'figureTitle', 'type' : 'text', 'default' : 'Sensitivity Analysis Result'},
-                'Title Size' : { 'name' : 'titleSize', 'type' : 'int', 'default' : 16, 'range' : (8, 32), 'step' : 1},
-                'X Label Size' : { 'name' : 'xLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-                'X Label' : { 'name' : 'xLabel', 'type' : 'text', 'default' : 'Parameter'},
-                'Y Label Size' : { 'name' : 'yLabelSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-                'Y Label' : { 'name' : 'yLabel', 'type' : 'text', 'default' : 'Value'},
-                'Y Maximum' : { 'name' : 'yMax', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1e6), 'step' : 1},
-                'Y Minimum' : {'name' : 'yMin', 'type' : 'float', 'default' : 0.0, 'range' : (0.1, 1e6), 'step' : 1},
-                'X Tick Size' : {'name' : 'xTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-                'X Tick Width' : {'name' : 'xTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
-                'Y Tick Size' : {'name' : 'yTickSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-                'Y Tick Width' : {'name' : 'yTickWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
-                'Y Tick Length' : {'name' : 'yTickLength', 'type' : 'int', 'default' : 4, 'range' : (1, 20), 'step' : 1},
-                'Y Tick Interval' : {'name' : 'yTickInterval', 'type' : 'float', 'default' : 10, 'range' : (0.01, 1000), 'step' : 1},
-                'X Tick Interval' : {'name' : 'xTickInterval', 'type' : 'float', 'default' : 10, 'range' : (0.01, 1000), 'step' : 1},
-                'Legend Size' : { 'name' : 'legendSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-                'Box Width' : { 'name' : 'boxWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
-                'Width Ratio' : { 'name' : 'widthRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
-                'Height Ratio' : { 'name' : 'heightRatio', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.01},
-        }
-        
+       
         vMainLayout.addSpacing(5)
         basicPanel=SubPanel('Basic Setting', BasicDicts, self)
         self.panels.append(basicPanel)
         vMainLayout.addWidget(basicPanel)
-        
-        # barDicts={ 'Bar Width' : { 'name' : 'barWidth', 'type' : 'float', 'default' : 0.5, 'range' : (0.1, 1.0), 'step' : 0.1},
-        #            'Bar Spacing' : {'name' : 'barSpacing', 'type' : 'float', 'default' : 1.0, 'range' : (0.1, 1), 'step' : 0.1},
-        #            'Bar Color' : { 'name' : 'barColor', 'type' : 'color', 'default' : '#1f77b4', 'tooltip': 'click to select color'},
-        #            'Edge Width' : { 'name' : 'edgeWidth', 'type': 'int', 'default': 2, 'range' : (1, 8), 'step' : 1},
-        #            'Value Text' : { 'name' : 'ifValueText', 'type' : 'bool', 'default': 'True'},
-        #            'Text Size' : { 'name' : 'textSize', 'type' : 'int', 'default' : 12, 'range' : (8, 32), 'step' : 1},
-        #            'Normalize' : { 'name' : 'normalize', 'type' : 'bool', 'default' : 'False'},
-        #            'Bar Select' : { 'name' : 'barSelect', 'type' : 'object', 'default' : None, 'data': self.data, 'key': None},
-        #            'Bar Interval' : {'name' : 'ifBarInterval', 'type' : 'bool', 'default' : 'False'},
-        #            'Interval Width' : {'name' : 'intervalWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 8), 'step' : 1},
-        #            'Legend Label' : {'name' : 'legendLabel', 'type' : 'text', 'default' : 'MethodName'},
-        # }
-        
-        lineDict={
-                'Marker Type' : { 'name' : 'markType', 'type' : 'combox', 'items': ['.', 'o', 's', '^'], 'default' : 'o' },
-                'Marker Frequency' : { 'name' : 'everyMark', 'type' : 'float', 'default' : 0.01, 'range' : (0.00, 1.00), 'step' : 0.01},
-                'Marker Size' : { 'name' : 'markSize', 'type' : 'int', 'default' : 12, 'range' : (1, 32), 'step' : 1},
-                'Face Color' : { 'name' : 'markColor', 'type' : 'color', 'default' : '#1f77b4', 'tooltip': 'click to select color'},
-                'Edge Color' : { 'name' : 'edgeColor', 'type' : 'color', 'default' : '#1f77b4', 'tooltip': 'click to select color'},
-                'Line Width' : { 'name' : 'lineWidth', 'type' : 'int', 'default' : 2, 'range' : (1, 10), 'step' : 1},
-                'Line Style' : { 'name' : 'lineStyle', 'type' : 'combox', 'items': ['-', '--', '-.', '.'], 'default' : '-' },
-                'Line Color' : { 'name' : 'lineColor', 'type' : 'color', 'default' : '#1f77b4', 'tooltip': 'click to select color'},
-                'Label Name' : { 'name' : 'labelName', 'type' : 'text', 'default' : 'MethodName'},
-                'Grid' : { 'name' : 'ifGrid', 'type' : 'bool', 'default' : 'True'},
-                'Grid Width' : {'name' : 'gridWidth', 'type' : 'int', 'default' : 1, 'range' : (1, 10), 'step' : 1},
-                'Y Inverse' : {'name' : 'ifInverse', 'type' : 'bool', 'default' : 'False'}
-        } 
-        
+         
         barPanel=SubPanel('Bar Setting', lineDict, self)
         self.panels.append(barPanel)
         vMainLayout.addWidget(barPanel)
@@ -455,17 +467,11 @@ class ConfigPanel(FramelessDialog):
         
         self.close()
     
-    def showColorDialog(self):
-        
-        w=ColorDialog(self.color, "Choose color", self.window())
-        w.exec()
-        w.deleteLater()
-    
 class ColorDialog_(ColorDialog):
     
     colorEmit=pyqtSignal(str)
     
-    def __init__(self, color, title: str, parent=None, enableAlpha=False):
+    def __init__(self, color, title: str, parent=None, enableAlpha=True):
         super().__init__(color, title, parent, enableAlpha)
         self.yesButton.clicked.connect(lambda: self.colorEmit.emit(self.color.name()))
 
@@ -583,20 +589,15 @@ class SubPanel(QFrame):
         w=ColorDialog_(widget.color, "Choose color", self.window())
         res=w.exec()
         if res:
-            widget.color=w.color.name()
+            color=w.color
+            red_hex = format(color.red(), '02X')
+            green_hex = format(color.green(), '02X')
+            blue_hex = format(color.blue(), '02X')
+            alpha_hex = format(color.alpha(), '02X')
+            full_hex_color = f"#{alpha_hex}{red_hex}{green_hex}{blue_hex}"
+            widget.color=full_hex_color
             widget.setColor(widget.color)
-    
-    # def showBarSelector(self):
-        
-    #     widget=self.sender()
-    #     key=widget.property('key')
-        
-    #     w=BarSelector(self.parent().data, key, self.window())
-    #     res=w.exec()
-
-    #     if res:
-    #         widget.setProperty('key', w.keys)
-            
+          
     def getValue(self):
         
         hyper={}
