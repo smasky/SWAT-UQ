@@ -53,7 +53,7 @@ class ParaTable(QFrame):
             str('Lower Bound'), str('Upper Bound'), str('Position'), str('Operation')])
         
         
-        hBoxLayout=QHBoxLayout();
+        hBoxLayout=QHBoxLayout()
         importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40); 
         self.importButton=importButton; self.importButton.clicked.connect(self.importParaFile)
         setFont(importButton)

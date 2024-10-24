@@ -12,6 +12,7 @@ from .para_setting import ParaSetting
 from .pro_define import ProDefine
 from .sensitivity_analysis import SenAnalysis
 from .optimization import Optimization
+from .validation import Validation
 from .project import Project as Pro
 from .displayA import DisplayWidgetA
 from .displayB import DisplayWidgetB
@@ -41,12 +42,14 @@ class MainWindow(FluentWindow):
         self.optimization = Optimization(self)
         self.optimization.setObjectName("Optimization")
         
+        self.validation = Validation(self)
+        self.validation.setObjectName("Validation")
+        
         self.displayA = DisplayWidgetA(self)
         self.displayA.setObjectName("DisplayA")
         
         self.displayB = DisplayWidgetB(self)
         self.displayB.setObjectName("DisplayB")
-        
         
         self.initNavigation()
         
@@ -68,11 +71,12 @@ class MainWindow(FluentWindow):
         
         Pro.btnSets.append(self.addSubInterface(self.sen_analysis, FIF.CALENDAR, self.tr('Sensitivity Analysis')))
         Pro.btnSets.append(self.addSubInterface(self.optimization, FIF.ALBUM, self.tr('Problem Optimization')))
+        Pro.btnSets.append(self.addSubInterface(self.validation, FIF.BUS, self.tr('Result Validation & Apply')))
         
         self.navigationInterface.addSeparator()
         
-        Pro.btnSets.append(self.addSubInterface(self.displayA, FIF.LAYOUT, self.tr('Result Visualization A')))
-        Pro.btnSets.append(self.addSubInterface(self.displayB, FIF.LAYOUT, self.tr('Result Visualization B')))
+        Pro.btnSets.append(self.addSubInterface(self.displayA, FIF.LAYOUT, self.tr('Visualization A')))
+        Pro.btnSets.append(self.addSubInterface(self.displayB, FIF.LAYOUT, self.tr('Visualization B')))
         
         for btn in Pro.btnSets:
             setFont(btn, 16)
@@ -92,6 +96,3 @@ class MainWindow(FluentWindow):
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w//2 - self.width()//2, h//2 - self.height()//2)
-        
-    
-        

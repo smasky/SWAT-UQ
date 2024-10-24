@@ -139,7 +139,6 @@ class DoubleTreeWidget(QWidget):
         for child in children:
             childItem = QTreeWidgetItem(parent, [child])
             childItem.setFont(0, getFont(16))
-            
             childItem.setFlags(childItem.flags() | Qt.ItemIsUserCheckable)
             childItem.setCheckState(0, Qt.Unchecked)
 
