@@ -23,19 +23,19 @@ class Validation(ScrollArea):
         banner=BannerWidget(self)
         with path(GUI.picture, "header4.png") as header_path:
             banner.setPixmap(str(header_path))
+            
         banner.setTitle("Result Validation & Apply")
         vBoxLayout.addWidget(banner)
         
         self.validation=ValidationWidget(self)
-        # self.table=ObjTable(self)
-        
+
         banner.vBoxLayout.addWidget(self.validation)
         
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
         
         self.setWidgetResizable(True)
         
-        with path(GUI.qss, "problem_define.qss") as qss_path:
+        with path(GUI.qss, "validation.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
     

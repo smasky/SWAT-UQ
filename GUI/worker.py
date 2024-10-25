@@ -683,6 +683,54 @@ class RunWorker(QObject):
             for future in as_completed(futures):
                 res=future.result()
     
+    def singleEvaluate(self, x):
+        
+        x=x.ravel()
+        if not self.stop:
+            workPath=self.workPath.get()
+            self.setValues(workPath, x)
+            
+            process= subprocess.Popen(
+                os.path.join(workPath, self.swatExe),
+                cwd=workPath,
+                stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE,
+                text=True)
+            process.wait()
+
+            objs=[]
+            data=[]
+            for obj, series in self.objInfos.items():
+                
+                vObj=0
+                subData=[]
+                for ser in series:
+                
+                    reachID=ser['reachID']
+                    readLines=ser['readLines']
+                    varType=ser['varType']
+                    objType=ser['objType']
+                    weight=ser['weight']
+                    
+                    simValueList=[]
+                    for line in readLines:
+                        
+                        startLine, endLine=line[0], line[1]
+                        subValue=np.array(read_simulation(os.path.join(workPath, "output.rch"), self.VAR_COL[varType] , reachID, self.nRch, startLine, endLine))
+                        simValueList.append(subValue)
+                
+                    simValue=np.concatenate(simValueList, axis=0)
+                    obValue=ser['dataList']
+                    vObj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
+                    subData.append((obValue, simValue))
+                    
+                objs.append(vObj)
+                data.append(subData)
+
+            self.workPath.put(workPath)
+            return objs, data
+        
     def evaluate(self, X):
     
         n = X.shape[0]

@@ -410,7 +410,6 @@ class SimulationWidget(QWidget):
         v.addLayout(h2); v.addLayout(h1)
         
         vBoxLayout.addLayout(v)
-        # vBoxLayout.addSpacing(10)
 
         ##############################
         formLayout=QFormLayout()
@@ -440,11 +439,13 @@ class SimulationWidget(QWidget):
         formLayout.addRow(self.label2, self.parallelEdit)
         
         vBoxLayout.addLayout(formLayout)
+        
         #################Verbose################
+        
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=8)  # 或者使用 "Courier New"
-        font.setStyleHint(QFont.Monospace)  # 确保字体为等宽字体
+        font = QFont("Consolas", pointSize=8)
+        font.setStyleHint(QFont.Monospace) 
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         h.addSpacing(10); h.addWidget(self.verbose); h.addSpacing(10)
@@ -491,6 +492,7 @@ class SimulationWidget(QWidget):
         self.swatEdit.setCurrentIndex(0)
         
     def swatChanged(self):
+        
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
     
     def initialize(self):
@@ -500,6 +502,7 @@ class SimulationWidget(QWidget):
         
         numParallel=int(self.parallelEdit.value())
         Pro.projectInfos['numParallel']=numParallel
+        Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
         
         self.swatEdit.setEnabled(False)
         self.parallelEdit.setEnabled(False)

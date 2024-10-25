@@ -472,6 +472,7 @@ class OptimizationWidget(QWidget):
         
         numParallel=int(self.parallelEdit.value())
         Pro.projectInfos['numParallel']=numParallel
+        Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
         
         self.swatEdit.setEnabled(False)
         self.parallelEdit.setEnabled(False)

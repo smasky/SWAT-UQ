@@ -305,7 +305,16 @@ class Project:
             cls.showError(f"Sampling failed, please check the hyperparameters!\n The error is {e}")
             
             return False
-            
+    
+    @classmethod
+    def singleSim(cls, x):
+        
+        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
+        objs, data=cls.worker.singleEvaluate(x)
+        
+        return objs, data
+    
+    
     @classmethod 
     def simulation(cls, processBar, statistics, finish, unfinish):
         
