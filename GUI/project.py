@@ -5,7 +5,7 @@ import sys
 import h5py
 from datetime import datetime
 from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
-                    VerboseWorker, RunWorker, EvaluateThread)
+                    VerboseWorker, RunWorker, EvaluateThread, SingleEvaluateThread)
 #C++ Module
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random, Saltelli_Sequence
@@ -75,6 +75,7 @@ class Project:
     
     window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
     problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None; OPResult=None
+    ValResult=None
     
     btnSets=[]
     @classmethod
@@ -307,12 +308,21 @@ class Project:
             return False
     
     @classmethod
-    def singleSim(cls, x):
+    def singleSim(cls, x, finish):
+        
         
         cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
-        objs, data=cls.worker.singleEvaluate(x)
+        cls.thread=SingleEvaluateThread(cls.worker, x)
         
-        return objs, data
+        
+        def accept(res):
+            
+            cls.ValResult=res
+        
+        cls.worker.result.connect(accept)
+        cls.worker.result.connect(finish)
+        cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.thread.start()
     
     
     @classmethod 
@@ -374,6 +384,7 @@ class Project:
         
         initHyper['verboseFreq']=1
         initHyper['verbose']=True
+        initHyper['saveFlag']=True
         
         optimizer=eval(opClass)(**initHyper)
         

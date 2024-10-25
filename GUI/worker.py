@@ -405,6 +405,7 @@ class InitWorker(QObject):
             for serID, ser in temp.items():
                 readLines=[]
                 dataList=[]
+                timeList=[]
                 for s in ser:
                     observeData=s['observeData']
                     beginIndex=observeData[0][0]
@@ -412,7 +413,10 @@ class InitWorker(QObject):
                     lines=self._generate_data_lines(beginIndex, endIndex, modelInfos)
                     readLines+=lines
                     dataList.append(np.array(observeData)[:, 4])
+                    timeList.append(np.array(observeData, dtype=np.int32)[:, 1:4])
+                    
                 s['dataList']=np.concatenate(dataList, axis=0) #TODO
+                s['timeList']=np.concatenate(timeList, axis=0)
                 s['readLines']=readLines
                 infos[objID].append(s)
             
@@ -700,13 +704,14 @@ class RunWorker(QObject):
             process.wait()
 
             objs=[]
-            data=[]
+            simData={}
             for obj, series in self.objInfos.items():
                 
                 vObj=0
-                subData=[]
-                for ser in series:
+                simData.setdefault(obj, [])
                 
+                for ser in series:
+                    
                     reachID=ser['reachID']
                     readLines=ser['readLines']
                     varType=ser['varType']
@@ -723,14 +728,15 @@ class RunWorker(QObject):
                     simValue=np.concatenate(simValueList, axis=0)
                     obValue=ser['dataList']
                     vObj+=weight*self.OBJTYPE_FUNC[objType](obValue, simValue)
-                    subData.append((obValue, simValue))
+                    
+                    simData[obj].append(simValue)
                     
                 objs.append(vObj)
-                data.append(subData)
 
             self.workPath.put(workPath)
-            return objs, data
-        
+            
+            self.result.emit((objs, simData))
+            
     def evaluate(self, X):
     
         n = X.shape[0]
@@ -766,6 +772,17 @@ class EvaluateThread(QThread):
 
     def run(self):
         self.worker.evaluate(self.X)
+
+class SingleEvaluateThread(QThread):
+    
+    def __init__(self, worker, x):
+        super().__init__()
+        self.worker = worker
+        self.x = x
+    
+    def run(self):
+        
+        self.worker.singleEvaluate(self.x)
 
 class OptimizeThread(QThread):
     

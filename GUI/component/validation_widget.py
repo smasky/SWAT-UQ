@@ -1,8 +1,17 @@
 
 from typing import List
 from PyQt5.QtWidgets import QHeaderView, QTableWidgetItem, QFrame, QWidget,QFormLayout, QGridLayout, QVBoxLayout, QHBoxLayout, QSizePolicy, QTreeWidgetItem
+from PyQt5.QtWidgets import QApplication
 
 from qfluentwidgets import TextEdit, TableWidget, BodyLabel, PrimaryPushButton, FluentStyleSheet, getStyleSheet, TreeWidget
+from qframelesswindow import FramelessDialog
+
+from datetime import datetime
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.ticker import MultipleLocator
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 import os
 import numpy as np
@@ -11,8 +20,8 @@ from .combox_ import ComboBox
 # from .tree_widget import TreeWidget_ as TreeWidget
 from ..project import Project as Pro
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont
-
+from PyQt5.QtGui import QFont, QTextCursor, QTextCharFormat, QFont
+import matplotlib.dates as mdates
 class ValidationWidget(QFrame):
     
     def __init__(self, parent=None):
@@ -144,11 +153,11 @@ class ValidationWidget(QFrame):
                                     background-color: rgba(249, 249, 249, 0.75);
                                 }
                            """)
-
         #connect
         self.leftTreeWidget.itemIndex.connect(self.setDecsToTable)
         self.applyBtn.clicked.connect(self.apply)
         self.simBtn.clicked.connect(self.simulate)
+        self.visualBtn.clicked.connect(self.visualize)
     
     def dynamicShowSwat(self):
         
@@ -199,6 +208,7 @@ class ValidationWidget(QFrame):
             
             description=f"Objs: {text_objs} | Decs: {text_decs}"
             self.leftTreeWidget.addItem_(key, description)
+            
         self.leftTreeWidget.scrollToBottom()
         
         paraFile=self.paraFileBox.currentText()
@@ -242,22 +252,49 @@ class ValidationWidget(QFrame):
         
         decs=self.data[index]
         self.table.setColValue(decs)
-        self.decs=np.array(decs).reshape(1, -1)
         
         if self.applyBtn.isEnabled()==False:
             self.applyBtn.setEnabled(True)
         
     def apply(self):
         
+        self.verbose.clear()
+        
         Pro.initProject(self.verbose, self.simBtn)
+        
+        self.applyBtn.setEnabled(False)
         
     def simulate(self):
         
-        objs, data=Pro.singleSim(self.decs)
+        def finish():
+            
+            self.verbose.append("The objective values are: ")
+            
+            objs, simData=Pro.ValResult
+            
+            self.data=simData
+            
+            for i, (ID, _) in enumerate(Pro.objInfos.items()):
+                
+                self.verbose.append(f"obj {ID}: {objs[i]:.4f} ")
+
+            self.verbose.append(f"The validation scheme has been saved to: {Pro.projectInfos['tempPath']}")
+            self.verbose.append("For detail, please click the 'Visualize' button.")
+
+            self.visualBtn.setEnabled(True)
         
-        a=1
-    
-    
+        self.verbose.append("Simulating. Please wait....")
+        
+        decs=self.table.getValues()
+        Pro.singleSim(decs, finish)
+        self.applyBtn.setEnabled(False)
+        self.simBtn.setEnabled(False)
+
+    def visualize(self):
+        
+        dialog=VisualizeWidget(self)
+        
+        dialog.show()
     
 class TreeWidgetVal(TreeWidget):
     
@@ -308,6 +345,55 @@ class TreeWidgetVal(TreeWidget):
         index=self.indexOfTopLevelItem(item)
         
         self.itemIndex.emit(index)
+
+class TreeWidgetObj(TreeWidget):
+    
+    selected=pyqtSignal(tuple)
+    
+    def __init__(self, parent=None):
+        
+        super().__init__(parent)
+        self.initUI()
+        self.setFixedWidth(200)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.itemClicked.connect(self.onItemClicked)
+        self.lastCheckedItem=None
+        
+    def initUI(self):
+        
+        self.setHeaderLabels(["Objective"])
+        qss=getStyleSheet(FluentStyleSheet.TREE_VIEW)
+        qss=substitute(qss, {'QHeaderView::section':{'font': " 18px 'Segoe UI', 'Microsoft YaHei'", 'font-weight': '500'}})
+        self.setStyleSheet(qss)
+        self.header().setStyleSheet("QHeaderView::section { color: black; }")
+
+    def addItems_(self, infos):
+        
+        for ID, series in infos.items():
+            iterItems = QTreeWidgetItem(self, [f"Obj {ID}"])
+            iterItems.setFont(0, getFont(16, Medium))
+            
+            for i, ser in enumerate(series):
+                serID=ser['serID']
+                iterItems = QTreeWidgetItem(iterItems, [f"Series {serID}"])
+                iterItems.setFont(0, getFont(16, Medium))
+                iterItems.setFlags(iterItems.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
+                iterItems.setCheckState(0, Qt.Unchecked)
+                iterItems.setData(0, Qt.UserRole, (ID, i))
+
+        self.expandAll()
+    
+    def onItemClicked(self, item, col):
+        
+        index=item.data(col, Qt.UserRole)
+        self.selected.emit(index)
+        
+        if self.lastCheckedItem and self.lastCheckedItem is not item:
+            self.lastCheckedItem.setCheckState(0, Qt.Unchecked) 
+        
+        item.setCheckState(0, Qt.Checked)
+        self.lastCheckedItem = item 
+        
     
 class TableWidgetVal(TableWidget):
     
@@ -364,7 +450,123 @@ class TableWidgetVal(TableWidget):
             setFont(item)
 
             self.setItem(i, 6, item)
+    
+    def getValues(self):
+        
+         return np.array([float(self.item(i, 6).text()) for i in range(self.rowCount())]).ravel()
 
+class VisualizeWidget(FramelessDialog):    
+        
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        vMainLayout=QVBoxLayout(self)
+        vMainLayout.setContentsMargins(0, 32, 0, 0)
+        
+        title=BodyLabel("Visual Validation", self)
+        
+        setFont(title)
+        
+        self.titleBar.hBoxLayout.insertWidget(0, title)
+        self.titleBar.hBoxLayout.insertSpacing(0, 20)
+        
+        h=QHBoxLayout()
+        self.treeWidget=TreeWidgetObj(self)
+        self.treeWidget.addItems_(Pro.objInfos)
+        
+        self.canvas=MplCanvas(width=16, height=9, dpi=300)
+       
+        h.addWidget(self.treeWidget)
+        h.addWidget(self.canvas)
+        
+        vMainLayout.addLayout(h)
+        vMainLayout.addStretch(1)
+        
+        self.setFixedSize(1200, 700)
+        
+        #connect
+        self.treeWidget.selected.connect(self.plotPic)
+    
+    def plotPic(self, index):
+        
+        objID, serInd=index
+        self.canvas.plotPic(objID, serInd, self.parent().data)
+        
+
+    def show(self):
+        
+        super().show()
         
         
+class MplCanvas(FigureCanvas):
+    
+    def __init__(self, width=16, height=9, dpi=300):
         
+        self.saveDpi=dpi
+        self.originDpi=100
+        self.fig = Figure(figsize=(width, height), dpi=self.originDpi)
+        self.axes = self.fig.add_subplot(111)
+        super(MplCanvas, self).__init__(self.fig)
+        self.clear_plot()
+        
+    def plotPic(self, objID, serID, simData):
+        
+        self.show_plot()
+        objInfos=Pro.objInfos
+        
+        timeLists=objInfos[objID][serID]['timeList']
+        dataList=objInfos[objID][serID]['dataList']
+        s=simData[objID][serID]
+        dates = [datetime(year, month, day).date() for year, month, day in timeLists]
+        
+                # 绘制数据
+        
+        if dates[0].month not in [4, 8, 12]:
+            xticks=[dates[0]]
+        else:
+            xticks=[]
+        xticks+=self.generate_xticks(dates)
+        
+        if dates[-1].month not in [4, 8, 12]:
+            xticks.append(dates[-1])
+        
+        
+        self.axes.set_ylim(np.min(dataList), np.max(dataList))
+        self.axes.plot(dates, dataList, marker='o', linestyle='-', markersize=2, label="observe")  # 点状标记和实线
+        self.axes.plot(dates, s, marker='o', linestyle='--', markersize=2, label="simulation")  # 点状标记和虚线
+        self.axes.set_title('Detailed Flow Data')
+        self.axes.set_xlabel('Date')
+        self.axes.set_ylabel('Flow (units)')
+        
+        self.axes.xaxis.set_major_locator(mdates.DayLocator())
+        self.axes.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        self.axes.legend()
+        self.axes.set_xticks(xticks)
+        self.fig.autofmt_xdate()
+        self.fig.tight_layout()
+        self.draw()
+    
+    def generate_xticks(self, dates):
+        
+        xticks = []
+        for date in dates:
+            if date.month in [4, 8, 12] and date.day == 1:
+                xticks.append(date)
+        return xticks 
+    
+    def clear_plot(self):
+        
+        self.axes.clear()
+        self.axes.set_xticks([])
+        self.axes.set_yticks([])
+        for spine in self.axes.spines.values():
+            spine.set_visible(False)
+        
+        self.figure.canvas.draw_idle()
+    
+    def show_plot(self):
+        
+        self.axes.clear()
+        for spine in self.axes.spines.values():
+            spine.set_visible(True)
+        self.figure.canvas.draw_idle()    
