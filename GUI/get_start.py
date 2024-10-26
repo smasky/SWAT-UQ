@@ -1,8 +1,8 @@
-from qfluentwidgets import (ScrollArea, FluentIcon, Dialog, InfoBar, getFont, setFont,
+from qfluentwidgets import (ScrollArea, FluentIcon, Dialog, getFont, setFont,
                             InfoBarPosition, MessageBoxBase, SubtitleLabel,
                             BodyLabel,)
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from PyQt5.QtCore import Qt, QUrl, pyqtSignal
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal, QTimer
 from PyQt5.QtGui import QDesktopServices, QFont
 from importlib.resources import path
 
@@ -10,6 +10,7 @@ import os
 import GUI.qss
 import GUI.picture
 from .component import BannerWidget, NewProject, OpenProject, LinkCardView
+from .component.info_bar import InfoBar_ as InfoBar, InfoBarPosition
 from .project import Project
 class GetStart(ScrollArea):
     
@@ -61,7 +62,9 @@ class GetStart(ScrollArea):
                 self.setStyleSheet(f.read())
         
         self.setWidgetResizable(True)
-    
+
+        Project.window=self
+        
     def click_new_project(self):
         
         if Project.projectInfos:
@@ -70,6 +73,7 @@ class GetStart(ScrollArea):
             dialog.show()
         
         else:
+            
             self.click_new_project_()
     
     def click_new_project_(self):
@@ -80,17 +84,22 @@ class GetStart(ScrollArea):
         if res==Dialog.Accepted:
             
             if not newPro.ifOpenExistingProject:
+                
                 info=InfoBar.success(
                 title=self.tr('Create Project'),
                 content=self.tr("Loading and checking model, please wait..."),
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP_RIGHT,
-                duration=20000,
+                duration=10000,
                 parent=self
                 )
                 
-                Project.openProject(newPro.projectName, newPro.projectPath, newPro.swatPath, info.close, self.activateBtn)
+                def close(time):
+                    
+                    QTimer.singleShot(time, info.close)
+                    
+                Project.openProject(newPro.projectName, newPro.projectPath, newPro.swatPath, close, self.activateBtn) #TODO
                 
             else:
                 
@@ -100,13 +109,17 @@ class GetStart(ScrollArea):
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP_RIGHT,
-                duration=20000,
+                duration=10000,
                 parent=self
                 )
                 
+                def close(time):
+                    
+                    QTimer.singleShot(time, info.close)
+                
                 dict=self.readFiles(newPro.projectPath)
-                Project.window=self
-                Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], info.close, self.activateBtn)
+                
+                Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], close, self.activateBtn)
 
     def readFiles(self, path):
         
@@ -141,6 +154,7 @@ class GetStart(ScrollArea):
         res=openPro.exec()
         
         if res:
+            
             if openPro.projectFile==None:
                 InfoBar.error(
                     title=self.tr('Error'),
@@ -148,27 +162,32 @@ class GetStart(ScrollArea):
                     orient=Qt.Horizontal,
                     isClosable=True,
                     position=InfoBarPosition.TOP_RIGHT,
-                    duration=20000,
+                    duration=10000,
                     parent=self
                 )
 
                 return
+            
             info=InfoBar.success(
                     title=self.tr('Open Project'),
                     content=self.tr("Loading and checking model files, please wait..."),
                     orient=Qt.Horizontal,
                     isClosable=True,
                     position=InfoBarPosition.TOP_RIGHT,
-                    duration=20000,
+                    duration=10000,
                     parent=self
                 )
+            
+            def close(time):
+                    
+                QTimer.singleShot(time, info.close)
             
             projectFile=openPro.projectFile
             projectPath=openPro.projectPath
             dict=self.readFiles(os.path.join(projectPath, projectFile))
             
             Project.window=self
-            Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], info.close, self.activateBtn)
+            Project.openProject(dict['projectName'], dict['projectPath'], dict['swatPath'], close, self.activateBtn)
             
     def click_examples(self):
         
@@ -181,8 +200,9 @@ class GetStart(ScrollArea):
         QDesktopServices.openUrl(url)
         
     def activateBtn(self):
-        
+        #TODO
         btnSets=Project.btnSets
+        
         for btn in btnSets[1:]:
             btn.setEnabled(True)
 

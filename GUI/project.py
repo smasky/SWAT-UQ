@@ -20,8 +20,9 @@ from .component.info_bar import InfoBar_ as InfoBar, InfoBarPosition
 class Project:
 
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
-    INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
-    INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
+    INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'PBIAS', 4: 'KGE', 5: 'SUM', 6: 'MEAN'}; OBJTYPE_INT={'NSE': 0, 'RMSE': 1, 'PCC': 2, 'PBIAS': 3, 'KGE': 4, 'SUM': 5, 'MEAN': 6}
+    INT_VAR={0: 'FLOW', 1: 'ORGN', 2: 'ORGP', 3: 'NO3', 4: 'NH4', 5: 'NO2', 6: 'TOTN', 7: 'TOTP'}
+    VAR_INT={'FLOW': 0, 'ORGN': 1, 'ORGP': 2, 'NO3': 3, 'NH4': 4, 'NO2': 5, 'TOTN': 6, 'TOTP': 7}
     
     SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
     SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Saltelli Sequence': 'Saltelli_Sequence'}
@@ -78,9 +79,12 @@ class Project:
     ValResult=None
     
     btnSets=[]
+    
     @classmethod
     def openProject(cls, projectName, projectPath, swatPath, close, activate):
+        
         try:
+            
             projectInfos={}
             projectInfos['projectName']=projectName
             projectInfos['projectPath']=projectPath
@@ -89,33 +93,46 @@ class Project:
             
             projectFile=f"{projectName}.prj"
             
-            with open(os.path.join(projectPath, projectFile), 'w') as f:
-                f.write(f"projectName: {projectName}\n")
-                f.write(f"projectPath: {projectInfos['projectPath']}\n")
-                f.write(f"swatPath: {projectInfos['swatPath']}\n")
-                f.write(f"tempPath: {projectInfos['tempPath']}\n")
-            
             cls.projectInfos=projectInfos
             
         except Exception as e:
             
             cls.showError("Some errors occur in project file, please check!")
-
+            close(500)
+            
             return
-        cls.loadModel(close, activate)
+        
+        def writeProjectFile():
+            
+            with open(os.path.join(projectPath, projectFile), 'w') as f:
+                        
+                f.write(f"projectName: {projectName}\n")
+                f.write(f"projectPath: {projectInfos['projectPath']}\n")
+                f.write(f"swatPath: {projectInfos['swatPath']}\n")
+                f.write(f"tempPath: {projectInfos['tempPath']}\n")
+
+        cls.loadModel(close, activate, writeProjectFile)
+        
+            
 
     @classmethod
-    def loadModel(cls, close, activate):
+    def loadModel(cls, close, activate, writeProjectFile):
         
         cls.worker=InitWorker()
+        
         cls.thread=NewThread(cls.worker, cls.projectInfos)
         
         def accept():
+            
             cls.modelInfos=cls.thread.modelInfos
-            close()
+            close(2000)
             activate()
-        
+            writeProjectFile()
+            
         def reject(error):
+            
+            close(500)
+            cls.projectInfos=None
             cls.showError(error)
         
         cls.thread.accept.connect(accept)
@@ -206,11 +223,19 @@ class Project:
     @classmethod
     def importParaFromFile(cls, path):
         
-        infos=[]
-        worker=ReadWorker()
-        infos=worker.readParaFile(path, cls.modelInfos)
+        try:
+        
+            infos=[]
+            worker=ReadWorker()
+            infos=worker.readParaFile(path, cls.modelInfos)
+        
+        except Exception as e:
+            
+            cls.showError("There are some error in parameter file, please check!")
+        
+        finally:
                 
-        return infos
+            return infos
     
     @classmethod
     def saveParaFile(cls, infos, path):
@@ -495,6 +520,7 @@ class Project:
         
         
         for hyper in saHyper:
+            
             name=hyper['name']
             func=hyper['method']
             value=hyper['value']
@@ -520,6 +546,7 @@ class Project:
         
         initHyper['verbose']=True
         initHyper['saveFlag']=True
+        
         sa=eval(saClass)(**initHyper)
         
         analyzeHyper['X']=cls.SAResult['X']
@@ -529,10 +556,13 @@ class Project:
         lb=cls.problemInfos['lb']
         nInput=cls.problemInfos['nInput']
         xLabels=cls.problemInfos['xLabels']
-        problem=PracticalProblem(None, nInput, 1, ub, lb, x_labels=xLabels)
+        
+        problem=PracticalProblem(None, nInput, 1, ub, lb, x_labels=xLabels, name=cls.problemInfos['name'])
         
         verbose=[]
+        
         def write_verbose(text):
+            
             verbose.append(text)
         
         def flush():
@@ -557,7 +587,7 @@ class Project:
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP_RIGHT,
-                duration=20000,
+                duration=10000,
                 parent=cls.window
                 )
     

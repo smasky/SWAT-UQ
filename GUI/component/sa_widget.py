@@ -415,28 +415,38 @@ class SimulationWidget(QWidget):
         formLayout=QFormLayout()
         formLayout.setContentsMargins(20, 0, 0, 0)
         formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        self.label=BodyLabel("SWAT Execution:")
-        self.label.setMinimumWidth(100)
-        setFont(self.label)
+        label=BodyLabel("SWAT Execution:")
+        label.setMinimumWidth(100)
+        setFont(label)
         
         self.swatEdit=ComboBox(self)
-        self.swatEdit.setMaximumWidth(200)
+        self.swatEdit.setMaximumWidth(400)
         self.swatEdit._showComboMenu=self.dynamicShowExe
         setFont(self.swatEdit, MediumSize, Normal)
         self.swatEdit.currentIndexChanged.connect(self.swatChanged)
         
-        formLayout.addRow(self.label, self.swatEdit)
+        formLayout.addRow(label, self.swatEdit)
         
         ##################################
 
-        self.label2=BodyLabel("SWAT Parallel:")
-        self.label2.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(self.label2)
+        label=BodyLabel("SWAT Parallel:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
         
         self.parallelEdit=SpinBox(self); self.parallelEdit.setValue(1)
         setFont(self.parallelEdit, MediumSize, Normal)
-        self.parallelEdit.setMaximumWidth(200)
-        formLayout.addRow(self.label2, self.parallelEdit)
+        self.parallelEdit.setMaximumWidth(400)
+        formLayout.addRow(label, self.parallelEdit)
+        
+        label=BodyLabel("Problem Name:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        self.problemEdit=LineEdit(self)
+        setFont(self.problemEdit, MediumSize, Normal)
+        self.problemEdit.setMaximumWidth(400)
+        
+        formLayout.addRow(label, self.problemEdit)
+        
         
         vBoxLayout.addLayout(formLayout)
         
@@ -444,7 +454,7 @@ class SimulationWidget(QWidget):
         
         h=QHBoxLayout()
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=8)
+        font = QFont("Consolas", pointSize=12)
         font.setStyleHint(QFont.Monospace) 
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -488,8 +498,10 @@ class SimulationWidget(QWidget):
         self.processBar.setValue(0)
         
     def updateUI(self):
+        
         self.swatEdit.addItems(Pro.findSwatExe())
         self.swatEdit.setCurrentIndex(0)
+        self.problemEdit.setText(Pro.projectInfos['projectName'])
         
     def swatChanged(self):
         
@@ -501,17 +513,20 @@ class SimulationWidget(QWidget):
         Verbose.total_width=self.verbose.document().idealWidth()
         
         numParallel=int(self.parallelEdit.value())
+        
         Pro.projectInfos['numParallel']=numParallel
         Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
         
         self.swatEdit.setEnabled(False)
         self.parallelEdit.setEnabled(False)
-        
         self.initializeBtn.setEnabled(False)
+        self.problemEdit.setEnabled(False)
         
         Pro.initProject(self.verbose, self.samplingBtn)
         
     def sampling(self):
+        
+        Pro.problemInfos['name']=self.problemEdit.text()
         
         success=Pro.sampling()
         
@@ -537,6 +552,10 @@ class SimulationWidget(QWidget):
         self.processBar.setValue(0)
         self.statistics.setText("NA/NA FEs")
         self.verbose.append("Simulation has been canceled by user.\n")
+        
+        self.swatEdit.setEnabled(True)
+        self.parallelEdit.setEnabled(True)
+        self.problemEdit.setEnabled(True)
     
     def cancel(self):
 
@@ -555,7 +574,7 @@ class AnalysisWidget(QWidget):
         vBoxLayout=QVBoxLayout(self)
         
         self.textWidget=TextEdit(self); self.textWidget.setReadOnly(True)
-        font = QFont("Consolas", pointSize=8)  
+        font = QFont("Consolas", pointSize=12)  
         font.setStyleHint(QFont.Monospace) 
         self.textWidget.setFont(font)
         vBoxLayout.addWidget(self.textWidget)
@@ -567,10 +586,7 @@ class AnalysisWidget(QWidget):
         self.executeBtn=PrimaryPushButton("Execute Analysis")
         self.executeBtn.clicked.connect(self.execute)
         setFont(self.executeBtn)
-        # self.saveBtn=PrimaryPushButton("Save Result")
-        # setFont(self.saveBtn)
-        # self.saveBtn.clicked.connect(self.save)
-        
+
         h.addStretch(1); h.addWidget(self.executeBtn); h.addSpacing(20);  h.addStretch(1)
         vBoxLayout.addWidget(self.btnWidget)
         
@@ -593,6 +609,4 @@ class AnalysisWidget(QWidget):
         
         self.textWidget.append("Sensibility Analysis is running ... \n")
         
-        Pro.sensibility_analysis(self.textWidget)
-        
-        
+        Pro.sensibility_analysis(self.textWidget)   

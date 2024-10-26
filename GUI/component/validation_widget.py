@@ -475,7 +475,8 @@ class VisualizeWidget(FramelessDialog):
         self.treeWidget.addItems_(Pro.objInfos)
         
         self.canvas=MplCanvas(width=16, height=9, dpi=300)
-       
+
+        h.setContentsMargins(10, 0, 0, 0)
         h.addWidget(self.treeWidget)
         h.addWidget(self.canvas)
         

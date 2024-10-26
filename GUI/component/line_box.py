@@ -13,24 +13,42 @@ class LineBox(LineEdit):
         self.data=None
         self.isSelected = False
         self.setPlaceholderText("all or click to change")
+        self.setToolTip("") 
+        if isinstance(rightOptions, dict) and 'all' in rightOptions:
+            self.rightOptions=[]
+    
+    def enterEvent(self, event):
         
+        self.setToolTip(self.text())
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        
+        self.setToolTip("") 
+        super().leaveEvent(event)
+    
     def focusInEvent(self, event):
-        """当 QLineEdit 获得焦点时显示 QComboBox 并展开"""
-        # super().focusInEvent(event)
+        
         if self.isSelected is False:
+            
             self.isSelected=True
             
             dialog=PositionWidget(self.leftOptions, self.rightOptions, self.data, self)
             res=dialog.exec()
             
             if res==Dialog.Accepted:
+                
                 if dialog.isAll or len(dialog.selected)==0:
                     self.setText("all")
+                    
                 else:
+                    
                     text=self.generateText(dialog.selected)
                     self.setText(text)
                     text=self.text()
+                    
             self.isSelected=False
+            
             self.clearFocus()
       
     def generateText(self, selected):

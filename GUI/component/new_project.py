@@ -12,9 +12,11 @@ from PyQt5.QtGui import QFont
 from .utility import getFont, setFont, Normal, MediumSize, substitute
 from .combox_ import ComboBox_
 class NewProject(FramelessDialog):
+    
     projectName=None
     projectPath=None
     swatPath=None
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -89,6 +91,7 @@ class NewProject(FramelessDialog):
         full_files=glob.glob(os.path.join(self.projectPath, "*.prj"))
         files = [os.path.basename(file) for file in full_files]
         self.ifOpenExistingProject=False
+        
         if files:
             dialog=AskForExistingProject(files, self.window())
             res=dialog.exec()

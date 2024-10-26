@@ -170,7 +170,7 @@ class AddProWidget(FramelessDialog):
         
         self.dataTable.horizontalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; }}")
         self.dataTable.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
-        self.dataTable.verticalHeader().setFixedWidth(30)
+        self.dataTable.verticalHeader().setFixedWidth(40)
         
         vBoxLayout.addWidget(self.dataTable)
         

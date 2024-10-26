@@ -1,14 +1,16 @@
 from qframelesswindow import FramelessDialog
 from qfluentwidgets import (BodyLabel, PushButton, LineEdit, PrimaryToolButton, SubtitleLabel,
                             FluentIcon, PrimaryPushButton, MessageBoxBase)
-
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-import glob
+
 import os
-from importlib.resources import path
+import glob
 import GUI.qss
+from importlib.resources import path
+
 from .combox_ import ComboBox_
 from .utility import setFont, MediumSize, Normal
+
 class OpenProject(FramelessDialog):
     
     projectPath=None
@@ -19,6 +21,7 @@ class OpenProject(FramelessDialog):
         self.vBoxLayout=QVBoxLayout(self)
         label=BodyLabel(self.tr("Open Existing SWAT-UQ Project"), self)
         setFont(label)
+        
         self.vBoxLayout.addWidget(label)
         self.vBoxLayout.addStretch(1)
         
@@ -83,6 +86,7 @@ class OpenProject(FramelessDialog):
                 return
             
         elif len(files)==1:
+            
             self.projectFile=files[0]
         
         self.accept()
@@ -94,6 +98,7 @@ class OpenProject(FramelessDialog):
 class SelctProject(MessageBoxBase):
     
     def __init__(self, files, parent=None):
+        
         super().__init__(parent)
         self.titleLabel=SubtitleLabel("There exists more than one project files in this directory.", self)
         setFont(self.titleLabel)

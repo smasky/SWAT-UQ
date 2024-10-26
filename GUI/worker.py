@@ -1,15 +1,17 @@
-from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
+
 import re
 import os
 import queue
-import numpy as np
-from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
-from datetime import datetime, timedelta
 import itertools
+import numpy as np
 import pandas as pd
 import subprocess
+from datetime import datetime, timedelta
 from UQPyL.problems import PracticalProblem
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from PyQt5.QtCore import QThread, QObject, pyqtSignal
+from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 class VerboseWorker(QObject):
     
     def __init__(self, projectInfos, modelInfos, paraInfos, objInfos):
@@ -46,8 +48,11 @@ class VerboseWorker(QObject):
         verboseInfos.append(f"The number of Reaches is: {self.modelInfos['nRch']}")
         
         if self.modelInfos["printFlag"]==0:
+            
             verboseInfos.append("The output flag of SWAT is: "+"monthly")
+            
         else:
+            
             verboseInfos.append("The output flag of SWAT is: "+"daily")
         
         verboseInfos.append("="*len(title))
@@ -134,9 +139,12 @@ class VerboseWorker(QObject):
     
     
 class ReadWorker(QObject):
-    INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
+    
+    INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v': 1, 'a': 2}
     INT_OBJTYPE={0: 'NSE', 1: 'RMSE', 2: 'PCC', 3: 'Pbias', 4: 'KGE'}; OBJTYPE_INT={'NSE': 0, 'RMSE':1, 'PCC':2, 'Pbias':3, 'KGE':4}
-    INT_VAR={0: 'Flow'}; VAR_INT={'Flow': 0}
+    INT_VAR={0: 'FLOW', 1: 'ORGN', 2: 'ORGP', 3: 'NO3', 4: 'NH4', 5: 'NO2', 6: 'TOTN', 7: 'TOTP'}
+    VAR_INT={'FLOW': 0, 'ORGN': 1, 'ORGP': 2, 'NO3': 3, 'NH4': 4, 'NO2': 5, 'TOTN': 6, 'TOTP': 7}
+    
     def readObjFile(self, path):
         
         objInfos={}
@@ -156,9 +164,11 @@ class ReadWorker(QObject):
         i=2
         
         while i<len(lines):
+            
             line=lines[i]
             
             match=patternObj.match(line)
+            
             if match:
                 
                 objID=int(match.group(1))
@@ -175,11 +185,14 @@ class ReadWorker(QObject):
                 
                 line=lines[i]
                 while patternValue.match(line) is None:
+                    
                     i+=1
                     line=lines[i]
                 
                 n=0; data=[]
+                
                 while True:
+                    
                     line=lines[i];n+=1
                     match=patternValue.match(line)
                     index, year, month ,day, value=int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4)), float(match.group(5))
@@ -191,7 +204,9 @@ class ReadWorker(QObject):
                         i+=1
                 
                 objInfos[objID].append({"objID": objID, "serID": serID, "reachID": reachID, "objType": objType, "varType": varType, "weight": weight, "observeData": data})
+            
             i+=1
+            
         return objInfos
     
     def readParaFile(self, path, modelInfos):
@@ -199,6 +214,7 @@ class ReadWorker(QObject):
         paraInfos=[]
         
         with open(path, 'r') as f:
+            
             lines=f.readlines()
             
             for line in lines:
@@ -281,11 +297,13 @@ class InitWorker(QObject):
     def __init__(self):
         super().__init__()
 
-    def initQThread(self, projectInfos,  modelInfos, paraInfos, objInfos):
+    def initQThread(self, projectInfos, modelInfos, paraInfos, objInfos):
         
         defaultVar=self.recordDefault(projectInfos, paraInfos, modelInfos)
         
         problemInfos=self.initProblem(paraInfos)
+        
+        problemInfos['name']=projectInfos['projectName']
         
         problemInfos['nOutput']=len(list(objInfos.keys()))
         
@@ -313,10 +331,13 @@ class InitWorker(QObject):
         projectInfos['tempPath']=tempPath
         
         for i in range(numParallel):
+            
             path=os.path.join(tempPath, f"instance_{i}")
+            
             tempSwatDirs.append(path)
         
         projectInfos['tempSwatDirs']=tempSwatDirs
+        
         with ThreadPoolExecutor(max_workers=projectInfos['numParallel']) as executor:
             futures = [executor.submit(copy_origin_to_tmp, swatPath, work_temp) for work_temp in tempSwatDirs]
         for future in as_completed(futures):
@@ -593,10 +614,19 @@ def func_KGE_inverse(true_values, sim_values):
     kge = 1 - np.sqrt((r - 1)**2 + (beta - 1)**2 + (gamma - 1)**2)
     return -1*kge
 
+def func_SUM(true_values, sim_values):
+    
+    return np.sum(sim_values)
+
+def func_MEAN(true_values, sim_values):
+    
+    return np.mean(sim_values)
+
 class RunWorker(QObject):
     
-    VAR_COL={0 : 7}
-    OBJTYPE_FUNC={0 : func_NSE_inverse}
+    VAR_COL={0 : 7, 1: 14, 2: 16, 3: 18, 4: 20, 5: 22, 6: 42, 7: 44}
+    
+    OBJTYPE_FUNC={0 : func_NSE_inverse, 1: func_RMSE, 2: func_PCC_inverse, 3: func_Pbias, 4: func_KGE_inverse, 5: func_SUM, 6: func_MEAN}
     
     updateProcess=pyqtSignal(float)
     result=pyqtSignal(object)
@@ -797,13 +827,15 @@ class OptimizeThread(QThread):
         ub=problemInfos['ub']
         xLabels=problemInfos['xLabels']
         self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels)
-        
+        self.problem.name="None" #TODO
+         
     def run(self):
         self.optimizer.run(self.problem)
 
 class NewThread(QThread):
     
     occurError=pyqtSignal(str)
+    
     accept=pyqtSignal()
     
     def __init__(self, worker, projectInfos):
@@ -815,9 +847,13 @@ class NewThread(QThread):
     def run(self):
         
         try:
+            
             self.modelInfos=self.worker.initModel(self.projectInfos)
+            
             self.accept.emit()
+            
         except Exception as e:
+            
             self.occurError.emit("There are some error in model file, please check!")
 
 class InitThread(QThread):

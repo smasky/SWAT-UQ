@@ -1,7 +1,8 @@
 from qfluentwidgets import InfoBar, FluentStyleSheet, getStyleSheet, InfoBarPosition, InfoBarIcon
 from PyQt5.QtCore import Qt
 from .utility import substitute, MediumSize
-
+from PyQt5.QtGui import QPainter
+from PyQt5.QtWidgets import QWidget
 
 class InfoBar_(InfoBar):
     
@@ -12,6 +13,7 @@ class InfoBar_(InfoBar):
         qss=getStyleSheet(FluentStyleSheet.INFO_BAR)
         qss=substitute(qss, {'#titleLabel': {'font' : f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"}, '#contentLabel': {'font' : f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"}})
         self.setStyleSheet(qss)
+        
         
         
     @classmethod

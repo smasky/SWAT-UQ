@@ -106,7 +106,10 @@ class ParaTable(QFrame):
         path, success= QFileDialog.getOpenFileName(self, "Import Parameter File", "", "Parameter File (*.par)")
         
         if success:
+            
+            Pro.window=self.parent()
             Infos=Pro.importParaFromFile(path)
+            
             for paraInfo in Infos:
                 self.table.addRow(paraInfo)
             self.table.repaint()
