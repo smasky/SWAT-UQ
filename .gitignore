@@ -8,6 +8,9 @@ UQPyL.egg-info
 TxtInOut/
 temp/
 validation/
+build/
+dist/
+
 
 Test/*.pickle
 Test/*.pdf

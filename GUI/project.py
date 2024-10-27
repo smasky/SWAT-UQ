@@ -10,7 +10,8 @@ from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThr
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 from UQPyL.DoE import LHS, FFD, Morris_Sequence, FAST_Sequence, Sobol_Sequence, Random, Saltelli_Sequence
 from UQPyL.sensibility import Sobol, Delta_Test, FAST, RBD_FAST, Morris, RSA
-from UQPyL.optimization import GA, DE, SCE_UA, PSO
+from UQPyL.optimization import GA, DE, SCE_UA, PSO, ABC, CSA
+from UQPyL.optimization import NSGAII, RVEA
 from UQPyL.problems import PracticalProblem
 from UQPyL.utility.scalers import StandardScaler
 from UQPyL.utility.verbose import Verbose
@@ -24,15 +25,15 @@ class Project:
     INT_VAR={0: 'FLOW', 1: 'ORGN', 2: 'ORGP', 3: 'NO3', 4: 'NH4', 5: 'NO2', 6: 'TOTN', 7: 'TOTP'}
     VAR_INT={'FLOW': 0, 'ORGN': 1, 'ORGP': 2, 'NO3': 3, 'NH4': 4, 'NO2': 5, 'TOTN': 6, 'TOTP': 7}
     
-    SA_METHOD={'Sobol': 'Sobol', 'Delta Test': 'Delta_Test', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
+    SA_METHOD={'Sobol': 'Sobol', 'FAST': 'FAST', 'RBD-FAST': 'RBD_FAST', 'Morris': 'Morris', 'RSA': 'RSA'}
     SAMPLE_METHOD={'Full Factorial Design': 'FFD', 'Latin Hyper Sampling': 'LHS', 'Random': 'Random', 'Fast Sequence': 'FAST_Sequence', 'Morris Sequence': 'Morris_Sequence', 'Saltelli Sequence': 'Saltelli_Sequence'}
     SOP_METHOD={'Genetic Algorithm (GA)': 'GA', 'Particle Swarm Optimization (PSO)': 'PSO', 'Differential Evolution (DE)': 'DE', 'Artificial Bee Colony (ABC)': 'ABC', 'Cooperation Search Algorithm (CSA)': 'CSA', 'Shuffled Complex Evolution-UA (SCE-UA)':'SCE_UA'}
     MOP_METHOD={'Reference Vector guided Evolutionary Algorithm (RVEA)': 'RVEA', 'Non-dominated Sorting Genetic Algorithm II (NSGA-II)': 'NSGAII', 'MultiObjective Evolutionary Algorithm based on Decomposition (MOEA/D)' : 'MOEAD'}
     
-    SA_SAMPLE={'Sobol': ['Saltelli Sequence'], 'Delta Test': ['any'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
+    SA_SAMPLE={'Sobol': ['Saltelli Sequence'], 'FAST': ['Fast Sequence'], 'RBD-FAST': ['any'], 'Morris': ['Morris Sequence'], 'RSA': ['any']}
     
     SA_HYPER={'Sobol': {'Z-score':{'type':'bool', 'class': 'Sobol', 'method': '__init__' ,'default': ''}}, 
-              'Delta Test': {'Z-score':{'decs':'Z-score' , 'class': 'Delta_Test','method': '__init__', 'type':'bool', 'default': '0'}, 'nNeighbors':{'type':'int', 'class': 'Delta_Test','method': '__init__','default': '2'}},
+            #   'Delta Test': {'Z-score':{'decs':'Z-score' , 'class': 'Delta_Test','method': '__init__', 'type':'bool', 'default': '0'}, 'nNeighbors':{'type':'int', 'class': 'Delta_Test','method': '__init__','default': '2'}},
               'FAST': {'Z-score':{'type':'bool', 'method': '__init__', 'class': 'FAST','default': ''}},
               'RBD-FAST': {'Z-score':{'type':'bool', 'class': 'RBD_FAST','method': '__init__', 'default': ''}, 'M':{'type':'int', 'method': '__init__', 'class': 'RBD_FAST', 'default': '4'}},
               'Morris': {'Z-score':{'type':'bool', 'method': '__init__', 'class' : 'Morris','default': ''}},
@@ -77,6 +78,8 @@ class Project:
     window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
     problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None; OPResult=None
     ValResult=None
+    
+    verboseWidth=None
     
     btnSets=[]
     
@@ -215,8 +218,14 @@ class Project:
     @classmethod 
     def importProFromFile(cls, path):
         
-        cls.worker=ReadWorker()
-        infos=cls.worker.readObjFile(path)
+        try:
+        
+            cls.worker=ReadWorker()
+            infos=cls.worker.readObjFile(path)
+        
+        except Exception as e:
+            
+            cls.showError("There are some error in objective file, please check!")
         
         return infos
                         
@@ -255,14 +264,37 @@ class Project:
             f.writelines(lines)
     
     @classmethod
-    def findResultFile(cls):
+    def findSOPResultFile(cls):
         
         path=os.path.join(cls.projectInfos['projectPath'], "Result\\Data")
         res_files=glob.glob(os.path.join(path, "*.hdf"))
-        
         files=[os.path.basename(file_path) for file_path in res_files]
         
-        return files
+        SOP_List=list(cls.SOP_METHOD.values())
+        
+        sop_files=[]
+        for file in files:
+            if file.split("_")[0] in SOP_List:
+                sop_files.append(file)
+            
+        return sop_files
+    
+    @classmethod
+    def findSAResultFile(cls):
+        
+        path=os.path.join(cls.projectInfos['projectPath'], "Result\\Data")
+        res_files=glob.glob(os.path.join(path, "*.hdf"))
+        files=[os.path.basename(file_path) for file_path in res_files]
+        
+        SA_List=list(cls.SA_METHOD.values())
+        
+        sa_files=[]
+        for file in files:
+            if file.split("_")[0] in SA_List:
+                sa_files.append(file)
+            
+        return sa_files        
+    
     
     @classmethod
     def findParaFile(cls):
@@ -451,8 +483,10 @@ class Project:
         cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
         cls.worker.updateProcess.connect(update_FEsBar)
         iterEmit.iterSend.connect(update_itersBar)
+        
         Verbose.iterEmit=iterEmit
         Verbose.verboseEmit=verboseEmit
+        Verbose.isStop=False
 
         verboseEmit.verboseSend.connect(update_verbose)
         cls.thread=OptimizeThread(cls.worker, optimizer, cls.problemInfos)
@@ -472,6 +506,7 @@ class Project:
         cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
         
         Verbose.workDir=cls.projectInfos['projectPath']
+        Verbose.total_width=verboseWidget.property('totalWidth')
         
         def accept(infos):
             
@@ -481,7 +516,7 @@ class Project:
             cls.thread.quit()
             cls.thread.deleteLater()
             
-            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
+            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.verboseWidth)
             
             verbose=worker.outputVerbose()
             
@@ -517,7 +552,6 @@ class Project:
                     initHyper[name]=value
                 else:
                     analyzeHyper[name]=value 
-        
         
         for hyper in saHyper:
             

@@ -10,21 +10,27 @@ from datetime import datetime, timedelta
 from UQPyL.problems import PracticalProblem
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from PyQt5.QtCore import QThread, QObject, pyqtSignal
+from PyQt5.QtCore import QThread, QObject, pyqtSignal, QProcess
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 class VerboseWorker(QObject):
     
-    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos):
+    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, verboseWidth):
+        
         self.projectInfos=projectInfos
         self.modelInfos=modelInfos
         self.paraInfos=paraInfos
         self.objInfos=objInfos
-    
+
+        self.verboseWidth=verboseWidth
+        
     def outputVerbose(self):
         
         ####################Project Information######################
         verboseInfos=[]
-        title="="*25+"Project setting"+"="*25
+        title="Project setting"
+        spacing=int((self.verboseWidth-len(title))/2)-1
+        verboseInfos.append("="*spacing+title+"="*spacing)
+        
         verboseInfos.append(f"The path of SWAT project is: {self.projectInfos['swatPath']}")
         verboseInfos.append(f"The path of UQ project is {self.projectInfos['projectPath']}") 
         verboseInfos.append(f"The file name of optimizing parameters is: {self.projectInfos['paraPath']}") #TODO
@@ -32,10 +38,13 @@ class VerboseWorker(QObject):
         verboseInfos.append(f"The name of SWAT executable is: {self.projectInfos['swatExe']}")
         verboseInfos.append(f"Temporary directory has been created in: {self.projectInfos['tempPath']}")
         verboseInfos.append(f"The number of thread to run SWAT: {self.projectInfos['numParallel']}")
-        verboseInfos.append("="*len(title))
+        # verboseInfos.append("="*len(title))
         
         ####################Model Information#############################
-        title="="*25+"Model Information"+"="*25
+        title="Model Information"
+        spacing=int((self.verboseWidth-len(title))/2)-1
+        verboseInfos.append("="*spacing+title+"="*spacing)
+        
         verboseInfos.append(title)
         beginDate=self.modelInfos["beginDate"].strftime("%Y%m%d")
         endDate=self.modelInfos['endDate'].strftime('%Y%m%d')
@@ -55,7 +64,7 @@ class VerboseWorker(QObject):
             
             verboseInfos.append("The output flag of SWAT is: "+"daily")
         
-        verboseInfos.append("="*len(title))
+        # verboseInfos.append("="*len(title))
         
         ########################Parameter Information###################
         verboseInfos+=self.outputParaInfo()
@@ -68,7 +77,9 @@ class VerboseWorker(QObject):
         
         verboseInfos=[]
         
-        title="="*25+"Observed Information"+"="*25
+        title="Observed Information"
+        spacing=int((self.verboseWidth-len(title))/2)-1
+        verboseInfos.append("="*spacing+title+"="*spacing)
         
         verboseInfos.append(title)
         
@@ -107,7 +118,7 @@ class VerboseWorker(QObject):
                 
                 verboseInfos.append(f"{objFormatted}||{serIDFormatted}||{rchFormatted}||{objTypeFormatted}||{varFormatted}||{weightFormatted}||{readLineFormatted}")
         
-        verboseInfos.append("="*len(title))
+        # verboseInfos.append("="*len(title))
         return verboseInfos
         
     def outputParaInfo(self):
@@ -116,8 +127,9 @@ class VerboseWorker(QObject):
         
         verboseInfos=[]
         
-        title="="*25+"Model Information"+"="*25
-        verboseInfos.append(title)
+        title="Model Information"
+        spacing=int((self.verboseWidth-len(title))/2)-1
+        verboseInfos.append("="*spacing+title+"="*spacing)
         nameFormatted=f"{'Parameter name':^20}"
         modeFormatted=f"{'Mode':^10}"
         lbFormatted=f"{'Lower Bound':^15}"
@@ -395,7 +407,9 @@ class InitWorker(QObject):
         modelInfos["nHru"]=len(modelInfos["hruList"])
         modelInfos["nRch"]=len(modelInfos["subList"])
         
-        totalParaList=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
+        # totalParaList={}
+        # totalParaList=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
+        totalParaList=pd.read_csv(os.path.join(work_path, 'SWAT_paras_files.csv'), index_col=0)
         modelInfos["totalParaList"]=totalParaList
         
         para_file={}
@@ -665,14 +679,21 @@ class RunWorker(QObject):
             workPath=self.workPath.get()
             self.setValues(workPath, x)
             
-            process= subprocess.Popen(
-                os.path.join(workPath, self.swatExe),
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
+
+            subprocess.run(
+                [os.path.join(workPath, self.swatExe)],
                 cwd=workPath,
-                stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE,
-                text=True)
-            process.wait()
+                stderr=subprocess.DEVNULL, 
+                stdin=subprocess.DEVNULL,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW, 
+                startupinfo=startupinfo  
+            )
 
             objs=[]
             
@@ -724,14 +745,34 @@ class RunWorker(QObject):
             workPath=self.workPath.get()
             self.setValues(workPath, x)
             
-            process= subprocess.Popen(
-                os.path.join(workPath, self.swatExe),
+            
+            # 创建 STARTUPINFO 对象
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
+
+            subprocess.run(
+                [os.path.join(workPath, self.swatExe)],
                 cwd=workPath,
-                stdin=subprocess.PIPE, 
                 stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE,
-                text=True)
-            process.wait()
+                stderr=subprocess.DEVNULL, 
+                stdin=subprocess.DEVNULL,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW,  # 如果需要的话
+                startupinfo=startupinfo  # 添加这一行
+            )
+
+            # process = subprocess.Popen(
+            #     os.path.join(workPath, self.swatExe),
+            #     shell=True,
+            #     cwd=workPath,
+            #     stdout=subprocess.PIPE, 
+            #     stderr=subprocess.DEVNULL, 
+            #     stdin=subprocess.DEVNULL,
+            #     text=True
+            # )
+            # process.wait()
 
             objs=[]
             simData={}
@@ -771,7 +812,7 @@ class RunWorker(QObject):
     
         n = X.shape[0]
         
-        Y = np.full((n, self.nOutput), np.nan)
+        Y = np.full((n, self.nOutput), np.inf)
         
         self.updateProcess.emit(self.count)
         
@@ -792,6 +833,7 @@ class RunWorker(QObject):
             self.result.emit(Y)
         else:
             self.unfinished.emit()
+            
         return Y
 class EvaluateThread(QThread):
     
@@ -826,12 +868,12 @@ class OptimizeThread(QThread):
         lb=problemInfos['lb']
         ub=problemInfos['ub']
         xLabels=problemInfos['xLabels']
-        self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels)
-        self.problem.name="None" #TODO
+        self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels, name=problemInfos['name'])
          
     def run(self):
+    
         self.optimizer.run(self.problem)
-
+        
 class NewThread(QThread):
     
     occurError=pyqtSignal(str)

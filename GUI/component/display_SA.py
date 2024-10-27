@@ -106,7 +106,7 @@ class DisplaySA(QFrame):
     def dynamicShowFile(self):
         
         self.resultFile.clear()
-        self.resultFile.addItems(Pro.findResultFile())
+        self.resultFile.addItems(Pro.findSAResultFile())
         self.resultFile.setCurrentIndex(0)
         super(ComboBox, self.resultFile)._showComboMenu()
     

@@ -20,7 +20,7 @@ from .combox_ import ComboBox
 # from .tree_widget import TreeWidget_ as TreeWidget
 from ..project import Project as Pro
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont, QTextCursor, QTextCharFormat, QFont
+from PyQt5.QtGui import QFont, QFontMetrics
 import matplotlib.dates as mdates
 class ValidationWidget(QFrame):
     
@@ -169,7 +169,7 @@ class ValidationWidget(QFrame):
     def dynamicShowResultFile(self):
         
         self.resultFileBox.clear()
-        self.resultFileBox.addItems(Pro.findResultFile())
+        self.resultFileBox.addItems(Pro.findSOPResultFile())
         self.resultFileBox.setCurrentIndex(0)
         super(ComboBox, self.resultFileBox)._showComboMenu()
     
@@ -257,6 +257,15 @@ class ValidationWidget(QFrame):
             self.applyBtn.setEnabled(True)
         
     def apply(self):
+        
+        #
+        textWidth = self.verbose.viewport().width()
+        fontMetrics = QFontMetrics(self.verbose.font())
+        averWidth = fontMetrics.averageCharWidth()
+        nChars=textWidth // averWidth
+        self.verbose.setProperty('totalWidth', nChars)
+        Pro.verboseWidth=nChars
+        #
         
         self.verbose.clear()
         

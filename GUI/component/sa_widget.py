@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QGridLayout,
                              QStackedWidget, QWidget,  QFileDialog)
 from PyQt5.QtCore import  Qt, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontMetrics
 from qfluentwidgets import (BodyLabel,
                              SpinBox,TextEdit,
                              PrimaryPushButton, LineEdit)
@@ -460,6 +460,7 @@ class SimulationWidget(QWidget):
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         h.addSpacing(10); h.addWidget(self.verbose); h.addSpacing(10)
         vBoxLayout.addLayout(h)
+        
         ######################################
         btnWidget=QWidget(self); btnWidget.setObjectName("btnWidget")
         btnWidget.setStyleSheet("#btnWidget{border-top: 1px solid rgba(0, 0, 0, 0.15);border-bottom: 1px solid rgba(0, 0, 0, 0.15);}")
@@ -508,6 +509,14 @@ class SimulationWidget(QWidget):
         Pro.projectInfos['swatExe']=self.swatEdit.currentText()
     
     def initialize(self):
+        #
+        textWidth = self.verbose.viewport().width()
+        fontMetrics = QFontMetrics(self.verbose.font())
+        averWidth = fontMetrics.averageCharWidth()
+        nChars=textWidth // averWidth
+        self.verbose.setProperty('totalWidth', nChars)
+        Pro.verboseWidth=nChars
+        #
         
         Pro.window=self.parent().parent().parent()
         Verbose.total_width=self.verbose.document().idealWidth()

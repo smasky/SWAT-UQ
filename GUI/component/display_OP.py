@@ -152,7 +152,7 @@ class DisplayOP(QFrame):
     def dynamicShowFile(self):
         
         self.resultFile.clear()
-        self.resultFile.addItems(Pro.findResultFile())
+        self.resultFile.addItems(Pro.findSOPResultFile())
         self.resultFile.setCurrentIndex(0)
         super(ComboBox, self.resultFile)._showComboMenu()
     
