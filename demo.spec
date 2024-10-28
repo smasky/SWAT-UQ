@@ -64,7 +64,9 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='./GUI/picture/icon.png',
+    onefile=True
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
