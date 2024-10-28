@@ -14,7 +14,9 @@ As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective D
 
 # Quick Start
 
-Here, we provide a simple Quick Start guide. Please choose the latest release version of SWAT-UQ.  
+Here, we provide a simple Quick Start guide. In future plans, we will provide detailed documentation and videos.  
+
+Please choose the latest release version of SWAT-UQ.  
 
 Next, on the Get Started interface, click the **New Project** card to create a project or the **Open Project** card to open an existing one. You can also select the **Example** card for reference cases or the **Help** card for assistance.
 
@@ -22,8 +24,12 @@ Next, on the Get Started interface, click the **New Project** card to create a p
 
 <p align="center"><strong>Figure 2. New Project Card and Open Project Card</strong></p>
 
-For New Project Card, the UQ Project name, UQ Project path, and SWAT Project path should be provided. Afterward, the program will verify the validity of the SWAT project files. If success, other modules would be activated.  
-For Open Project Card, users should open the folder that contain *.prj files.
+For the New Project Card (left picture of Figure 2), users need to provide the following information: the UQ Project name, the UQ Project path, and the SWAT Project path. After these inputs are provided, the program will verify the validity of the SWAT project files. If the verification is successful, other modules will be activated. Once the UQ Project is created, a project file named *.prj (where * represents the UQ Project name set by the user) will be saved in the specified UQ Project path.
+For the Open Project Card (right picture of Figure 2), users should select the folder that contains *.prj files. SWAT-UQ will then check the validity of the project file before proceeding.
+
+
+
+
 
 
 
