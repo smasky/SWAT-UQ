@@ -3,4 +3,4 @@
 
 **SWAT-UQ**: This a GUI Interface based on UQPyL, specifically designed for the uncertainty quantification (UQ) of the **SWAT** model.
 
-![Get Start]("./resource/MainUI.png")
+![Get Start](./resource/MainUI.png)
