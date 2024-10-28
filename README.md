@@ -9,8 +9,24 @@ This GUI interface is designed for parameter uncertainty quantification (UQ) of 
 
 <p align="center"><strong>Figure 1. SWAT-UQ at Get Start Interface</strong></p>
 
-The SWAT-UQ contains three part of modules corresponding to preparation, execution, and post-processing. 
-As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization**).
+The SWAT-UQ framework consists of three modules corresponding to preparation, execution, and post-processing. 
+As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization B**).
+
+Here, we provide a simply Quick Start. Please, choose the latest release version of SWAT-UQ.
+First, you should prepare a SWAT project folder (default: TxtInOut) and a UQ project folder.
+
+<p align="center"><img src="./resource/New_Project.jpg" alt="Main GUI" width="200"/> <img src="./resource/Open_Project.jpg" alt="Table List" width="200"/></p>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
