@@ -13,9 +13,12 @@ The SWAT-UQ framework consists of three modules corresponding to preparation, ex
 As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization B**).
 
 Here, we provide a simply Quick Start. Please, choose the latest release version of SWAT-UQ.
-First, you should prepare a SWAT project folder (default: TxtInOut) and a UQ project folder.
+First, you should prepare a SWAT project folder (default: TxtInOut) and a UQ project folder.  
+Second, at the Get Start Interface, you can click the **New Project** Card or **Open Project** Card. Of course, you also can click the **Example** Card or **Help** Card to refer to some cases or seek for help.
 
-<p align="center"><img src="./resource/New_Project.jpg" alt="Main GUI" width="200"/> <img src="./resource/Open_Project.jpg" alt="Table List" width="200"/></p>
+<p align="center"><img src="./resource/New_Project.png" alt="New Widget" width="200"/> <img src="./resource/Open_Project.png" alt="Open Widget" width="200"/></p>
+
+<p align="center"><strong>Figure 2. New Project Card and Open Project Card</strong></p>
 
 
 
