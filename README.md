@@ -1,7 +1,8 @@
 
 # SWAT-UQ ( Uncertainty Quantification for SWAT )
 
-**SWAT-UQ**: This is a GUI Interface designed for parameter uncertainty quantification (UQ) of the **SWAT** model. The implementation of core functions is developed on [UQPyL](https://github.com/smasky/UQPyL), which is another useful python package. Therefore, you can use all Characteristics of UQPyL, like sensibility analysis, single-objective optimization, multi-objective optimization. The main advantages of this program is that users do not worry about code generation; **it fully automates the workflow from sensitivity analysis and parameter optimization to visualization.**
+**SWAT-UQ:**  
+This GUI interface is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our publicly released Python package for UQ. Therefore, SWAT-UQ would provide full access to its features, such as sensitivity analysis, single-objective optimization, and multi-objective optimization. A key advantage of this program is that users do not need to worry coding; **it seamlessly automates the entire workflow from sensitivity analysis and parameter optimization to visualization**.
 
 ![Get Start](./resource/MainUI.jpg)
 **Figure 1. SWAT-UQ Get Start Interface**
