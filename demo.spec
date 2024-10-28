@@ -29,10 +29,11 @@ datas = [
     ('GUI/data/parameter_list.txt', 'GUI/data'),
     ('GUI/picture/icon.png', 'GUI/picture'),
     ('GUI/picture/title_icon.png', 'GUI/picture'),
+    ('GUI/data/SWAT_paras_files.csv', 'GUI/data')
 ]
 
 a = Analysis(
-    ['test.py'],
+    ['app.py'],
     pathex=[],
     binaries=[],
     datas=datas,

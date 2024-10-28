@@ -9,8 +9,10 @@ import subprocess
 from datetime import datetime, timedelta
 from UQPyL.problems import PracticalProblem
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from importlib.resources import path
+import GUI.data
 
-from PyQt5.QtCore import QThread, QObject, pyqtSignal, QProcess
+from PyQt5.QtCore import QThread, QObject, pyqtSignal
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 class VerboseWorker(QObject):
     
@@ -407,9 +409,10 @@ class InitWorker(QObject):
         modelInfos["nHru"]=len(modelInfos["hruList"])
         modelInfos["nRch"]=len(modelInfos["subList"])
         
-        # totalParaList={}
-        # totalParaList=pd.read_excel(os.path.join(work_path, 'SWAT_paras_files.xlsx'), index_col=0)
-        totalParaList=pd.read_csv(os.path.join(work_path, 'SWAT_paras_files.csv'), index_col=0)
+        with path(GUI.data, "SWAT_paras_files.csv") as para_path:
+            
+            totalParaList=pd.read_csv(para_path, index_col=0)
+        
         modelInfos["totalParaList"]=totalParaList
         
         para_file={}
