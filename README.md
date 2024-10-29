@@ -36,9 +36,16 @@ For the Open Project Card (right picture of Figure 2), users should select the f
 To be specific, as shown in Figure 3, the Parameter Setting Card enables users to define the parameters they wish to tune. There are two ways to add parameters to the information table: either by importing them from an existing file or by clicking the Add button to open the **Parameter Selection** widget. In this table, all selectable parameters are organized by the suffix of the SWAT project files. Additionally, the search bar provides a convenient way to locate specific parameters quickly.
 
 <p align="center"><img src="./resource/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p> 
+<p align="center"><strong>Figure 4. Parameter Setting Table </strong></p>
 
-After adding parameters, users can set the tuning mode, lower and upper bounds, and specify tuning files for each parameter (Figure 3 shows). Finally, these settings should be saved to the UQ project folder.
+After adding parameters, users can set the tuning mode, lower and upper bounds, and specify tuning files (default: all) for each parameter (**Figure 3 shows**). Finally, these settings should be saved to the UQ project folder by clicking "Saving Current Parameter" button.
 
+There are also two ways to define the objective function: by importing from existing files or by user definition. For user definition, you should click "Add" button. 
+
+<p align="center"><img src="./resource/Objective_Define.png" alt="Objective Define" width="300"/></p> 
+<p align="center"><strong>Figure 5. Objective Define Table </strong></p>
+
+From Figure 5 shows, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. Noted that, it’s important to note that both the sequence ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. 
 
 
 
