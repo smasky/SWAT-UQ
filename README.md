@@ -121,7 +121,7 @@ Email: [wmtsky@hhu.edu.cn](mailto:wmtsky@hhu.edu.cn), [wmtsmasky@gmail.com](mail
 
 ---
 
-*This project is licensed under the MIT License - see the [LICENSE](https://github.com/smasky/SWAT-UQ/LICENSE) file for details.*
+*This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.*
 
 ![GitHub Stars](https://img.shields.io/github/stars/smasky/SWAT-UQ?style=social)
 ![GitHub Forks](https://img.shields.io/github/forks/smasky/SWAT-UQ?style=social)
