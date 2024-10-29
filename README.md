@@ -103,3 +103,25 @@ Specifically, On the Visualization A and Visualization B, user can select the re
 <p align="center"><img src="./resource/Visualization_A.png" alt="Visualization_A" width="400"/> <img src="./resource/Visualization_B.png" alt="Visualization_B" width="400"/></p>
 
 <p align="center"><strong> Figure 11. Visualization Interface </strong></p>
+
+**This concludes the Quick Start section for SWAT-UQ. For more advanced operations, please refer to the documentation.**
+
+# Call for Contributions
+
+We welcome contributions to expand our library with more sophisticated UQ methods, optimization algorithms and engineering problems.
+
+---
+
+# Contact
+
+For any inquiries or contributions, please contact:
+
+**wmtSky**  
+Email: [wmtsky@hhu.edu.cn](mailto:wmtsky@hhu.edu.cn), [wmtsmasky@gmail.com](mailto:wmtsmasky@gmail.com)
+
+---
+
+*This project is licensed under the MIT License - see the [LICENSE](https://github.com/smasky/SWAT-UQ/LICENSE) file for details.*
+
+![GitHub Stars](https://img.shields.io/github/stars/smasky/SWAT-UQ?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/smasky/SWAT-UQ?style=social)
