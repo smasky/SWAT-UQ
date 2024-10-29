@@ -97,3 +97,9 @@ Here, we list the available sensibility analysis method and optimization method.
 <p align="center"><img src="./resource/GA.png" alt="OP_Result" width="600"/></p>
 
 <p align="center"><strong> Figure 10. Optimization Visualization </strong></p>
+
+Specifically, On the Visualization A and Visualization B, user can select the result file. SWAT-UQ would generates initial visualizations. **Users can click the “Config” button to open the settings panel and tune various parameters of the plot based on the preset values, as Figure 11 indicates.**
+
+<p align="center"><img src="./resource/Visualization_A.png" alt="Visualization_A" width="400"/> <img src="./resource/Visualization_B.png" alt="Visualization_B" width="400"/></p>
+
+<p align="center"><strong> Figure 11. Visualization Interface </strong></p>
