@@ -29,14 +29,11 @@ For the Open Project Card (right picture of Figure 2), users should select the f
 
 **Step2:** On the **Parameter Setting** and **Objective Definition**, the parameter file (.par) and the objective file (.obj) should be created. These files are crucial as they specify which parameters will be modified and what objectives will be evaluated by the program.
 
-To be specific, 
+<p align="center"><img src="./resource/Parameter_Setting.jpg" alt="Main GUI" width="400"/> <img src="./resource/Objective_Widget.jpg" alt="Table List" width="400"/></p> 
 
-p align="center"><img src="./resource/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./resource/TableList.jpg" alt="Table List" width="400"/></p> 
+<p align="center"><strong>Figure 3. Parameter Setting Card and Figure 4. Objective Define Card</strong></p>
 
-
-
-
-
+To be specific, as Figure 3 shows, on Parameter Setting Card, 
 
 
 
