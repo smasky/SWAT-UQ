@@ -77,7 +77,12 @@ Here, we list the available sensibility analysis method and optimization method.
 - Regional Sensitivity Analysis (RSA)
 
 **Optimization Algorithm:**
-
+(* indicates solving computational expensive optimization problem)
 - **Single Objective Optimization**: SCE-UA, ML-SCE-UA, GA, CSA, PSO, DE, ABC, ASMO* (#TODO), EGO* (#TODO)  
 - **Multi-Objective Optimization**: MOEA/D, NSGA-II, RVEA, MOASMO* (#TODO)
 
+For Result Validation & Apply interface, SWAT-UQ allows users to simulate a specific set of parameters individually and extract the desired time series data, or apply the optimal parameters directly to the SWAT project files. This parameter set can be user-defined or sourced from completed optimization result files.
+
+<p align="center"><img src="./resource/Validation.jpg" alt="OP_Setup" width="400"/></p>
+
+<p align="center"><strong> Figure 8. Result Validation Interface </strong></p>
