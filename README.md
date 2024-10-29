@@ -53,6 +53,8 @@ After defining objectives, you can save them to the objective file. It is also a
 
 Using Sensitivity Analysis as an example, as shown in the left image of Figure 6, users should first select the parameter file and objective file. Next, they choose the desired sensitivity analysis method and sampling technique. Users can then configure additional settings as required, fine-tuning the analysis to best meet project needs before proceeding. **SWAT-UQ thoughtfully displays the number of parameters and the total sample size to assist users in making informed decisions.**
 
+Once all initial settings are all ready, click the "Next" button to proceed to the simulation and analysis process. The right image of Figure 6 displays the settings of simulation, including the selection of SWAT executable file, parallel numbers and problem name. Finally, click the "Initialize," "Sampling," and "Simulation" buttons in sequence, and wait for simulation completing. **SWAT-UQ can display the simulation progress in real-time, and users can also pause it to reconfigure settings.** 
+
 <p align="center"><img src="./resource/Sensibility_Analysis.jpg" alt="SA_Setup" width="400"/> <img src="./resource/Sensibility_Analysis_Simulation.jpg" alt="SA_Simulation" width="400"/></p>
 
 <p align="center"><strong>Figure 6. Sensibility Analysis Interface </strong></p>
