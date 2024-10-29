@@ -33,7 +33,13 @@ For the Open Project Card (right picture of Figure 2), users should select the f
 
 <p align="center"><strong>Figure 3. Parameter Setting Card and Figure 4. Objective Define Card</strong></p>
 
-To be specific, as Figure 3 shows, on Parameter Setting Card, 
+To be specific, as shown in Figure 3, the Parameter Setting Card enables users to define the parameters they wish to tune. There are two ways to add parameters to the information table: either by importing them from an existing file or by clicking the Add button to open the **Parameter Selection** widget. In this table, all selectable parameters are organized by the suffix of the SWAT project files. Additionally, the search bar provides a convenient way to locate specific parameters quickly.
+
+<p align="center"><img src="./resource/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p> 
+
+After adding parameters, users can set the tuning mode, lower and upper bounds, and specify tuning files for each parameter (Figure 3 shows). Finally, these settings should be saved to the UQ project folder.
+
+
 
 
 
