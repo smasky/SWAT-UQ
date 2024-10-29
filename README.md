@@ -45,7 +45,11 @@ There are also two ways to define the objective function: by importing from exis
 <p align="center"><img src="./resource/Objective_Define.png" alt="Objective Define" width="300"/></p> 
 <p align="center"><strong>Figure 5. Objective Define Table </strong></p>
 
-From Figure 5 shows, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. Noted that, it’s important to note that both the sequence ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. 
+As shown in Figure 5, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. It’s important to note that both the series ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. For more details, please refer to the comprehensive documentation.
+
+After defining objectives, you can save them to the objective file. It is also allowed to define multiple objective functions within a single file.
+
+
 
 
 
