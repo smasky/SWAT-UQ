@@ -90,10 +90,10 @@ Here, we list the available sensibility analysis method and optimization method.
 **Step 5:** Result Visualization. The current SWAT-UQ provides two types of plot pictures: a bar chart for sensitivity analysis (Visualization A Interface) and an iteration convergence plot for parameter optimization (Visualization B Interface). Of course, additional types of plots will be continuously added in future versions.
 **Figures 9 and 10 shows the visualization pictures from two interfaces.**
 
-<p align="center"><img src="./resource/FAST.png" alt="SA_Result" width="400"/></p>
+<p align="center"><img src="./resource/FAST.png" alt="SA_Result" width="800"/></p>
 
 <p align="center"><strong> Figure 9. Sensibility Analysis Visualization </strong></p>
 
-p align="center"><img src="./resource/GA.png" alt="OP_Result" width="400"/></p>
+<p align="center"><img src="./resource/GA.png" alt="OP_Result" width="600"/></p>
 
 <p align="center"><strong> Figure 10. Optimization Visualization </strong></p>
