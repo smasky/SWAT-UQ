@@ -65,4 +65,19 @@ For parameter optimization, users should still select parameter file and objecti
 
 <p align="center"><strong> Figure 7. Parameter Optimization Interface </strong></p>
 
+Here, we list the available sensibility analysis method and optimization method.
+
+**Sensibility Analysis:**
+- Sobol'
+- Delta Test (DT) #TODO
+- Extended Fourier Amplitude Sensitivity Test (eFAST)
+- Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST)
+- Multivariate Adaptive Regression Splines-Sensitivity Analysis (MARS-SA) #TODO
+- Morris
+- Regional Sensitivity Analysis (RSA)
+
+**Optimization Algorithm:**
+
+- **Single Objective Optimization**: SCE-UA, ML-SCE-UA, GA, CSA, PSO, DE, ABC, ASMO* (#TODO), EGO* (#TODO)  
+- **Multi-Objective Optimization**: MOEA/D, NSGA-II, RVEA, MOASMO* (#TODO)
 
