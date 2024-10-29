@@ -59,7 +59,7 @@ class MainWindow(FluentWindow):
         
         self.setStyleSheet(qss)
 
-        QTimer.singleShot(15000, self.take_screenshot)  # 1秒后自动截图
+        QTimer.singleShot(35000, self.take_screenshot)  # 1秒后自动截图
         
     def take_screenshot(self):
         

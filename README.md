@@ -45,25 +45,17 @@ There are also two ways to define the objective function: by importing from exis
 <p align="center"><img src="./resource/Objective_Define.png" alt="Objective Define" width="300"/></p> 
 <p align="center"><strong>Figure 5. Objective Define Table </strong></p>
 
-As shown in Figure 5, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. It’s important to note that both the series ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. For more details, please refer to the comprehensive documentation.
+As shown in Figure 5, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. It is important to note that both the series ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. For more details, please refer to the comprehensive documentation.
 
 After defining objectives, you can save them to the objective file. It is also allowed to define multiple objective functions within a single file.
 
+**Step3:** Perform sensitivity analysis or parameter optimization as needed. 
 
+Using Sensitivity Analysis as an example, as shown in the left image of Figure 6, users should first select the parameter file and objective file. Next, they choose the desired sensitivity analysis method and sampling technique. Users can then configure additional settings as required, fine-tuning the analysis to best meet project needs before proceeding. **SWAT-UQ thoughtfully displays the number of parameters and the total sample size to assist users in making informed decisions.**
 
+<p align="center"><img src="./resource/Sensibility_Analysis.jpg" alt="SA_Setup" width="400"/> <img src="./resource/Sensibility_Analysis_Simulation.jpg" alt="SA_Simulation" width="400"/></p>
 
-
-
-
-
-
-
-
-
-
-
-
-
+<p align="center"><strong>Figure 6. Sensibility Analysis Interface </strong></p>
 
 
 
