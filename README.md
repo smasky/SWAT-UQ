@@ -81,8 +81,19 @@ Here, we list the available sensibility analysis method and optimization method.
 - **Single Objective Optimization**: SCE-UA, ML-SCE-UA, GA, CSA, PSO, DE, ABC, ASMO* (#TODO), EGO* (#TODO)  
 - **Multi-Objective Optimization**: MOEA/D, NSGA-II, RVEA, MOASMO* (#TODO)
 
-For Result Validation & Apply interface, SWAT-UQ allows users to simulate a specific set of parameters individually and extract the desired time series data, or apply the optimal parameters directly to the SWAT project files. This parameter set can be user-defined or sourced from completed optimization result files.
+**Step 4:** Result Validation and Apply. On Result Validation & Apply interface, SWAT-UQ allows users to simulate a specific set of parameters individually and extract the desired time series data, or apply the optimal parameters directly to the SWAT project files. This parameter set can be user-defined or sourced from completed optimization result files.
 
 <p align="center"><img src="./resource/Validation.jpg" alt="OP_Setup" width="400"/></p>
 
 <p align="center"><strong> Figure 8. Result Validation Interface </strong></p>
+
+**Step 5:** Result Visualization. The current SWAT-UQ provides two types of plot pictures: a bar chart for sensitivity analysis (Visualization A Interface) and an iteration convergence plot for parameter optimization (Visualization B Interface). Of course, additional types of plots will be continuously added in future versions.
+**Figures 9 and 10 shows the visualization pictures from two interfaces.**
+
+<p align="center"><img src="./resource/FAST.png" alt="SA_Result" width="400"/></p>
+
+<p align="center"><strong> Figure 9. Sensibility Analysis Visualization </strong></p>
+
+p align="center"><img src="./resource/GA.png" alt="OP_Result" width="400"/></p>
+
+<p align="center"><strong> Figure 10. Optimization Visualization </strong></p>
