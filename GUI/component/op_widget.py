@@ -78,12 +78,12 @@ class OPWidget(QFrame):
                 
     def reset(self):
         
-        Pro.OPInfos=None
-        Pro.OPResult=None
-        Pro.paraInfos=None
-        Pro.problemInfos=None
-        Pro.objInfos=None
-
+        Pro.OP_infos={}
+        Pro.OP_result={}
+        Pro.OP_paraInfos={}
+        Pro.OP_problemInfos={}
+        Pro.OP_objInfos={}
+        
         self.contentWidget.setCurrentIndex(0)
         self.setupWidget.reset()
         self.opWidget.reset()
@@ -98,10 +98,10 @@ class OPWidget(QFrame):
 
             if widget.objType=="SOP":
                 op=widget.SOP_METHOD[widget.sopComBox.currentIndex()]
-                Pro.OPInfos={'opName': op, 'opClass': Pro.SOP_METHOD[op], 'opHyper': hyper[Pro.SOP_METHOD[op]]}
+                Pro.OP_infos={'opName': op, 'opClass': Pro.SOP_METHOD[op], 'opHyper': hyper[Pro.SOP_METHOD[op]]}
             else:
                 op=widget.MOP_METHOD[widget.mopComBox.currentIndex()]
-                Pro.OPInfos={'opName': op, 'opClass': Pro.MOP_METHOD[op], 'opHyper': hyper[Pro.MOP_METHOD[op]]}
+                Pro.OP_infos={'opName': op, 'opClass': Pro.MOP_METHOD[op], 'opHyper': hyper[Pro.MOP_METHOD[op]]}
             
         self.INDEX+=1
         self.contentWidget.setCurrentIndex(self.INDEX)
@@ -326,8 +326,8 @@ class SetupWidget(QWidget):
         infos=Pro.importParaFromFile(path)
         self.numPara.setText(str(len(infos)))
         
-        Pro.paraInfos=infos
-        Pro.projectInfos['paraPath']=path
+        Pro.OP_paraInfos=infos
+        Pro.OP_runInfos['paraPath']=path
     
     def loadObjFile(self):
         
@@ -340,7 +340,7 @@ class SetupWidget(QWidget):
         objs=[f"obj {i : d}" for i in list(infos.keys())]
         self.objEdit.addObjs(objs)
 
-        Pro.projectInfos['objPath']=path
+        Pro.OP_runInfos['objPath']=path
         
     def ensureObj(self):
         
@@ -349,7 +349,7 @@ class SetupWidget(QWidget):
         for objID in objIDs:
             objInfos[objID]=self.objInfos[objID]
         
-        Pro.objInfos=objInfos
+        Pro.OP_objInfos=objInfos
 
     def reset(self):
         
@@ -490,7 +490,7 @@ class OptimizationWidget(QWidget):
         
     def swatChanged(self):
         
-        Pro.projectInfos['swatExe']=self.swatEdit.currentText()
+        Pro.OP_runInfos['swatExe']=self.swatEdit.currentText()
     
     def initialize(self):
         #
@@ -499,11 +499,11 @@ class OptimizationWidget(QWidget):
         averWidth = fontMetrics.averageCharWidth()
         nChars=textWidth // averWidth
         self.verbose.setProperty('totalWidth', nChars)
-        Pro.verboseWidth=nChars
+        Pro.OP_runInfos['verboseWidth']=nChars
         #
         numParallel=int(self.parallelEdit.value())
-        Pro.projectInfos['numParallel']=numParallel
-        Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
+        Pro.OP_runInfos['numParallel']=numParallel
+        Pro.OP_runInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
         
         self.initializeBtn.setEnabled(False)
         
@@ -511,11 +511,11 @@ class OptimizationWidget(QWidget):
         self.parallelEdit.setEnabled(False)
         self.problemEdit.setEnabled(False)
         
-        Pro.initProject(self.verbose, self.optimizationBtn)
+        Pro.initOP(self.verbose, self.optimizationBtn)
         
     def optimizing(self):
         
-        Pro.problemInfos['name']=self.problemEdit.text()
+        Pro.OP_problemInfos['name']=self.problemEdit.text()
         
         self.resetChange.emit(False)
         self.optimizationBtn.setEnabled(False)
@@ -583,18 +583,10 @@ class ConclusionWidget(QWidget):
         vBoxLayout.addSpacing(10)
         ############################
         
-        #TODO
-        # h=QHBoxLayout()
-        # self.applyBtn=PrimaryPushButton("Apply optimal parameters to SWAT")
-        # setFont(self.applyBtn)
-        # h.addStretch(1); h.addWidget(self.applyBtn); h.addStretch(1)
-        # vBoxLayout.addLayout(h)
-        # vBoxLayout.addSpacing(10)
-        
     def updateUI(self):
         
         self.verbose.append("")
-        self.verbose.append("".join(Pro.OPResult['verbose']))
+        self.verbose.append("".join(Pro.OP_result['verbose']))
         
 class RadioWidget(QWidget):
     
@@ -659,4 +651,3 @@ class RadioWidget(QWidget):
             self.clearBtn.emit()
             self.mop.emit()
             self.nextBtn.emit(True)
-
