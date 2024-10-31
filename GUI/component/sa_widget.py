@@ -68,7 +68,6 @@ class SAWidget(QFrame):
         vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         
-        
         #connect
         self.nextButton.clicked.connect(self.nextPage)
         self.setupWidget.nextBtn.connect(self.nextButton.setEnabled)
@@ -84,11 +83,18 @@ class SAWidget(QFrame):
         self.setupWidget.updateUI()
     
     def reset(self):
-        Pro.SAInfos=None
-        Pro.SAResult=None
-        Pro.paraInfos=None
-        Pro.problemInfos=None
-        Pro.objInfos=None
+        
+        Pro.SA_objInfos={}
+        Pro.SA_paraInfos={}
+        Pro.SA_problemInfos={}
+        Pro.SA_result={}
+        Pro.SA_runInfos={}
+        Pro.SA_infos={}
+        # Pro.SAInfos={}
+        # Pro.SAResult={}
+        # Pro.paraInfos=None
+        # Pro.problemInfos=None
+        # Pro.objInfos=None
         
         self.contentWidget.setCurrentIndex(0)
         self.setupWidget.reset()
@@ -104,7 +110,7 @@ class SAWidget(QFrame):
 
             sa=widget.SA_METHOD[widget.saBtnGroup.currentIndex]
             sm=widget.SAMPLE_METHOD[widget.smBtnGroup.currentIndex]
-            Pro.SAInfos={'saName': sa, 'saClass': Pro.SA_METHOD[sa],'saHyper': hyper[Pro.SA_METHOD[sa]],
+            Pro.SA_infos={'saName': sa, 'saClass': Pro.SA_METHOD[sa],'saHyper': hyper[Pro.SA_METHOD[sa]],
                          'smName': sm,'smClass' : Pro.SAMPLE_METHOD[sm],'smHyper': hyper[Pro.SAMPLE_METHOD[sm]]}
             
         self.INDEX+=1
@@ -126,6 +132,12 @@ class SetupWidget(QWidget):
         gridLayout=QGridLayout(contentWidget)
         gridLayout.setVerticalSpacing(10)
         gridLayout.setContentsMargins(0, 0, 0, 0)
+        ####
+        label=BodyLabel("Parameter File:")
+        label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        setFont(label)
+        gridLayout.addWidget(label, 0, 1, Qt.AlignmentFlag.AlignVCenter)
+        
         
         self.paraEdit=ComboBox(self )
         self.paraEdit.currentIndexChanged.connect(self.loadParaFile)
@@ -133,13 +145,8 @@ class SetupWidget(QWidget):
         self.paraEdit._showComboMenu=self.dynamicShowPara
         setFont(self.paraEdit)
         self.paraEdit.setPlaceholderText("Click to select parameter file")
-        
-        label=BodyLabel("Parameter File:")
-        label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        setFont(label)
-        gridLayout.addWidget(label, 0, 1, Qt.AlignmentFlag.AlignVCenter)
         gridLayout.addWidget(self.paraEdit, 0, 2, Qt.AlignmentFlag.AlignVCenter)
-        
+        ##########
         label=BodyLabel("Number of Parameters:")
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
         setFont(label)
@@ -201,8 +208,6 @@ class SetupWidget(QWidget):
         self.SA_METHOD=list(Pro.SA_METHOD.keys())
         gridLayout.addWidget(self.saBtnGroup, 3, 2, 1, 4, Qt.AlignmentFlag.AlignVCenter)
         
-        # w=QWidget();w.setFixedHeight(1);w.setMinimumWidth(300)
-        # gridLayout.addWidget(w, 4, 2)
         label=BodyLabel("Sampling Method:")
         
         label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -242,6 +247,8 @@ class SetupWidget(QWidget):
         self.saBtnGroup.group.idClicked.connect(self.updateHyper)
         self.smBtnGroup.group.idClicked.connect(self.updateHyper)
         self.saBtnGroup.group.buttonClicked.connect(self.updateNextButton)
+        
+        # self.reset()
         
     def activateSABtn(self):
         
@@ -317,7 +324,7 @@ class SetupWidget(QWidget):
         self.hyperStack.setCurrentIndex(0)
         
     def updateUI(self):
-        pass 
+        pass
     
     def loadParaFile(self):
         
@@ -326,8 +333,8 @@ class SetupWidget(QWidget):
         infos=Pro.importParaFromFile(path)
         self.numPara.setText(str(len(infos)))
         
-        Pro.paraInfos=infos
-        Pro.projectInfos['paraPath']=path
+        Pro.SA_paraInfos=infos
+        Pro.SA_runInfos['paraPath']=path
         
     def loadObjFile(self):
         
@@ -339,32 +346,19 @@ class SetupWidget(QWidget):
         self.objEdit.clear()
         self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
         self.objEdit.setCurrentIndex(0)
-        Pro.projectInfos['objPath']=path
+        
+        Pro.SA_runInfos['objPath']=path
         
     def ensureObj(self):
         
         objID=int(self.objEdit.text().split()[1])
-        Pro.objInfos={objID: self.objInfos[objID]}
-        
-    def openParaDialog(self):
-        
-        path, success=QFileDialog.getOpenFileName(self, "Open File", "", "Parameter Files (*.par)")
-        if success:
-            self.paraEdit.setText(path)
-            self.paraBtn.setEnabled(True)
-     
-    def openProDialog(self):
-        
-        path, success=QFileDialog.getOpenFileName(self, "Open File", "", "Objective Files (*.obj)")
-        
-        if success:
-            self.objLine.setText(path)
-            self.proBtn.setEnabled(True)        
-
+        Pro.SA_objInfos={objID: self.objInfos[objID]}
+      
     def updateNextButton(self):
         
         selectedSA=self.saBtnGroup.group.checkedButton()
         selectedSampling=self.smBtnGroup.group.checkedButton()
+        
         if selectedSA and selectedSampling:
             self.parent().parent().nextButton.setEnabled(True)
         else:
@@ -506,7 +500,7 @@ class SimulationWidget(QWidget):
         
     def swatChanged(self):
         
-        Pro.projectInfos['swatExe']=self.swatEdit.currentText()
+        Pro.SA_runInfos['swatExe']=self.swatEdit.currentText()
     
     def initialize(self):
         #
@@ -515,27 +509,27 @@ class SimulationWidget(QWidget):
         averWidth = fontMetrics.averageCharWidth()
         nChars=textWidth // averWidth
         self.verbose.setProperty('totalWidth', nChars)
-        Pro.verboseWidth=nChars
+        Pro.SA_runInfos['verboseWidth']=nChars
         #
-        
+        Pro.SA_runInfos['window']=self.parent().parent().parent()
         Pro.window=self.parent().parent().parent()
-        Verbose.total_width=self.verbose.document().idealWidth()
+        # Verbose.total_width=self.verbose.document().idealWidth()
         
         numParallel=int(self.parallelEdit.value())
         
-        Pro.projectInfos['numParallel']=numParallel
-        Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
+        Pro.SA_runInfos['numParallel']=numParallel
+        Pro.SA_runInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'temp')
         
         self.swatEdit.setEnabled(False)
         self.parallelEdit.setEnabled(False)
         self.initializeBtn.setEnabled(False)
         self.problemEdit.setEnabled(False)
         
-        Pro.initProject(self.verbose, self.samplingBtn)
+        Pro.initSA(self.verbose, self.samplingBtn)
         
     def sampling(self):
         
-        Pro.problemInfos['name']=self.problemEdit.text()
+        Pro.SA_problemInfos['name']=self.problemEdit.text()
         
         success=Pro.sampling()
         
@@ -572,7 +566,7 @@ class SimulationWidget(QWidget):
         self.verbose.append("Canceling... Please wait!\n")
         
     def finish(self):
-        
+        self.cancelBtn.setEnabled(False)
         self.verbose.append("Simulation Done. Please click the next to execute analysis!\n")
         self.nextBtn.emit(True)
         self.resetBtn.emit(True)
@@ -601,14 +595,14 @@ class AnalysisWidget(QWidget):
         
     def updateUI(self):
         
-        SAInfos=Pro.SAInfos
+        SAInfos=Pro.SA_infos
         
         saName=SAInfos['saName']
         smName=SAInfos['smName']
         self.textWidget.append(f"Sensibility Analysis you selected: {saName}\n")
         self.textWidget.append(f"The used data set is sampled by {smName}\n")
         
-        result=Pro.SAResult
+        result=Pro.SA_result
         
         self.textWidget.append(f"The size of the data set is {result['Y'].size}\n")
         

@@ -2,6 +2,7 @@
 import re
 import os
 import queue
+import time
 import itertools
 import numpy as np
 import pandas as pd
@@ -16,14 +17,15 @@ from PyQt5.QtCore import QThread, QObject, pyqtSignal
 from .pyd.swat_utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
 class VerboseWorker(QObject):
     
-    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, verboseWidth):
+    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, runInfos):
         
         self.projectInfos=projectInfos
         self.modelInfos=modelInfos
+        self.runInfos=runInfos
         self.paraInfos=paraInfos
         self.objInfos=objInfos
 
-        self.verboseWidth=verboseWidth
+        self.verboseWidth=runInfos['verboseWidth']
         
     def outputVerbose(self):
         
@@ -35,12 +37,11 @@ class VerboseWorker(QObject):
         
         verboseInfos.append(f"The path of SWAT project is: {self.projectInfos['swatPath']}")
         verboseInfos.append(f"The path of UQ project is {self.projectInfos['projectPath']}") 
-        verboseInfos.append(f"The file name of optimizing parameters is: {self.projectInfos['paraPath']}") #TODO
-        verboseInfos.append(f"The file name of observed data is: {self.projectInfos['objPath']}") #TODO
-        verboseInfos.append(f"The name of SWAT executable is: {self.projectInfos['swatExe']}")
-        verboseInfos.append(f"Temporary directory has been created in: {self.projectInfos['tempPath']}")
-        verboseInfos.append(f"The number of thread to run SWAT: {self.projectInfos['numParallel']}")
-        # verboseInfos.append("="*len(title))
+        verboseInfos.append(f"The file name of optimizing parameters is: {self.runInfos['paraPath']}") #TODO
+        verboseInfos.append(f"The file name of observed data is: {self.runInfos['objPath']}") #TODO
+        verboseInfos.append(f"The name of SWAT executable is: {self.runInfos['swatExe']}")
+        verboseInfos.append(f"Temporary directory has been created in: {self.runInfos['tempPath']}")
+        verboseInfos.append(f"The number of subprocess to run SWAT: {self.runInfos['numParallel']}")
         
         ####################Model Information#############################
         title="Model Information"
@@ -311,9 +312,9 @@ class InitWorker(QObject):
     def __init__(self):
         super().__init__()
 
-    def initQThread(self, projectInfos, modelInfos, paraInfos, objInfos):
+    def initQThread(self, projectInfos, modelInfos, paraInfos, objInfos, runInfos):
         
-        defaultVar=self.recordDefault(projectInfos, paraInfos, modelInfos)
+        defaultVar=self.recordDefault(projectInfos, paraInfos, modelInfos, runInfos)
         
         problemInfos=self.initProblem(paraInfos)
         
@@ -323,17 +324,17 @@ class InitWorker(QObject):
         
         problemInfos['defaultVar']=defaultVar
         
-        projectInfos=self.generateTempPath(projectInfos)
+        runInfos=self.generateTempPath(projectInfos, runInfos)
         
         objInfos=self.initObj(objInfos, modelInfos)
         
-        self.result.emit({"problemInfos": problemInfos, 'projectInfos': projectInfos, 'objInfos': objInfos})
+        self.result.emit({"problemInfos": problemInfos, 'runInfos': runInfos, 'objInfos': objInfos})
 
-    def generateTempPath(self, projectInfos):
+    def generateTempPath(self, projectInfos, runInfos):
         
         swatPath=projectInfos['swatPath']
-        numParallel=projectInfos['numParallel']
-        tempPath=projectInfos['tempPath']
+        numParallel=runInfos['numParallel']
+        tempPath=runInfos['tempPath']
         tempSwatDirs=[]
         
         if not os.path.exists(tempPath):
@@ -342,22 +343,23 @@ class InitWorker(QObject):
         now_time=datetime.now().strftime("%m%d_%H%M%S")
         tempPath=os.path.join(tempPath, now_time)
         os.makedirs(tempPath)
-        projectInfos['tempPath']=tempPath
+        runInfos['tempPath']=tempPath
         
         for i in range(numParallel):
             
             path=os.path.join(tempPath, f"instance_{i}")
             
             tempSwatDirs.append(path)
+            
+        runInfos['tempSwatDirs']=tempSwatDirs
         
-        projectInfos['tempSwatDirs']=tempSwatDirs
-        
-        with ThreadPoolExecutor(max_workers=projectInfos['numParallel']) as executor:
+        with ThreadPoolExecutor(max_workers=runInfos['numParallel']) as executor:
             futures = [executor.submit(copy_origin_to_tmp, swatPath, work_temp) for work_temp in tempSwatDirs]
+        
         for future in as_completed(futures):
             future.result()    
         
-        return projectInfos
+        return runInfos
         
     def initModel(self, projectInfos):
         
@@ -523,7 +525,7 @@ class InitWorker(QObject):
         
         return problemInfos
         
-    def recordDefault(self, projectInfos, paraInfos, modelInfos):
+    def recordDefault(self, projectInfos, paraInfos, modelInfos, runInfos):
         totalParaInfos=modelInfos["totalParaList"]
         hruSuffix=["chm", "gw", "hru", "mgt", "sdr", "sep", "sol"]
         subBasinSuffix=["pnd", "rte", "sub", "swq", "wgn", "wus"]
@@ -593,7 +595,7 @@ class InitWorker(QObject):
                 file_var[file]["position"].append(position)
                 file_var[file]["type"].append(data_type_)
          
-        with ThreadPoolExecutor(max_workers=projectInfos["numThreads"]) as executor:
+        with ThreadPoolExecutor(max_workers=runInfos["numThreads"]) as executor:
             futures=[]
             for file_name, infos in file_var.items():
                 futures.append(executor.submit(read_value_swat, projectInfos["swatPath"], file_name, infos["name"], infos["position"], 1))
@@ -650,18 +652,19 @@ class RunWorker(QObject):
     unfinished=pyqtSignal()
     start=pyqtSignal(object)
     stop=False
-    def __init__(self, projectInfos, modelInfos, paraInfos, objInfos, problemInfos):
+    
+    def __init__(self, modelInfos, paraInfos, objInfos, problemInfos, runInfos):
         
-        self.projectInfos=projectInfos
         self.modelInfos=modelInfos
         self.paraInfos=paraInfos
         self.objInfos=objInfos
+        self.runInfos=runInfos
         
-        self.numParallel=projectInfos['numParallel']
-        self.numThreads=projectInfos['numThreads']
-        swatDirs=projectInfos['tempSwatDirs']
+        self.numParallel=runInfos['numParallel']
+        self.numThreads=runInfos['numThreads']
+        swatDirs=runInfos['tempSwatDirs']
         self.file_var=problemInfos['defaultVar']
-        self.swatExe=projectInfos['swatExe']
+        self.swatExe=runInfos['swatExe']
         self.objInfos=objInfos
         self.nRch=modelInfos['nRch']
         self.nOutput=problemInfos['nOutput']
@@ -748,13 +751,11 @@ class RunWorker(QObject):
             workPath=self.workPath.get()
             self.setValues(workPath, x)
             
-            
-            # 创建 STARTUPINFO 对象
+
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             startupinfo.wShowWindow = subprocess.SW_HIDE
-
-
+            
             subprocess.run(
                 [os.path.join(workPath, self.swatExe)],
                 cwd=workPath,
@@ -762,20 +763,9 @@ class RunWorker(QObject):
                 stderr=subprocess.DEVNULL, 
                 stdin=subprocess.DEVNULL,
                 text=True,
-                creationflags=subprocess.CREATE_NO_WINDOW,  # 如果需要的话
-                startupinfo=startupinfo  # 添加这一行
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                startupinfo=startupinfo 
             )
-
-            # process = subprocess.Popen(
-            #     os.path.join(workPath, self.swatExe),
-            #     shell=True,
-            #     cwd=workPath,
-            #     stdout=subprocess.PIPE, 
-            #     stderr=subprocess.DEVNULL, 
-            #     stdin=subprocess.DEVNULL,
-            #     text=True
-            # )
-            # process.wait()
 
             objs=[]
             simData={}
@@ -820,6 +810,11 @@ class RunWorker(QObject):
         self.updateProcess.emit(self.count)
         
         with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
+            
+            # for i in range(n):
+            #     time.sleep(1)
+            #     futures.append(executor.submit(self._subprocess, X[i, :], i))
+            
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
             
             for future in as_completed(futures):
@@ -903,17 +898,17 @@ class NewThread(QThread):
 
 class InitThread(QThread):
     
-    def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos):
+    def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos, runInfos):
         super().__init__()
         self.worker=worker
         self.projectInfos=projectInfos
         self.modelInfos=modelInfos
         self.paraInfos=paraInfos
         self.objInfos=objInfos
-    
+        self.runInfos=runInfos
     def run(self):
         
-        self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos)
+        self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos, self.runInfos)
 
 class IterEmit(QObject):
     

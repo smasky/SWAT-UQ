@@ -74,12 +74,25 @@ class Project:
              'Morris Sequence' : 'nt*(nInput+1)',
              'Saltelli Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
+    window=None;
+    #Basic Infos
+    projectInfos=None; modelInfos=None
     
-    window=None; projectInfos=None; modelInfos=None; paraInfos=None; proInfos=None; objInfos=None
-    problemInfos=None; SAInfos=None; SAResult=None; OPInfos=None; OPResult=None
+    #
+    paraInfos=None; objInfos=None; problemInfos=None
+    
+    #Sensibility Analysis
+    SA_paraInfos={}; SA_runInfos={}; SA_objInfos={}; SA_problemInfos={}
+    SA_result={}; SA_infos={}
+    #Optimization
+    OP_paraInfos=None; OP_runInfos=None; OP_objInfos=None; OP_problemInfos=None
+    OP_result=None
+    #Validation
+    Val_paraInfos=None; Val_runInfos=None; Val_objInfos=None; Val_problemInfos=None
+    Val_result=None
+    
+    OPInfos=None; OPResult=None
     ValResult=None
-    
-    verboseWidth=None
     
     btnSets=[]
     
@@ -116,8 +129,6 @@ class Project:
 
         cls.loadModel(close, activate, writeProjectFile)
         
-            
-
     @classmethod
     def loadModel(cls, close, activate, writeProjectFile):
         
@@ -320,12 +331,45 @@ class Project:
         name=[os.path.basename(file_path) for file_path in exe_name]
 
         return name
+    ##############sensibility analysis####################
+    @classmethod
+    def initSA(cls, verboseWidget, btn):
+        
+        cls.SA_runInfos["numThreads"]=12 
+
+        cls.worker = InitWorker()
+        cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_runInfos)
+        
+        Verbose.workDir=cls.projectInfos['projectPath']
+        Verbose.total_width=verboseWidget.property('totalWidth')
+        
+        def accept(infos):
+            
+            cls.SA_problemInfos=infos["problemInfos"]
+            cls.SA_runInfos=infos["runInfos"]
+            cls.SA_objInfos=infos['objInfos']
+            cls.thread.quit()
+            cls.thread.deleteLater()
+            
+            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_runInfos)
+            
+            verbose=worker.outputVerbose()
+            
+            text="\n".join(verbose)
+            
+            verboseWidget.setText(text)
+            verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
+
+            btn.setEnabled(True)
+            
+        cls.worker.result.connect(accept)
+        cls.thread.start()
     
     @classmethod
     def sampling(cls):
         
-        SAInfos=cls.SAInfos
-        paraInfos=cls.paraInfos
+        SAInfos=cls.SA_infos
+        paraInfos=cls.SA_paraInfos
         
         lb=np.array([float(para[3]) for para in paraInfos])
         ub=np.array([float(para[4]) for para in paraInfos])
@@ -353,8 +397,7 @@ class Project:
             
             X=sampler.sample(**sampleHyper) 
             X=X*(ub-lb)+lb
-            cls.SAResult={}
-            cls.SAResult['X']=X
+            cls.SA_result['X']=X
             
             return True
         
@@ -363,29 +406,11 @@ class Project:
             cls.showError(f"Sampling failed, please check the hyperparameters!\n The error is {e}")
             
             return False
-    
-    @classmethod
-    def singleSim(cls, x, finish):
         
-        
-        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
-        cls.thread=SingleEvaluateThread(cls.worker, x)
-        
-        
-        def accept(res):
-            
-            cls.ValResult=res
-        
-        cls.worker.result.connect(accept)
-        cls.worker.result.connect(finish)
-        cls.thread.finished.connect(cls.thread.deleteLater)
-        cls.thread.start()
-    
-    
     @classmethod 
     def simulation(cls, processBar, statistics, finish, unfinish):
         
-        tolN=cls.SAResult['X'].shape[0]
+        tolN=cls.SA_result['X'].shape[0]
         
         def update_progress(value):
             
@@ -395,16 +420,109 @@ class Project:
         
         def accept(Y):
             
-            cls.SAResult['Y']=abs(Y)
+            cls.SA_result['Y']=abs(Y)
         
-        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
+        cls.worker=RunWorker(cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_problemInfos, cls.SA_runInfos)
         cls.worker.result.connect(accept)
         cls.worker.result.connect(finish)
         cls.worker.unfinished.connect(unfinish)
-        cls.thread=EvaluateThread(cls.worker, cls.SAResult['X'])
-        cls.worker.updateProcess.connect(update_progress)
-        cls.thread.finished.connect(cls.thread.deleteLater)  # 确保线程完成后被清理
         
+        cls.thread=EvaluateThread(cls.worker, cls.SA_result['X'])
+        cls.worker.updateProcess.connect(update_progress)
+        cls.thread.finished.connect(cls.thread.deleteLater)
+        
+        cls.thread.start()
+    
+    @classmethod
+    def sensibility_analysis(cls, verboseWidget):
+        
+        SAInfos=cls.SA_infos
+        initHyper={}
+        analyzeHyper={}
+        saClass=SAInfos['saClass']
+        saHyper=SAInfos['saHyper']
+        smHyper=SAInfos['smHyper']
+        
+        for hyper in smHyper:
+            if 'share' in hyper:
+                name=hyper['name']
+                func=hyper['share']
+                value=hyper['value']
+                if func=="__init__":
+                    initHyper[name]=value
+                else:
+                    analyzeHyper[name]=value
+                     
+        for hyper in saHyper:
+            name=hyper['name']
+            func=hyper['method']
+            value=hyper['value']
+            if name=="Z-score":
+                if value:
+                    value=(StandardScaler(0,1), StandardScaler(0,1))
+                else:
+                    value=(None, None)
+                    
+                initHyper["scalers"]=value
+        
+                continue
+        
+            if func=="__init__":
+                
+                initHyper[name]=value
+            else:  
+                analyzeHyper[name]=value
+        
+        initHyper['verbose']=True
+        initHyper['saveFlag']=True
+        
+        sa=eval(saClass)(**initHyper)
+        
+        analyzeHyper['X']=cls.SA_result['X']
+        analyzeHyper['Y']=cls.SA_result['Y']
+        
+        ub=cls.SA_problemInfos['ub']
+        lb=cls.SA_problemInfos['lb']
+        nInput=cls.SA_problemInfos['nInput']
+        xLabels=cls.SA_problemInfos['xLabels']
+        
+        problem=PracticalProblem(None, nInput, 1, ub, lb, x_labels=xLabels, name=cls.SA_problemInfos['name'])
+        #TODO
+        problem.workDir=cls.projectInfos['projectPath']
+        problem.totalWidth=cls.SA_runInfos['verboseWidth']
+        problem.GUI=True
+        # verbose=[]
+        
+        # def write_verbose(text):
+        #     verbose.append(text)
+        
+        # def flush():
+        #     pass
+        
+        #TODO
+        # origin=sys.stdout
+        # sys.stdout.write = write_verbose
+        # sys.stdout.flush = flush
+        
+        sa.analyze(problem=problem, **analyzeHyper)
+        
+        # sys.stdout=origin
+        
+        verboseWidget.append("\n".join(sa.problem.logLines))
+    
+    ##################################################
+    @classmethod
+    def singleSim(cls, x, finish):
+        
+        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
+        cls.thread=SingleEvaluateThread(cls.worker, x)
+        
+        def accept(res):
+            cls.ValResult=res
+        
+        cls.worker.result.connect(accept)
+        cls.worker.result.connect(finish)
+        cls.thread.finished.connect(cls.thread.deleteLater)
         cls.thread.start()
     
     @classmethod
@@ -497,120 +615,8 @@ class Project:
         cls.thread.finished.connect(saveResult)
         cls.thread.start()
         
-    @classmethod
-    def initProject(cls, verboseWidget, btn):
-        
-        cls.projectInfos["numThreads"]=12 
-
-        cls.worker = InitWorker()
-        cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos)
-        
-        Verbose.workDir=cls.projectInfos['projectPath']
-        Verbose.total_width=verboseWidget.property('totalWidth')
-        
-        def accept(infos):
-            
-            cls.problemInfos=infos["problemInfos"]
-            cls.projectInfos=infos['projectInfos']
-            cls.objInfos=infos['objInfos']
-            cls.thread.quit()
-            cls.thread.deleteLater()
-            
-            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.verboseWidth)
-            
-            verbose=worker.outputVerbose()
-            
-            text="\n".join(verbose)
-            
-            verboseWidget.setText(text)
-            verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
-
-            btn.setEnabled(True)
-            
-        cls.worker.result.connect(accept)
-        cls.thread.start()
     
-    @classmethod
-    def sensibility_analysis(cls, verboseWidget):
-        
-        SAInfos=cls.SAInfos
-        initHyper={}
-        analyzeHyper={}
-        saClass=SAInfos['saClass']
-        saHyper=SAInfos['saHyper']
-        smHyper=SAInfos['smHyper']
-        
-        for hyper in smHyper:
-            
-            if 'share' in hyper:
-                
-                name=hyper['name']
-                func=hyper['share']
-                value=hyper['value']
-               
-                if func=="__init__":
-                    initHyper[name]=value
-                else:
-                    analyzeHyper[name]=value 
-        
-        for hyper in saHyper:
-            
-            name=hyper['name']
-            func=hyper['method']
-            value=hyper['value']
-            
-            if name=="Z-score":
-                
-                if value:
-                    value=(StandardScaler(0,1), StandardScaler(0,1))
-                else:
-                    value=(None, None)
-                    
-                initHyper["scalers"]=value
-                
-                continue
-            
-            if func=="__init__":
-                
-                initHyper[name]=value
-                
-            else:
-                
-                analyzeHyper[name]=value
-        
-        initHyper['verbose']=True
-        initHyper['saveFlag']=True
-        
-        sa=eval(saClass)(**initHyper)
-        
-        analyzeHyper['X']=cls.SAResult['X']
-        analyzeHyper['Y']=cls.SAResult['Y']
-        
-        ub=cls.problemInfos['ub']
-        lb=cls.problemInfos['lb']
-        nInput=cls.problemInfos['nInput']
-        xLabels=cls.problemInfos['xLabels']
-        
-        problem=PracticalProblem(None, nInput, 1, ub, lb, x_labels=xLabels, name=cls.problemInfos['name'])
-        
-        verbose=[]
-        
-        def write_verbose(text):
-            
-            verbose.append(text)
-        
-        def flush():
-            pass
-        
-        origin=sys.stdout
-        sys.stdout.write = write_verbose
-        sys.stdout.flush = flush
-        
-        sa.analyze(problem=problem, **analyzeHyper)
-        
-        sys.stdout=origin
-        
-        verboseWidget.append("".join(verbose))
+   
         
     @classmethod
     def showError(cls, error):
@@ -632,7 +638,6 @@ class Project:
         cls.projectInfos=None
         cls.modelInfos=None
         cls.paraInfos=None
-        cls.proInfos=None
         cls.objInfos=None
         cls.problemInfos=None
         cls.SAInfos=None

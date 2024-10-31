@@ -37,3 +37,5 @@ class ProDefine(ScrollArea):
         with path(GUI.qss, "problem_define.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
+                
+        
