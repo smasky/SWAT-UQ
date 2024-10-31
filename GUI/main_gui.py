@@ -91,6 +91,9 @@ class MainWindow(FluentWindow):
         
         for btn in Pro.btnSets:
             setFont(btn, 16)
+        
+        for btn in Pro.btnSets[1:]:
+            btn.setEnabled(False)
 
     def switchTo(self, interface):
         

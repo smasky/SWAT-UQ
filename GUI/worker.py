@@ -867,7 +867,11 @@ class OptimizeThread(QThread):
         ub=problemInfos['ub']
         xLabels=problemInfos['xLabels']
         self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels, name=problemInfos['name'])
-         
+    
+    def run1(self):
+        
+        self.optimizer.run(self.problem)
+    
     def run(self):
     
         self.optimizer.run(self.problem)

@@ -74,7 +74,7 @@ class Project:
              'Morris Sequence' : 'nt*(nInput+1)',
              'Saltelli Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
-    window=None;
+    window=None
     #Basic Infos
     projectInfos=None; modelInfos=None
     
@@ -85,14 +85,11 @@ class Project:
     SA_paraInfos={}; SA_runInfos={}; SA_objInfos={}; SA_problemInfos={}
     SA_result={}; SA_infos={}
     #Optimization
-    OP_paraInfos=None; OP_runInfos=None; OP_objInfos=None; OP_problemInfos=None
-    OP_result=None
+    OP_paraInfos={}; OP_runInfos={}; OP_objInfos={}; OP_problemInfos={}
+    OP_result={}; OP_infos={}
     #Validation
-    Val_paraInfos=None; Val_runInfos=None; Val_objInfos=None; Val_problemInfos=None
-    Val_result=None
-    
-    OPInfos=None; OPResult=None
-    ValResult=None
+    Val_paraInfos={}; Val_runInfos={}; Val_objInfos={}; Val_problemInfos={}
+    Val_result={}
     
     btnSets=[]
     
@@ -491,39 +488,46 @@ class Project:
         problem.workDir=cls.projectInfos['projectPath']
         problem.totalWidth=cls.SA_runInfos['verboseWidth']
         problem.GUI=True
-        # verbose=[]
-        
-        # def write_verbose(text):
-        #     verbose.append(text)
-        
-        # def flush():
-        #     pass
-        
-        #TODO
-        # origin=sys.stdout
-        # sys.stdout.write = write_verbose
-        # sys.stdout.flush = flush
-        
+
         sa.analyze(problem=problem, **analyzeHyper)
         
-        # sys.stdout=origin
-        
         verboseWidget.append("\n".join(sa.problem.logLines))
+    #################################################
+    @classmethod
+    def initOP(cls, verboseWidget, btn):
+        
+        cls.OP_runInfos["numThreads"]=12 
+
+        cls.worker = InitWorker()
+        cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.OP_paraInfos, cls.OP_objInfos, cls.OP_runInfos)
+        
+        Verbose.workDir=cls.projectInfos['projectPath']
+        Verbose.total_width=verboseWidget.property('totalWidth')
+        
+        def accept(infos):
+            
+            cls.OP_problemInfos=infos["problemInfos"]
+            cls.OP_runInfos=infos["runInfos"]
+            cls.OP_objInfos=infos['objInfos']
+            cls.thread.quit()
+            cls.thread.deleteLater()
+            
+            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.OP_paraInfos, cls.OP_objInfos, cls.OP_runInfos)
+            
+            verbose=worker.outputVerbose()
+            
+            text="\n".join(verbose)
+            
+            verboseWidget.setText(text)
+            verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
+
+            btn.setEnabled(True)
+            
+        cls.worker.result.connect(accept)
+        cls.thread.start()
     
     ##################################################
-    @classmethod
-    def singleSim(cls, x, finish):
-        
-        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
-        cls.thread=SingleEvaluateThread(cls.worker, x)
-        
-        def accept(res):
-            cls.ValResult=res
-        
-        cls.worker.result.connect(accept)
-        cls.worker.result.connect(finish)
-        cls.thread.finished.connect(cls.thread.deleteLater)
-        cls.thread.start()
+    
     
     @classmethod
     def cancelSA(cls):
@@ -534,15 +538,15 @@ class Project:
     def cancelOpt(cls):
         
         cls.worker.stop=True
-        Verbose.isStop=True
+        cls.thread.problem.isStop=True
     
     @classmethod
     def optimizing(cls, FEsBar, itersBar, FEsLabel, itersLabel, verbose, finish, unfinish):
         
-        cls.OPResult={}
-        cls.OPResult['verbose']=[]
+        cls.OP_result={}
+        cls.OP_result['verbose']=[]
         
-        opInfos=cls.OPInfos
+        opInfos=cls.OP_infos
         
         opClass=opInfos['opClass']
         opHyper=opInfos['opHyper']
@@ -580,44 +584,89 @@ class Project:
             
         def update_verbose(txt):
             
-            cls.OPResult['verbose'].append(txt+'\n')
+            cls.OP_result['verbose'].append(txt+'\n')
             verbose.append(txt+'\n')
-        
-        def reset():
-            
-            Verbose.isStop=False
-            Verbose.iterEmit=None
-            Verbose.verboseEmit=None
-        
+             
         def saveResult():
             
-            cls.OPResult['bestDec']=optimizer.result.bestDec
-            cls.OPResult['bestObj']=optimizer.result.bestObj
-            cls.OPResult['historyBestDecs']=optimizer.result.historyBestDecs
-            cls.OPResult['historyBestObjs']=optimizer.result.historyBestObjs
+            cls.OP_result['bestDec']=optimizer.result.bestDec
+            cls.OP_result['bestObj']=optimizer.result.bestObj
+            cls.OP_result['historyBestDecs']=optimizer.result.historyBestDecs
+            cls.OP_result['historyBestObjs']=optimizer.result.historyBestObjs
         
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
-        cls.worker=RunWorker(cls.projectInfos, cls.modelInfos, cls.paraInfos, cls.objInfos, cls.problemInfos)
-        cls.worker.updateProcess.connect(update_FEsBar)
-        iterEmit.iterSend.connect(update_itersBar)
         
-        Verbose.iterEmit=iterEmit
-        Verbose.verboseEmit=verboseEmit
-        Verbose.isStop=False
-
+        cls.worker=RunWorker(cls.modelInfos, cls.OP_paraInfos, cls.OP_objInfos, cls.OP_problemInfos, cls.OP_runInfos)
+        cls.worker.updateProcess.connect(update_FEsBar)
+        
+        iterEmit.iterSend.connect(update_itersBar)
         verboseEmit.verboseSend.connect(update_verbose)
-        cls.thread=OptimizeThread(cls.worker, optimizer, cls.problemInfos)
+
+        cls.thread=OptimizeThread(cls.worker, optimizer, cls.OP_problemInfos)
+        
+        cls.thread.problem.GUI=True
+        cls.thread.problem.iterEmit=iterEmit
+        cls.thread.problem.verboseEmit=verboseEmit
+        cls.thread.problem.isStop=False
+        cls.thread.problem.totalWidth=cls.OP_runInfos['verboseWidth']
+        cls.thread.problem.workDir=cls.projectInfos['projectPath']
+        
         cls.thread.finished.connect(cls.thread.deleteLater)
         iterEmit.iterFinished.connect(finish)
         iterEmit.iterStop.connect(unfinish)
-        cls.thread.finished.connect(reset)
         cls.thread.finished.connect(saveResult)
+    
+        cls.thread.start()
+    ################################
+    @classmethod
+    def initVal(cls, verboseWidget, btn):
+        
+        cls.Val_runInfos["numThreads"]=12 
+
+        cls.worker = InitWorker()
+        cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_runInfos)
+        
+        Verbose.workDir=cls.projectInfos['projectPath']
+        Verbose.total_width=verboseWidget.property('totalWidth')
+        
+        def accept(infos):
+            
+            cls.Val_problemInfos=infos["problemInfos"]
+            cls.Val_runInfos=infos["runInfos"]
+            cls.Val_objInfos=infos['objInfos']
+            cls.thread.quit()
+            cls.thread.deleteLater()
+            
+            worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_runInfos)
+            
+            verbose=worker.outputVerbose()
+            
+            text="\n".join(verbose)
+            
+            verboseWidget.setText(text)
+            verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
+
+            btn.setEnabled(True)
+            
+        cls.worker.result.connect(accept)
         cls.thread.start()
         
-    
-   
+    @classmethod
+    def singleSim(cls, x, finish):
         
+        cls.worker=RunWorker(cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_problemInfos, cls.Val_runInfos)
+        cls.thread=SingleEvaluateThread(cls.worker, x)
+        
+        def accept(res):
+            cls.Val_result=res
+        
+        cls.worker.result.connect(accept)
+        cls.worker.result.connect(finish)
+        cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.thread.start()
+    
+    
     @classmethod
     def showError(cls, error):
          

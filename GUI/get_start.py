@@ -200,7 +200,6 @@ class GetStart(ScrollArea):
         QDesktopServices.openUrl(url)
         
     def activateBtn(self):
-        #TODO
         btnSets=Project.btnSets
         
         for btn in btnSets[1:]:

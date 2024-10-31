@@ -38,5 +38,3 @@ class Validation(ScrollArea):
         with path(GUI.qss, "validation.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
-    
-    

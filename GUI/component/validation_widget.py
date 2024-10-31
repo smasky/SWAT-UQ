@@ -116,7 +116,7 @@ class ValidationWidget(QFrame):
         vMainLayout.addWidget(self.table)
         
         self.verbose=TextEdit(self);self.verbose.setReadOnly(True)
-        font = QFont("Consolas", pointSize=8)
+        font = QFont("Consolas", pointSize=12)
         font.setStyleHint(QFont.Monospace) 
         self.verbose.setFont(font)
         self.verbose.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -219,19 +219,19 @@ class ValidationWidget(QFrame):
         for info in infos:
             self.table.addRows_(info)
             
-        Pro.paraInfos=infos #TODO
-        Pro.projectInfos['paraPath']=path
+        Pro.Val_paraInfos=infos #TODO
+        Pro.Val_runInfos['paraPath']=path
         
         objFile=self.objFileBox.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], objFile)
         infos=Pro.importProFromFile(path)
       
-        Pro.objInfos=infos #TODO
-        Pro.projectInfos['objPath']=path
+        Pro.Val_objInfos=infos #TODO
+        Pro.Val_runInfos['objPath']=path
         
-        Pro.projectInfos['numParallel']=1
-        Pro.projectInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'validation') #TODO
-        Pro.projectInfos['swatExe']=self.swatBox.currentText()
+        Pro.Val_runInfos['numParallel']=1
+        Pro.Val_runInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'validation') #TODO
+        Pro.Val_runInfos['swatExe']=self.swatBox.currentText()
 
         self.resetBtn.setEnabled(True)
         self.loadBtn.setEnabled(False)
@@ -247,6 +247,14 @@ class ValidationWidget(QFrame):
         self.applyBtn.setEnabled(False)
         self.simBtn.setEnabled(False)
         self.visualBtn.setEnabled(False)
+        
+        self.verbose.clear()
+        
+        Pro.Val_objInfos={}
+        Pro.Val_paraInfos={}
+        Pro.Val_problemInfos={}
+        Pro.Val_result={}
+        Pro.Val_runInfos={}
         
     def setDecsToTable(self, index):
         
@@ -264,12 +272,11 @@ class ValidationWidget(QFrame):
         averWidth = fontMetrics.averageCharWidth()
         nChars=textWidth // averWidth
         self.verbose.setProperty('totalWidth', nChars)
-        Pro.verboseWidth=nChars
+        Pro.Val_runInfos['verboseWidth']=nChars
         #
-        
         self.verbose.clear()
         
-        Pro.initProject(self.verbose, self.simBtn)
+        Pro.initVal(self.verbose, self.simBtn)
         
         self.applyBtn.setEnabled(False)
         
@@ -279,11 +286,11 @@ class ValidationWidget(QFrame):
             
             self.verbose.append("The objective values are: ")
             
-            objs, simData=Pro.ValResult
+            objs, simData=Pro.Val_result
             
             self.data=simData
             
-            for i, (ID, _) in enumerate(Pro.objInfos.items()):
+            for i, (ID, _) in enumerate(Pro.Val_objInfos.items()):
                 
                 self.verbose.append(f"obj {ID}: {objs[i]:.4f} ")
 
@@ -481,7 +488,7 @@ class VisualizeWidget(FramelessDialog):
         
         h=QHBoxLayout()
         self.treeWidget=TreeWidgetObj(self)
-        self.treeWidget.addItems_(Pro.objInfos)
+        self.treeWidget.addItems_(Pro.Val_objInfos)
         
         self.canvas=MplCanvas(width=16, height=9, dpi=300)
 
@@ -522,7 +529,7 @@ class MplCanvas(FigureCanvas):
     def plotPic(self, objID, serID, simData):
         
         self.show_plot()
-        objInfos=Pro.objInfos
+        objInfos=Pro.Val_objInfos
         
         timeLists=objInfos[objID][serID]['timeList']
         dataList=objInfos[objID][serID]['dataList']
