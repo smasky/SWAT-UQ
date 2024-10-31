@@ -59,15 +59,14 @@ class MainWindow(FluentWindow):
         
         self.setStyleSheet(qss)
 
-        QTimer.singleShot(35000, self.take_screenshot)  # 1秒后自动截图
+    #     QTimer.singleShot(35000, self.take_screenshot)
         
-    def take_screenshot(self):
+    # def take_screenshot(self):
         
-        screenshot = self.grab()  # 抓取当前窗口
+    #     screenshot = self.grab()
         
-        # 保存截图到文件
-        screenshot.save('screenshot.png', 'png')
-        print('截图已保存为 screenshot.png')
+    #     screenshot.save('screenshot.png', 'png')
+    #     print('截图已保存为 screenshot.png')
         
       
     def initNavigation(self):

@@ -35,6 +35,7 @@ class SenAnalysis(ScrollArea):
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
         self.setWidgetResizable(True)
+        
     def updateUI(self):
         
         self.saWidget.updateUI()
