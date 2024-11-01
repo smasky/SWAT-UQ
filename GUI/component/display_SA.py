@@ -130,11 +130,13 @@ class DisplaySA(QFrame):
             del self.SAData['S1']['matrix']
             data=self.SAData['S1']
             
-        if self.configPanel is None:
-            self.configPanel=ConfigPanel(self.canvas, self)
-            self.configPanel.configEmit.connect(self.canvas.setHyper)
-            self.configPanel.configEmit.connect(self.canvas.refresh)
-            self.canvas.saveEmit.connect(self.configPanel.cancel)
+        if self.configPanel:
+            self.configPanel.close()
+            self.configPanel=None
+        self.configPanel=ConfigPanel(self.canvas, self)
+        self.configPanel.configEmit.connect(self.canvas.setHyper)
+        self.configPanel.configEmit.connect(self.canvas.refresh)
+        self.canvas.saveEmit.connect(self.configPanel.cancel)
         
         self.configPanel.data=data
         self.canvas.data=data
@@ -570,10 +572,17 @@ class MplCanvas(FigureCanvas):
     
     def resizeEvent(self, event):
         
-        self.canvas_width, self.canvas_height=self.get_width_height()
-        self.ratio=self.canvas_width/self.canvas_height
         super(MplCanvas, self).resizeEvent(event)
-    
+        try:
+            self.canvas_width, self.canvas_height=self.get_width_height()
+            self.ratio=self.canvas_width/self.canvas_height
+        except Exception as e:
+            size=self.parent().size()
+            width, height=size.width(), size.height()
+            self.canvas_width=width-18
+            self.canvas_height=height-18
+            self.ratio=self.canvas_width/self.canvas_height
+
     def save_figure_with_size(self, filename, format='png', scale=None, dpi=None):
     
         original_size = self.get_width_height()
@@ -597,7 +606,7 @@ class MplCanvas(FigureCanvas):
         try:
             self.plotPic(mul=True)
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
-        
+            
         finally:
             restored_width = original_size[0] / original_dpi *scaling
             restored_height = original_size[1] / original_dpi *scaling

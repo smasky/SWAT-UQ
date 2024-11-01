@@ -23,6 +23,7 @@ class SenAnalysis(ScrollArea):
         banner=BannerWidget(self)
         with path(GUI.picture, "header2.png") as header_path:
             banner.setPixmap(str(header_path))
+            
         banner.setTitle("Sensitivity Analysis")
         vBoxLayout.addWidget(banner)
         

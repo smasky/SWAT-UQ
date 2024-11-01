@@ -683,17 +683,6 @@ class Project:
     @classmethod
     def clearAll(cls):
         
-        cls.window=None
-        cls.projectInfos=None
-        cls.modelInfos=None
-        cls.paraInfos=None
-        cls.objInfos=None
-        cls.problemInfos=None
-        cls.SAInfos=None
-        cls.SAResult=None
-        cls.OPInfos=None
-        cls.OPResult=None
-
         btnSets=Project.btnSets
         
         for btn in btnSets[1:]:
