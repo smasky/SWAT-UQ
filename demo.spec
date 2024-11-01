@@ -1,6 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_submodules
+
+hiddenimports = collect_submodules('matplotlib')
 
 datas = [
     ('GUI/qss/banner_widget.qss', 'GUI/qss'),
@@ -37,7 +40,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=datas,
-    hiddenimports=[],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

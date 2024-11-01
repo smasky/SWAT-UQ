@@ -176,6 +176,8 @@ class DisplayOP(QFrame):
         
         #calculate interval
         def calInterval(value):
+            if value==0:
+                return 1
             num_digits = round(math.log10(abs(value)))+1
             base = 10 ** (num_digits-2)
             return base
@@ -193,11 +195,14 @@ class DisplayOP(QFrame):
         
         data=(xData, yData)
         
-        if self.configPanel is None:
-            self.configPanel=ConfigPanel(self.canvas, self)
-            self.configPanel.configEmit.connect(self.canvas.setHyper)
-            self.configPanel.configEmit.connect(self.canvas.refresh)
-            self.canvas.saveEmit.connect(self.configPanel.cancel)
+        if self.configPanel:
+            self.configPanel.close()
+            self.configPanel=None
+        self.configPanel=ConfigPanel(self.canvas, self)
+        self.configPanel.configEmit.connect(self.canvas.setHyper)
+        self.configPanel.configEmit.connect(self.canvas.refresh)
+        self.canvas.saveEmit.connect(self.configPanel.cancel)
+            
 
         self.configPanel.data=data
         self.canvas.data=data
@@ -342,9 +347,20 @@ class MplCanvas(FigureCanvas):
     
     def resizeEvent(self, event):
         
-        self.canvas_width, self.canvas_height=self.get_width_height()
-        self.ratio=self.canvas_width/self.canvas_height
         super(MplCanvas, self).resizeEvent(event)
+        
+        try:
+            
+            self.canvas_width, self.canvas_height=self.get_width_height()
+            self.ratio=self.canvas_width/self.canvas_height
+            
+        except Exception as e:
+            
+            size=self.parent().size()
+            width, height=size.width(), size.height()
+            self.canvas_width=width-18
+            self.canvas_height=height-18
+            self.ratio=self.canvas_width/self.canvas_height
     
     def save_figure_with_size(self, filename, format='png', scale=None, dpi=None):
     
@@ -366,7 +382,17 @@ class MplCanvas(FigureCanvas):
             self.plotPic(mul=True)
             self.fig.savefig(filename, format=format, dpi=dpi, bbox_inches='tight')
         
+        except Exception as e:
+            
+            from PyQt5.QtWidgets import QMessageBox
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Critical)
+            error_dialog.setText(f"An error occurred: {str(e)}")
+            error_dialog.setWindowTitle("Error")
+            error_dialog.exec_()
+        
         finally:
+            
             restored_width = original_size[0] / original_dpi *scaling
             restored_height = original_size[1] / original_dpi *scaling
     
@@ -398,7 +424,7 @@ class ConfigPanel(FramelessDialog):
         
         super().__init__(parent)
         
-        width = 600
+        width = 650
         height = parent.window().height()
         
         self.setFixedSize(width, height)
