@@ -15,7 +15,8 @@ As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective D
 
 Here, we provide a simple Quick Start guide. In future plans, we will provide detailed documentation and videos.  
 
-Please choose the latest release version of SWAT-UQ.  
+Please choose the latest release version of SWAT-UQ.
+**Demo Version has been released:** [SWAT-UQ](https://github.com/smasky/SWAT-UQ/releases/tag/v0.0)
 
 **Step1:** On the **Get Started** interface, click the **New Project** card to create a project or the **Open Project** card to open an existing one. You can also select the **Example** card for reference cases or the **Help** card for assistance.
 
