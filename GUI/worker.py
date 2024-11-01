@@ -811,10 +811,6 @@ class RunWorker(QObject):
         
         with ThreadPoolExecutor(max_workers=self.numParallel) as executor:
             
-            # for i in range(n):
-            #     time.sleep(1)
-            #     futures.append(executor.submit(self._subprocess, X[i, :], i))
-            
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
             
             for future in as_completed(futures):

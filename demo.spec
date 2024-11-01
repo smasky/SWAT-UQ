@@ -51,8 +51,10 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
+    onefile=True,
     exclude_binaries=True,
     name='demo',
+    contents_directory='.',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -64,7 +66,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='./GUI/picture/icon.png',
-    onefile=True
 )
 
 coll = COLLECT(
@@ -74,5 +75,6 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='demo'
+    name='demo',
+    distpath='bin'
 )
