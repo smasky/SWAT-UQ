@@ -837,6 +837,7 @@ class EvaluateThread(QThread):
         self.X = X
 
     def run(self):
+        
         self.worker.evaluate(self.X)
 
 class SingleEvaluateThread(QThread):
@@ -851,7 +852,7 @@ class SingleEvaluateThread(QThread):
         self.worker.singleEvaluate(self.x)
 
 class OptimizeThread(QThread):
-    
+    errorOccur=pyqtSignal(str)
     def __init__(self, worker, optimizer, problemInfos):
         super().__init__()
         self.worker = worker
@@ -864,13 +865,15 @@ class OptimizeThread(QThread):
         xLabels=problemInfos['xLabels']
         self.problem=PracticalProblem(self.worker.evaluate, nInput=nInput, nOutput=nOutput, lb=lb, ub=ub, x_labels=xLabels, name=problemInfos['name'])
     
-    def run1(self):
+    # def run1(self):
         
-        self.optimizer.run(self.problem)
+    #     self.optimizer.run(self.problem)
     
     def run(self):
-    
-        self.optimizer.run(self.problem)
+        try:
+            self.optimizer.run(self.problem)
+        except Exception as e:
+            self.errorOccur.emit(str(e))
         
 class NewThread(QThread):
     
@@ -897,7 +900,7 @@ class NewThread(QThread):
             self.occurError.emit("There are some error in model file, please check!")
 
 class InitThread(QThread):
-    
+    errorOccur=pyqtSignal(str)
     def __init__(self, worker, projectInfos,  modelInfos , paraInfos, objInfos, runInfos):
         super().__init__()
         self.worker=worker
@@ -906,9 +909,12 @@ class InitThread(QThread):
         self.paraInfos=paraInfos
         self.objInfos=objInfos
         self.runInfos=runInfos
-    def run(self):
         
-        self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos, self.runInfos)
+    def run(self):
+        try:
+            self.worker.initQThread(self.projectInfos, self.modelInfos, self.paraInfos, self.objInfos, self.runInfos)
+        except Exception as e:
+            self.errorOccur.emit(str(e))
 
 class IterEmit(QObject):
     

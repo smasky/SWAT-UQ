@@ -109,11 +109,12 @@ class ParaTable(QFrame):
         if success:
             
             Pro.window=self.parent()
-            Infos=Pro.importParaFromFile(path)
+            Infos, res=Pro.importParaFromFile(path)
             
-            for paraInfo in Infos:
-                self.table.addRow(paraInfo)
-            self.table.repaint()
+            if res:
+                for paraInfo in Infos:
+                    self.table.addRow(paraInfo)
+                self.table.repaint()
 
     def saveParFile(self):
         
@@ -146,7 +147,7 @@ class ParaTable(QFrame):
         #     duration=2000,
         #     parent=self.parent()
         # )
-            box=MessageBox(title="Error", content=f"There is no parameter information to save.", parent=self.window())
+            box=MessageBox(title="Warning", content=f"There is no parameter information to save.", parent=self.window())
             box.show()
             
     def saveSuccess(self, path): 

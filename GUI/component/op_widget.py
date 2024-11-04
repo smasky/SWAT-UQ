@@ -245,7 +245,7 @@ class SetupWidget(QWidget):
     def dynamicShowObj(self):
         
         self.objLine.clear()
-        self.objLine.addItems(Pro.findProFile())
+        self.objLine.addItems(Pro.findObjFile())
         self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
     
@@ -323,11 +323,12 @@ class SetupWidget(QWidget):
         
         path=self.paraEdit.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], path)
-        infos=Pro.importParaFromFile(path)
-        self.numPara.setText(str(len(infos)))
+        infos, res=Pro.importParaFromFile(path)
         
-        Pro.OP_paraInfos=infos
-        Pro.OP_runInfos['paraPath']=path
+        if res:
+            self.numPara.setText(str(len(infos)))
+            Pro.OP_paraInfos=infos
+            Pro.OP_runInfos['paraPath']=path
     
     def loadObjFile(self):
         
@@ -548,6 +549,8 @@ class OptimizationWidget(QWidget):
         self.itersBar.setValue(0)
         self.swatEdit.setEnabled(True)
         self.parallelEdit.setEnabled(True)
+        self.problemEdit.setEnabled(True)
+        self.parallelEdit.setValue(1)
         self.verbose.clear()
         
     def cancel(self):

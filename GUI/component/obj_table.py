@@ -58,11 +58,11 @@ class ObjTable(QFrame):
         
         importButton=PrimaryPushButton("Import Existing File", self); importButton.setFixedSize(300, 40)
         setFont(importButton, 18, Medium)
-        self.importButton=importButton; self.importButton.clicked.connect(self.importProFile)
+        self.importButton=importButton; self.importButton.clicked.connect(self.importObjFile)
         
         self.generateButton=PrimaryPushButton("Save Current File", self)
         self.generateButton.setFixedSize(300, 40)
-        self.generateButton.clicked.connect(self.saveProFile)
+        self.generateButton.clicked.connect(self.saveObjFile)
         setFont(self.generateButton, 18, Medium)
         
         self.clearButton=PrimaryPushButton("Clear All", self); self.clearButton.setFixedSize(300, 40)
@@ -84,9 +84,9 @@ class ObjTable(QFrame):
         self.table.verticalHeader().setStyleSheet(f"QHeaderView::section {{ color: black; font: {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'; text-align: center; }}")
         self.table.verticalHeader().setFixedWidth(30)
         
-    def importProFile(self):
+    def importObjFile(self):
         
-        path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
+        path, success= QFileDialog.getOpenFileName(self, "Open Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.obj)")
         
         if not success:
             return
@@ -100,7 +100,7 @@ class ObjTable(QFrame):
 
             self.default['serID']=self.default['serID']+len(series)
         
-    def saveProFile(self):
+    def saveObjFile(self):
         
         keys=['reachID', 'objType', 'varType', 'weight']
         
@@ -126,36 +126,21 @@ class ObjTable(QFrame):
             
             if not sign:
                 
-                # InfoBar.warning(
-                # title=f"Error",
-                # content=f"The series ID {signID} have different attributes, please check.",
-                # position=InfoBarPosition.TOP_RIGHT,
-                # duration=2000,
-                # parent=self.parent()
-                # )
-                
                 box=MessageBox(title="Error", content=f"The series ID {signID} have different attributes, please check.", parent=self.window())
                 box.show()
                 
             else:
             
-                path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos['projectPath'], "Parameter File (*.pro)")
+                path, success= QFileDialog.getSaveFileName(self, "Save Parameter File", Pro.projectInfos['projectPath'], "Objective File (*.obj)")
                 if not success:
                     return
                 
-                Pro.saveProFile(path, self.objInfos)
+                Pro.saveObjFile(path, self.objInfos)
             
         else:
             
             box=MessageBox(title="Warning", content=f"There is no objective information to save.", parent=self.window())
             box.show()
-            # InfoBar.warning(
-            # title=f"Error",
-            # content=f"There is no objective information to save.",
-            # position=InfoBarPosition.TOP_RIGHT,
-            # duration=2000,
-            # parent=self.parent()
-            # )
         
     def addPro(self):
         
@@ -248,8 +233,6 @@ class ObjTable(QFrame):
         operation.delBtn=delButton
         delButton.clicked.connect(self.delete_row)
         
-        # v.addLayout(hBoxLayout, Qt.AlignmentFlag.AlignHCenter)
-        # v.setContentsMargins(0, 0, 0, 0)
         operation.setFixedHeight(30)
         hBoxLayout.setContentsMargins(0,0,0,0)
         return operation

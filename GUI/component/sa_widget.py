@@ -308,7 +308,7 @@ class SetupWidget(QWidget):
         
         self.objLine.clear()
         self.objEdit.clear()
-        self.objLine.addItems(Pro.findProFile())
+        self.objLine.addItems(Pro.findObjFile())
         # self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
 
@@ -333,20 +333,27 @@ class SetupWidget(QWidget):
         
         path=self.paraEdit.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], path)
-        infos=Pro.importParaFromFile(path)
-        self.numPara.setText(str(len(infos)))
+        infos, res=Pro.importParaFromFile(path)
         
-        Pro.SA_paraInfos=infos
-        Pro.SA_runInfos['paraPath']=path
+        if res:
+            
+            self.numPara.setText(str(len(infos)))
+            
+            Pro.SA_paraInfos=infos
+            Pro.SA_runInfos['paraPath']=path
+            
+        else:
+            
+            self.paraEdit.setCurrentIndex(-1)
         
     def loadObjFile(self):
         
         path=self.objLine.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], path)
-        
         infos, res=Pro.importObjFromFile(path)
         
         if res:
+            
             self.objInfos=infos
             self.objEdit.clear()
             self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
@@ -450,7 +457,6 @@ class SimulationWidget(QWidget):
         
         formLayout.addRow(label, self.problemEdit)
         
-        
         vBoxLayout.addLayout(formLayout)
         
         #################Verbose################
@@ -493,11 +499,13 @@ class SimulationWidget(QWidget):
         
         self.swatEdit.setEnabled(True)
         self.parallelEdit.setEnabled(True)
+        self.problemEdit.setEnabled(True)
         self.initializeBtn.setEnabled(True)
         self.simBtn.setEnabled(False)
         self.samplingBtn.setEnabled(False)
         self.cancelBtn.setEnabled(False)
         self.verbose.clear()
+        self.parallelEdit.setValue(1)
         self.statistics.setText("NA/NA FEs")
         self.processBar.setValue(0)
         
