@@ -10,6 +10,7 @@ from ..project import Project as Pro
 from .combox_ import ComboBox_
 from .info_bar import InfoBar_ as InfoBar
 from .utility import setFont, Medium, MediumSize, substitute, Normal
+from .message_box import MessageBox
 import numpy as np
 class AddProWidget(FramelessDialog):
     
@@ -112,8 +113,8 @@ class AddProWidget(FramelessDialog):
         
         self.endDataEdit=DatePicker_(self, isMonthTight=True)
         self.endDataEdit.setObjectName("endDataEdit")
-        self.endDataEdit.beginDate=lbDate
-        self.endDataEdit.endDate=ubDate 
+        self.endDataEdit.beginDate=lbQDate
+        self.endDataEdit.endDate=ubQDate 
         self.endDataEdit.setDate(endQDate)
         self.endDataEdit.previousDate=endQDate
         self.endDataEdit.dateChanged.connect(self.checkValidDate)
@@ -209,18 +210,8 @@ class AddProWidget(FramelessDialog):
         observeData=[]
 
         if n!=num:
-            infoBar = InfoBar(
-                icon=InfoBarIcon.WARNING,
-                title=self.tr('Warning'),
-                content=f"The project need {num} sets of data for the project, but only {n} have been provided. \n Please check the data.",
-                orient=Qt.Vertical,
-                isClosable=True,
-                duration=-1,
-                position=InfoBarPosition.TOP_RIGHT,
-                parent=self.window()
-            )
-            infoBar.show()
-            
+            box=MessageBox(title="Warning", content=f"The project need {num} sets of data for the project, but only {n} have been provided. \n Please check the data.", parent=self.window())
+            box.show()  
         else:
             for i in range(n):
                 index, year, month, day=Pro.calDateIndex(self.beginDataEdit.date, i)
@@ -236,12 +227,9 @@ class AddProWidget(FramelessDialog):
         
         m = len(data)
         
-        # n = self.dataTable.rowCount()
-        
         for i in range(m):
             index, year, month, day, value = data[i]
-            
-            # if i>=n:  
+
             self.dataTable.insertRow(i)
                 
             item=QTableWidgetItem(f"{index:d}")
@@ -296,23 +284,28 @@ class AddProWidget(FramelessDialog):
         self.numDisplay.setText(str(num))
     
     def confirm_clicked(self):
-        
-        objID=self.objIDEdit.text()
-        serID=self.serIDEdit.text()
-        reachID=self.reachIDEdit.text()
-        objType=self.objTypeEdit.currentText()
-        varType=self.varEdit.currentText()
-        weight=self.weightEdit.text()
-        observeData=self.getObserveData()
-        
-        self.data['objID']=int(objID)
-        self.data['serID']=int(serID)
-        self.data['reachID']=int(reachID)
-        self.data['objType']=Pro.OBJTYPE_INT[objType]
-        self.data['varType']=Pro.VAR_INT[varType]
-        self.data['weight']=float(weight)
-        self.data['observeData']=observeData
-        self.accept()
+        if self.dataTable.rowCount()>0:
+            objID=self.objIDEdit.text()
+            serID=self.serIDEdit.text()
+            reachID=self.reachIDEdit.text()
+            objType=self.objTypeEdit.currentText()
+            varType=self.varEdit.currentText()
+            weight=self.weightEdit.text()
+            observeData=self.getObserveData()
+            
+            self.data['objID']=int(objID)
+            self.data['serID']=int(serID)
+            self.data['reachID']=int(reachID)
+            self.data['objType']=Pro.OBJTYPE_INT[objType]
+            self.data['varType']=Pro.VAR_INT[varType]
+            self.data['weight']=float(weight)
+            self.data['observeData']=observeData
+            self.accept()
+            
+        else:
+            
+            box=MessageBox(title="Error", content="Please, input the observe data!", parent=self.window())
+            box.show()
         
     def getObserveData(self):
         
@@ -342,15 +335,17 @@ class AddProWidget(FramelessDialog):
                 
                 ifInfo=True
         if ifInfo:
-            InfoBar.error(
-                title=self.tr('Error'),
-                content="The date is earlier than the begin date or later than the end date. \n Please check the date.",
-                orient=Qt.Vertical,
-                isClosable=True,
-                duration=-1,
-                position=InfoBarPosition.TOP_RIGHT,
-                parent=self.window()
-            )
+            # InfoBar.error(
+            #     title=self.tr('Error'),
+            #     content="The date is earlier than the begin date or later than the end date. \n Please check the date.",
+            #     orient=Qt.Vertical,
+            #     isClosable=True,
+            #     duration=-1,
+            #     position=InfoBarPosition.TOP_RIGHT,
+            #     parent=self.window()
+            # )
+            box=MessageBox(title="Error", content="The date is earlier than the begin date or later than the end date. \n Please check the date.", parent=self.window())
+            box.show()
             picker.setDate(picker.previousDate)
         else:
             self.reCalNum()
@@ -385,31 +380,36 @@ class DatePicker_(DatePicker):
             
             self.setDate(self.beginDate)
             
-            InfoBar.error(
-                title=self.tr('Error'),
-                content="The date is earlier than the begin date of the project. \n The date has set to the begin date.",
-                orient=Qt.Vertical,
-                isClosable=True,
-                duration=-1,
-                position=InfoBarPosition.TOP_RIGHT,
-                parent=self.window()
-            )
+            # InfoBar.error(
+            #     title=self.tr('Error'),
+            #     content="The date is earlier than the begin date of the project. \n The date has set to the begin date.",
+            #     orient=Qt.Vertical,
+            #     isClosable=True,
+            #     duration=-1,
+            #     position=InfoBarPosition.TOP_RIGHT,
+            #     parent=self.window()
+            # )
             
+            box=MessageBox(title="Error", content="The date is earlier than the begin date of the project. \n The date has set to the begin date.", parent=self.window())
+            box.show()
         
         elif self.date > self.endDate:
             
             self.setDate(self.endDate)
             
-            InfoBar.error(
-                title=self.tr('Error'),
-                content="The date is later than the end date of the project. \n The date has set to the end date.",
-                orient=Qt.Vertical,
-                isClosable=True,
-                duration=-1,
-                position=InfoBarPosition.TOP_RIGHT,
-                parent=self.window()
-            )
-        
+            # InfoBar.error(
+            #     title=self.tr('Error'),
+            #     content="The date is later than the end date of the project. \n The date has set to the end date.",
+            #     orient=Qt.Vertical,
+            #     isClosable=True,
+            #     duration=-1,
+            #     position=InfoBarPosition.TOP_RIGHT,
+            #     parent=self.window()
+            # )
+            
+            box=MessageBox(title="Error", content="The date is later than the end date of the project. \n The date has set to the end date.", parent=self.window())
+            box.show()
+
             
 class TableWidget_(TableWidget):
     

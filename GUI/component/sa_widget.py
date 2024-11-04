@@ -90,11 +90,6 @@ class SAWidget(QFrame):
         Pro.SA_result={}
         Pro.SA_runInfos={}
         Pro.SA_infos={}
-        # Pro.SAInfos={}
-        # Pro.SAResult={}
-        # Pro.paraInfos=None
-        # Pro.problemInfos=None
-        # Pro.objInfos=None
         
         self.contentWidget.setCurrentIndex(0)
         self.setupWidget.reset()
@@ -259,6 +254,11 @@ class SetupWidget(QWidget):
             self.saBtnGroup.setEnabled_(True)
             btn=self.saBtnGroup.group.buttons()[0]
             btn.click()
+        else:
+            self.saBtnGroup.setEnabled_(False)
+            self.hyperStack.setCurrentIndex(0)
+            self.smBtnGroup.setEnabled_(False)
+            self.nextBtn.emit(False)
     
     def updateHyper(self):
         
@@ -298,17 +298,20 @@ class SetupWidget(QWidget):
     def dynamicShowPara(self):
         
         self.paraEdit.clear()
+        self.numPara.clear()
         self.paraEdit.addItems(Pro.findParaFile())
-        self.paraEdit.setCurrentIndex(0)
+        # self.paraEdit.setCurrentIndex(0)
         super(ComboBox, self.paraEdit)._showComboMenu()
+        
 
     def dynamicShowObj(self):
         
         self.objLine.clear()
+        self.objEdit.clear()
         self.objLine.addItems(Pro.findProFile())
-        self.objLine.setCurrentIndex(0)
+        # self.objLine.setCurrentIndex(0)
         super(ComboBox, self.objLine)._showComboMenu()
-    
+
     def reset(self):
         
         self.objLine.clear()
@@ -340,15 +343,21 @@ class SetupWidget(QWidget):
         
         path=self.objLine.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], path)
-        infos=Pro.importProFromFile(path)
-        self.objInfos=infos
         
-        self.objEdit.clear()
-        self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
-        self.objEdit.setCurrentIndex(0)
+        infos, res=Pro.importObjFromFile(path)
         
-        Pro.SA_runInfos['objPath']=path
+        if res:
+            self.objInfos=infos
+            self.objEdit.clear()
+            self.objEdit.addItems([f"obj {i : d}" for i in list(infos.keys())])
+            self.objEdit.setCurrentIndex(0)
+            
+            Pro.SA_runInfos['objPath']=path
         
+        else:
+            
+            self.objLine.setCurrentIndex(-1)
+            
     def ensureObj(self):
         
         objID=int(self.objEdit.text().split()[1])
@@ -360,9 +369,9 @@ class SetupWidget(QWidget):
         selectedSampling=self.smBtnGroup.group.checkedButton()
         
         if selectedSA and selectedSampling:
-            self.parent().parent().nextButton.setEnabled(True)
+            self.nextBtn.emit(True)
         else:
-            self.parent().parent().nextButton.setEnabled(False)
+            self.nextBtn.emit(False)
             
     def enableSampling(self, i):
         saName=self.SA_METHOD[i]

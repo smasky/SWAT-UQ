@@ -11,6 +11,7 @@ import GUI.qss
 import GUI.picture
 from .component import BannerWidget, NewProject, OpenProject, LinkCardView
 from .component.info_bar import InfoBar_ as InfoBar, InfoBarPosition
+from .component.message_box import MessageBox
 from .project import Project
 class GetStart(ScrollArea):
     
@@ -64,6 +65,7 @@ class GetStart(ScrollArea):
         self.setWidgetResizable(True)
 
         Project.window=self
+        Project.W=self.window()
         
     def click_new_project(self):
         
@@ -156,16 +158,8 @@ class GetStart(ScrollArea):
         if res:
             
             if openPro.projectFile==None:
-                InfoBar.error(
-                    title=self.tr('Error'),
-                    content=self.tr("There is no project file in the selected directory."),
-                    orient=Qt.Horizontal,
-                    isClosable=True,
-                    position=InfoBarPosition.TOP_RIGHT,
-                    duration=10000,
-                    parent=self
-                )
-
+                box=MessageBox(title="Errors Occur", content="There is no project file in the selected directory.", parent=self.window())
+                box.show()
                 return
             
             info=InfoBar.success(
@@ -228,6 +222,7 @@ class ReOpenWidget(MessageBoxBase):
         with path(GUI.qss, "messagebox.qss") as qss_path:
             with open(qss_path) as f:
                 self.setStyleSheet(f.read())
+        
     
     def continue_(self):
         

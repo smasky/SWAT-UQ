@@ -9,12 +9,9 @@ class InfoBar_(InfoBar):
     def __init__(self, icon, title, content, orient=Qt.Horizontal, isClosable=True, duration=1000, position=InfoBarPosition.TOP_RIGHT, parent=None):
         super().__init__(icon, title, content, orient, isClosable, duration, position, parent)
         
-        
         qss=getStyleSheet(FluentStyleSheet.INFO_BAR)
         qss=substitute(qss, {'#titleLabel': {'font' : f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"}, '#contentLabel': {'font' : f" {MediumSize}px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC'"}})
         self.setStyleSheet(qss)
-        
-        
         
     @classmethod
     def new(cls, icon, title, content, orient=Qt.Horizontal, isClosable=True, duration=1000,

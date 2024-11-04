@@ -576,6 +576,10 @@ class MplCanvas(FigureCanvas):
         try:
             self.canvas_width, self.canvas_height=self.get_width_height()
             self.ratio=self.canvas_width/self.canvas_height
+        
+        except ZeroDivisionError:
+            pass
+            
         except Exception as e:
             size=self.parent().size()
             width, height=size.width(), size.height()

@@ -1,7 +1,6 @@
 import os
 import glob
 import numpy as np
-import sys
 import h5py
 from datetime import datetime
 from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
@@ -17,7 +16,7 @@ from UQPyL.utility.scalers import StandardScaler
 from UQPyL.utility.verbose import Verbose
 from PyQt5.QtCore import QDate, Qt
 from .component.info_bar import InfoBar_ as InfoBar, InfoBarPosition
-
+from .component.message_box import MessageBox
 class Project:
 
     INT_MODE={0: 'r', 1: 'v', 2: 'a'}; MODE_INT={'r': 0, 'v':1, 'a':2}
@@ -75,6 +74,7 @@ class Project:
              'Saltelli Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
     window=None
+    W=None
     #Basic Infos
     projectInfos=None; modelInfos=None
     
@@ -97,7 +97,6 @@ class Project:
     def openProject(cls, projectName, projectPath, swatPath, close, activate):
         
         try:
-            
             projectInfos={}
             projectInfos['projectName']=projectName
             projectInfos['projectPath']=projectPath
@@ -109,10 +108,8 @@ class Project:
             cls.projectInfos=projectInfos
             
         except Exception as e:
-            
-            cls.showError("Some errors occur in project file, please check!")
+            cls.showError(error="Some errors occur in project file, please check!")
             close(500)
-            
             return
         
         def writeProjectFile():
@@ -144,7 +141,7 @@ class Project:
             
             close(500)
             cls.projectInfos=None
-            cls.showError(error)
+            cls.showError(error=error)
         
         cls.thread.accept.connect(accept)
         cls.thread.finished.connect(cls.thread.deleteLater)
@@ -224,34 +221,26 @@ class Project:
             return index, nowDate.year(), nowDate.month(), 1 
          
     @classmethod 
-    def importProFromFile(cls, path):
+    def importObjFromFile(cls, path):
         
         try:
-        
             cls.worker=ReadWorker()
             infos=cls.worker.readObjFile(path)
-        
+            return infos, True
+                
         except Exception as e:
-            
-            cls.showError("There are some error in objective file, please check!")
-        
-        return infos
-                        
+            cls.showError(error="There exists some errors in objective file, please check!")
+            return {}, False      
     @classmethod
     def importParaFromFile(cls, path):
         
         try:
-        
             infos=[]
             worker=ReadWorker()
             infos=worker.readParaFile(path, cls.modelInfos)
-        
         except Exception as e:
-            
-            cls.showError("There are some error in parameter file, please check!")
-        
+            cls.showError(error="There are some error in parameter file, please check!")
         finally:
-                
             return infos
     
     @classmethod
@@ -400,7 +389,7 @@ class Project:
         
         except Exception as e:
             
-            cls.showError(f"Sampling failed, please check the hyperparameters!\n The error is {e}")
+            cls.showError(error=f"Sampling failed, please check the hyperparameters!\n The error is {e}")
             
             return False
         
@@ -669,17 +658,10 @@ class Project:
     
     @classmethod
     def showError(cls, error):
-         
-        InfoBar.error(
-                title='Error',
-                content=error,
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP_RIGHT,
-                duration=10000,
-                parent=cls.window
-                )
-    
+        
+        box=MessageBox(title="Errors Occur", content=error, parent=cls.W)
+        box.show()
+        
     @classmethod
     def clearAll(cls):
         
