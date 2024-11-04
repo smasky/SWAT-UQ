@@ -224,7 +224,7 @@ class ValidationWidget(QFrame):
         
         objFile=self.objFileBox.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], objFile)
-        infos=Pro.importProFromFile(path)
+        infos=Pro.importObjFromFile(path)
       
         Pro.Val_objInfos=infos #TODO
         Pro.Val_runInfos['objPath']=path

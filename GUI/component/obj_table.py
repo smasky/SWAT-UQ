@@ -13,6 +13,7 @@ from .add_pro_widget import AddProWidget
 from ..project import Project as Pro
 from .info_bar import InfoBar_ as InfoBar
 from .utility import setFont, Medium, MediumSize, Normal
+from .message_box import MessageBox
 OBJTYPE={ "NSE":0, "RMSE":1, "PCC":2, "Pbias":3, "KGE":4 }
 VARIABLE={ "Flow":0 }
 class ObjTable(QFrame):
@@ -90,13 +91,14 @@ class ObjTable(QFrame):
         if not success:
             return
         
-        infos=Pro.importProFromFile(path)
-        for _, series in infos.items():
-            for s in series:
-                self.addRow(s)
-                self.objInfos.append(s)
+        infos, res=Pro.importObjFromFile(path)
+        if res:
+            for _, series in infos.items():
+                for s in series:
+                    self.addRow(s)
+                    self.objInfos.append(s)
 
-        self.default['serID']=self.default['serID']+len(series)
+            self.default['serID']=self.default['serID']+len(series)
         
     def saveProFile(self):
         
@@ -123,13 +125,17 @@ class ObjTable(QFrame):
                     break
             
             if not sign:
-                InfoBar.warning(
-                title=f"Error",
-                content=f"The series ID {signID} have different attributes, please check.",
-                position=InfoBarPosition.TOP_RIGHT,
-                duration=2000,
-                parent=self.parent()
-                )
+                
+                # InfoBar.warning(
+                # title=f"Error",
+                # content=f"The series ID {signID} have different attributes, please check.",
+                # position=InfoBarPosition.TOP_RIGHT,
+                # duration=2000,
+                # parent=self.parent()
+                # )
+                
+                box=MessageBox(title="Error", content=f"The series ID {signID} have different attributes, please check.", parent=self.window())
+                box.show()
                 
             else:
             
@@ -140,13 +146,16 @@ class ObjTable(QFrame):
                 Pro.saveProFile(path, self.objInfos)
             
         else:
-            InfoBar.warning(
-            title=f"Error",
-            content=f"There is no objective information to save.",
-            position=InfoBarPosition.TOP_RIGHT,
-            duration=2000,
-            parent=self.parent()
-            )
+            
+            box=MessageBox(title="Warning", content=f"There is no objective information to save.", parent=self.window())
+            box.show()
+            # InfoBar.warning(
+            # title=f"Error",
+            # content=f"There is no objective information to save.",
+            # position=InfoBarPosition.TOP_RIGHT,
+            # duration=2000,
+            # parent=self.parent()
+            # )
         
     def addPro(self):
         

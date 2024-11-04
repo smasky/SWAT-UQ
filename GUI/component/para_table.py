@@ -12,6 +12,7 @@ from .table_widget_para import TableWidgetPara
 from .add_para_widget import AddParaWidget
 from .info_bar import InfoBar_ as InfoBar
 from .utility import  setFont, MediumSize
+from .message_box import MessageBox
 from ..project import Project as Pro
 class ParaTable(QFrame):
     
@@ -138,13 +139,15 @@ class ParaTable(QFrame):
             self.saveSuccess(path)
         
         else:
-            InfoBar.warning(
-            title=f"Error",
-            content=f"There is no parameter information to save.",
-            position=InfoBarPosition.TOP_RIGHT,
-            duration=2000,
-            parent=self.parent()
-        )
+        #     InfoBar.warning(
+        #     title=f"Error",
+        #     content=f"There is no parameter information to save.",
+        #     position=InfoBarPosition.TOP_RIGHT,
+        #     duration=2000,
+        #     parent=self.parent()
+        # )
+            box=MessageBox(title="Error", content=f"There is no parameter information to save.", parent=self.window())
+            box.show()
             
     def saveSuccess(self, path): 
         InfoBar.success(

@@ -333,14 +333,15 @@ class SetupWidget(QWidget):
         
         path=self.objLine.currentText()
         path=os.path.join(Pro.projectInfos['projectPath'], path)
-        infos=Pro.importProFromFile(path)
-        self.objInfos=infos
-        
-        self.objEdit.clear()
-        objs=[f"obj {i : d}" for i in list(infos.keys())]
-        self.objEdit.addObjs(objs)
+        infos, res=Pro.importObjFromFile(path)
+        if res:
+            self.objInfos=infos
+            
+            self.objEdit.clear()
+            objs=[f"obj {i : d}" for i in list(infos.keys())]
+            self.objEdit.addObjs(objs)
 
-        Pro.OP_runInfos['objPath']=path
+            Pro.OP_runInfos['objPath']=path
         
     def ensureObj(self):
         
