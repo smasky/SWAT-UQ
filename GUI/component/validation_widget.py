@@ -17,6 +17,7 @@ import os
 import numpy as np
 from .utility import setFont, getFont, Medium, substitute, MediumSize, Normal
 from .combox_ import ComboBox
+from .message_box import MessageBox
 # from .tree_widget import TreeWidget_ as TreeWidget
 from ..project import Project as Pro
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -176,7 +177,7 @@ class ValidationWidget(QFrame):
     def dynamicShowObjFile(self):
         
         self.objFileBox.clear()
-        self.objFileBox.addItems(Pro.findProFile())
+        self.objFileBox.addItems(Pro.findObjFile())
         self.objFileBox.setCurrentIndex(0)
         super(ComboBox, self.objFileBox)._showComboMenu()
         
@@ -189,52 +190,59 @@ class ValidationWidget(QFrame):
     
     def loadFile(self):
         
-        fileName=self.resultFileBox.currentText()
-        self.OPData=Pro.loadOPFile(fileName)
-        data=self.OPData['History_Best']
-        
-        self.data=[]
-        
-        self.leftTreeWidget.clear()
-        
-        for key, items in data.items():
+        try:
+            fileName=self.resultFileBox.currentText()
+            self.OPData=Pro.loadOPFile(fileName)
+            data=self.OPData['History_Best']
             
-            bestObj, bestDecs=items['Best Objectives'].tolist(), items['Best Decisions'].tolist()
+            self.data=[]
             
-            self.data.append(bestDecs)
+            self.leftTreeWidget.clear()
             
-            text_decs = ",".join([f"{num:.2f}" for num in bestDecs])
-            text_objs = ",".join([f"{num:.2f}" for num in bestObj])
+            for key, items in data.items():
+                
+                bestObj, bestDecs=items['Best Objectives'].tolist(), items['Best Decisions'].tolist()
+                
+                self.data.append(bestDecs)
+                
+                text_decs = ",".join([f"{num:.2f}" for num in bestDecs])
+                text_objs = ",".join([f"{num:.2f}" for num in bestObj])
+                
+                description=f"Objs: {text_objs} | Decs: {text_decs}"
+                self.leftTreeWidget.addItem_(key, description)
+                
+            self.leftTreeWidget.scrollToBottom()
             
-            description=f"Objs: {text_objs} | Decs: {text_decs}"
-            self.leftTreeWidget.addItem_(key, description)
+            paraFile=self.paraFileBox.currentText()
+            path=os.path.join(Pro.projectInfos['projectPath'], paraFile)
+            infos, _=Pro.importParaFromFile(path)
             
-        self.leftTreeWidget.scrollToBottom()
+            self.table.setRowCount(0)
+            for info in infos:
+                self.table.addRows_(info)
+                
+            Pro.Val_paraInfos=infos #TODO
+            Pro.Val_runInfos['paraPath']=path
+            
+            objFile=self.objFileBox.currentText()
+            path=os.path.join(Pro.projectInfos['projectPath'], objFile)
+            infos, _=Pro.importObjFromFile(path)
         
-        paraFile=self.paraFileBox.currentText()
-        path=os.path.join(Pro.projectInfos['projectPath'], paraFile)
-        infos=Pro.importParaFromFile(path)
-        
-        self.table.setRowCount(0)
-        for info in infos:
-            self.table.addRows_(info)
+            Pro.Val_objInfos=infos #TODO
+            Pro.Val_runInfos['objPath']=path
             
-        Pro.Val_paraInfos=infos #TODO
-        Pro.Val_runInfos['paraPath']=path
-        
-        objFile=self.objFileBox.currentText()
-        path=os.path.join(Pro.projectInfos['projectPath'], objFile)
-        infos=Pro.importObjFromFile(path)
-      
-        Pro.Val_objInfos=infos #TODO
-        Pro.Val_runInfos['objPath']=path
-        
-        Pro.Val_runInfos['numParallel']=1
-        Pro.Val_runInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'validation') #TODO
-        Pro.Val_runInfos['swatExe']=self.swatBox.currentText()
+            Pro.Val_runInfos['numParallel']=1
+            Pro.Val_runInfos['tempPath']=os.path.join(Pro.projectInfos['projectPath'], 'validation') #TODO
+            Pro.Val_runInfos['swatExe']=self.swatBox.currentText()
 
-        self.resetBtn.setEnabled(True)
-        self.loadBtn.setEnabled(False)
+            self.resetBtn.setEnabled(True)
+            self.loadBtn.setEnabled(False)
+            
+        except Exception as e:
+            
+            self.reset()
+            box=MessageBox(title="Error", content=f"The error is {e}\n If you cannot solve this problem, please contact us!", parent=self.window())
+            box.show()
         
     def reset(self):
         
@@ -249,6 +257,11 @@ class ValidationWidget(QFrame):
         self.visualBtn.setEnabled(False)
         
         self.verbose.clear()
+        
+        self.resultFileBox.clear()
+        self.paraFileBox.clear()
+        self.objFileBox.clear()
+        self.swatBox.clear()
         
         Pro.Val_objInfos={}
         Pro.Val_paraInfos={}
@@ -549,8 +562,8 @@ class MplCanvas(FigureCanvas):
         
         
         self.axes.set_ylim(np.min(dataList), np.max(dataList))
-        self.axes.plot(dates, dataList, marker='o', linestyle='-', markersize=2, label="observe")  # 点状标记和实线
-        self.axes.plot(dates, s, marker='o', linestyle='--', markersize=2, label="simulation")  # 点状标记和虚线
+        self.axes.plot(dates, dataList, marker='o', linestyle='-', markersize=2, label="observe")
+        self.axes.plot(dates, s, marker='o', linestyle='--', markersize=2, label="simulation") 
         self.axes.set_title('Detailed Flow Data')
         self.axes.set_xlabel('Date')
         self.axes.set_ylabel('Flow (units)')

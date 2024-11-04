@@ -19,7 +19,7 @@ from .utility import setFont, substitute, MediumSize
 from .combox_ import ComboBox_ as ComboBox
 from ..project import Project as Pro
 from .check_box import CheckBox_ as CheckBox
-
+from .message_box import MessageBox
 class DisplaySA(QFrame):
     configPanel=None
     def __init__(self, parent=None):
@@ -119,7 +119,7 @@ class DisplaySA(QFrame):
         fileName=self.resultFile.currentText()
         self.SAData=Pro.loadSAFile(fileName)
         self.canvas.show_plot()
-            
+        
         try:
             
             del self.SAData['S1(First Order)']['matrix']
@@ -133,6 +133,7 @@ class DisplaySA(QFrame):
         if self.configPanel:
             self.configPanel.close()
             self.configPanel=None
+            
         self.configPanel=ConfigPanel(self.canvas, self)
         self.configPanel.configEmit.connect(self.canvas.setHyper)
         self.configPanel.configEmit.connect(self.canvas.refresh)

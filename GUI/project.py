@@ -73,20 +73,21 @@ class Project:
              'Morris Sequence' : 'nt*(nInput+1)',
              'Saltelli Sequence' : '(2*nt+2)*nInput if calSecondOrder else (nt+2)*nInput'
              }
-    window=None
+    
     W=None
+    
     #Basic Infos
     projectInfos=None; modelInfos=None
-    
-    #
     paraInfos=None; objInfos=None; problemInfos=None
     
     #Sensibility Analysis
     SA_paraInfos={}; SA_runInfos={}; SA_objInfos={}; SA_problemInfos={}
     SA_result={}; SA_infos={}
+    
     #Optimization
     OP_paraInfos={}; OP_runInfos={}; OP_objInfos={}; OP_problemInfos={}
     OP_result={}; OP_infos={}
+    
     #Validation
     Val_paraInfos={}; Val_runInfos={}; Val_objInfos={}; Val_problemInfos={}
     Val_result={}
@@ -230,7 +231,8 @@ class Project:
                 
         except Exception as e:
             cls.showError(error="There exists some errors in objective file, please check!")
-            return {}, False      
+            return {}, False   
+   
     @classmethod
     def importParaFromFile(cls, path):
         
@@ -238,11 +240,12 @@ class Project:
             infos=[]
             worker=ReadWorker()
             infos=worker.readParaFile(path, cls.modelInfos)
+            return infos, True
+        
         except Exception as e:
             cls.showError(error="There are some error in parameter file, please check!")
-        finally:
-            return infos
-    
+            return {}, False
+        
     @classmethod
     def saveParaFile(cls, infos, path):
         
@@ -251,7 +254,7 @@ class Project:
             f.writelines(lines)
         
     @classmethod
-    def saveProFile(cls, path, objInfos):
+    def saveObjFile(cls, path, objInfos):
         
         worker=SaveWorker()
         
@@ -302,9 +305,9 @@ class Project:
         return files
     
     @classmethod
-    def findProFile(cls):
+    def findObjFile(cls):
         
-        pro_files=glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.pro"))
+        pro_files=glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.obj"))
         files=[os.path.basename(file_path) for file_path in pro_files]
         
         return files
@@ -348,6 +351,11 @@ class Project:
 
             btn.setEnabled(True)
             
+        def showError(infos):
+            
+            cls.showError(title="Error in Sensitivity Analysis", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+        
+        cls.thread.errorOccur.connect(showError)
         cls.worker.result.connect(accept)
         cls.thread.start()
     
@@ -478,9 +486,14 @@ class Project:
         problem.totalWidth=cls.SA_runInfos['verboseWidth']
         problem.GUI=True
 
-        sa.analyze(problem=problem, **analyzeHyper)
+        try:
+            sa.analyze(problem=problem, **analyzeHyper)
+            verboseWidget.append("\n".join(sa.problem.logLines))
+        except Exception as e:
+            cls.showError(title="Error in sensibility analysis", content=f"The error is {e} \n If you can't solve this problem, please contact the developer!")
+            
         
-        verboseWidget.append("\n".join(sa.problem.logLines))
+        
     #################################################
     @classmethod
     def initOP(cls, verboseWidget, btn):
@@ -511,7 +524,10 @@ class Project:
             verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
 
             btn.setEnabled(True)
-            
+        def showError(infos):
+            cls.showError(title="Error in Optimization", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+        
+        cls.thread.errorOccur.connect(showError)
         cls.worker.result.connect(accept)
         cls.thread.start()
     
@@ -583,6 +599,9 @@ class Project:
             cls.OP_result['historyBestDecs']=optimizer.result.historyBestDecs
             cls.OP_result['historyBestObjs']=optimizer.result.historyBestObjs
         
+        def showError(infos):
+            cls.showError(title="Error in Optimization", content=f"The error is {infos} \n If you cannot solve this problem, please contact the developer!")
+        
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
         
@@ -593,7 +612,7 @@ class Project:
         verboseEmit.verboseSend.connect(update_verbose)
 
         cls.thread=OptimizeThread(cls.worker, optimizer, cls.OP_problemInfos)
-        
+        cls.thread.errorOccur.connect(showError)
         cls.thread.problem.GUI=True
         cls.thread.problem.iterEmit=iterEmit
         cls.thread.problem.verboseEmit=verboseEmit
@@ -637,7 +656,10 @@ class Project:
             verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
 
             btn.setEnabled(True)
-            
+        def showError(infos):
+            cls.showError(title="Error in Validation", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+        
+        cls.thread.errorOccur.connect(showError)
         cls.worker.result.connect(accept)
         cls.thread.start()
         
@@ -657,7 +679,7 @@ class Project:
     
     
     @classmethod
-    def showError(cls, error):
+    def showError(cls, title="Errors Occur", error=""):
         
         box=MessageBox(title="Errors Occur", content=error, parent=cls.W)
         box.show()
