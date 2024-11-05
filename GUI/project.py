@@ -2,6 +2,7 @@ import os
 import glob
 import numpy as np
 import h5py
+import shutil
 from datetime import datetime
 from .worker import (InitWorker, ReadWorker, SaveWorker, InitThread, OptimizeThread, IterEmit, VerboseEmit, NewThread,
                     VerboseWorker, RunWorker, EvaluateThread, SingleEvaluateThread)
@@ -274,8 +275,10 @@ class Project:
         
         sop_files=[]
         for file in files:
-            if file.split("_")[0] in SOP_List:
-                sop_files.append(file)
+            for name in SOP_List:
+                if name in file:
+                    sop_files.append(file)
+                    break
             
         return sop_files
     
@@ -290,11 +293,12 @@ class Project:
         
         sa_files=[]
         for file in files:
-            if file.split("_")[0] in SA_List:
-                sa_files.append(file)
+            for name in SA_List:
+                if name in file:
+                    sa_files.append(file)
+                    break
             
         return sa_files        
-    
     
     @classmethod
     def findParaFile(cls):
@@ -320,6 +324,7 @@ class Project:
         name=[os.path.basename(file_path) for file_path in exe_name]
 
         return name
+    
     ##############sensibility analysis####################
     @classmethod
     def initSA(cls, verboseWidget, btn):
@@ -415,7 +420,13 @@ class Project:
         def accept(Y):
             
             cls.SA_result['Y']=abs(Y)
-        
+
+            try:
+                tempPath=cls.SA_runInfos['tempPath']
+                shutil.rmtree(tempPath)
+            except Exception as e:
+                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself\n The error is {str(e)}")
+            
         cls.worker=RunWorker(cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_problemInfos, cls.SA_runInfos)
         cls.worker.result.connect(accept)
         cls.worker.result.connect(finish)
@@ -491,8 +502,6 @@ class Project:
             verboseWidget.append("\n".join(sa.problem.logLines))
         except Exception as e:
             cls.showError(title="Error in sensibility analysis", content=f"The error is {e} \n If you can't solve this problem, please contact the developer!")
-            
-        
         
     #################################################
     @classmethod
@@ -524,6 +533,7 @@ class Project:
             verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
 
             btn.setEnabled(True)
+            
         def showError(infos):
             cls.showError(title="Error in Optimization", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
         
@@ -532,7 +542,6 @@ class Project:
         cls.thread.start()
     
     ##################################################
-    
     
     @classmethod
     def cancelSA(cls):
@@ -600,7 +609,16 @@ class Project:
             cls.OP_result['historyBestObjs']=optimizer.result.historyBestObjs
         
         def showError(infos):
+            
             cls.showError(title="Error in Optimization", content=f"The error is {infos} \n If you cannot solve this problem, please contact the developer!")
+        
+        def deleteTempFiles():
+            
+            try:
+                tempPath=cls.OP_runInfos['tempPath']
+                shutil.rmtree(tempPath)
+            except Exception as e:
+                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself\n The error is {str(e)}")
         
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
@@ -623,6 +641,9 @@ class Project:
         cls.thread.finished.connect(cls.thread.deleteLater)
         iterEmit.iterFinished.connect(finish)
         iterEmit.iterStop.connect(unfinish)
+        
+        iterEmit.iterFinished.connect(deleteTempFiles)
+        iterEmit.iterStop.connect(deleteTempFiles)
         cls.thread.finished.connect(saveResult)
     
         cls.thread.start()
@@ -656,6 +677,7 @@ class Project:
             verboseWidget.verticalScrollBar().setValue(verboseWidget.verticalScrollBar().maximum())
 
             btn.setEnabled(True)
+            
         def showError(infos):
             cls.showError(title="Error in Validation", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
         
@@ -676,7 +698,6 @@ class Project:
         cls.worker.result.connect(finish)
         cls.thread.finished.connect(cls.thread.deleteLater)
         cls.thread.start()
-    
     
     @classmethod
     def showError(cls, title="Errors Occur", error=""):
