@@ -684,6 +684,7 @@ class Project:
             btn.setEnabled(True)
             
         def showError(infos):
+            
             cls.showError(title="Error in Validation", error=f"{infos}.\n If you can't solve this problem, please contact the developer!")
         
         cls.Val_thread.errorOccur.connect(showError)
@@ -707,7 +708,7 @@ class Project:
     @classmethod
     def showError(cls, title="Errors Occur", error=""):
         
-        box=MessageBox(title="Errors Occur", content=error, parent=cls.W)
+        box=MessageBox(title=title, content=error, parent=cls.W)
         box.show()
         
     @classmethod
