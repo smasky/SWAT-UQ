@@ -35,7 +35,7 @@ class DisplaySA(QFrame):
         
         self.resultFile=ComboBox(self)
         self.resultFile._showComboMenu=self.dynamicShowFile
-        self.resultFile.setFixedWidth(300)
+        self.resultFile.setFixedWidth(450)
         setFont(self.resultFile)
         
         self.drawBtn=PrimaryPushButton("Draw", self)

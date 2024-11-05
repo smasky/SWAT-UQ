@@ -19,7 +19,7 @@ class ComboBox_(ComboBox):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-    
+        self.setMaxVisibleItems(10)
     def _createComboMenu(self):
         
         return ComboBoxMenu_(parent=self)

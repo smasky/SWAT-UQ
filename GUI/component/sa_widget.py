@@ -542,6 +542,7 @@ class SimulationWidget(QWidget):
         self.initializeBtn.setEnabled(False)
         self.problemEdit.setEnabled(False)
         
+        self.verbose.append("Initializing ... Please wait!\n")
         Pro.initSA(self.verbose, self.samplingBtn)
         
     def sampling(self):
@@ -629,4 +630,6 @@ class AnalysisWidget(QWidget):
         
         self.textWidget.append("Sensibility Analysis is running ... \n")
         
-        Pro.sensibility_analysis(self.textWidget)   
+        Pro.sensibility_analysis(self.textWidget)
+        
+        
