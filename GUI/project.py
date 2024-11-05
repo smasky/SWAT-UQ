@@ -110,14 +110,13 @@ class Project:
             cls.projectInfos=projectInfos
             
         except Exception as e:
-            cls.showError(error="Some errors occur in project file, please check!")
+            cls.showError(error=f"Some errors occur in project file, please check!\n The error is {str(e)}.")
             close(500)
             return
         
         def writeProjectFile():
             
             with open(os.path.join(projectPath, projectFile), 'w') as f:
-                        
                 f.write(f"projectName: {projectName}\n")
                 f.write(f"projectPath: {projectInfos['projectPath']}\n")
                 f.write(f"swatPath: {projectInfos['swatPath']}\n")
@@ -221,7 +220,7 @@ class Project:
             nowDate=beginDate.addMonths(delta)
             index=nowDate.month()-baseDate.month()+1
             return index, nowDate.year(), nowDate.month(), 1 
-         
+        
     @classmethod 
     def importObjFromFile(cls, path):
         
@@ -231,7 +230,7 @@ class Project:
             return infos, True
                 
         except Exception as e:
-            cls.showError(error="There exists some errors in objective file, please check!")
+            cls.showError(error=f"There exists some errors in objective file, please check! \n The error is {str(e)}.")
             return {}, False   
    
     @classmethod
@@ -244,7 +243,7 @@ class Project:
             return infos, True
         
         except Exception as e:
-            cls.showError(error="There are some error in parameter file, please check!")
+            cls.showError(error=f"There are some error in parameter file, please check! \n The error is {str(e)}.")
             return {}, False
         
     @classmethod
@@ -283,6 +282,10 @@ class Project:
         return sop_files
     
     @classmethod
+    def findMOPResultFile(cls):
+        pass
+    
+    @classmethod
     def findSAResultFile(cls):
         
         path=os.path.join(cls.projectInfos['projectPath'], "Result\\Data")
@@ -316,7 +319,7 @@ class Project:
         
         return files
     
-    @classmethod#TODO find
+    @classmethod
     def findSwatExe(cls):
         
         swatPath=cls.projectInfos['swatPath']
@@ -358,7 +361,7 @@ class Project:
             
         def showError(infos):
             
-            cls.showError(title="Error in Sensitivity Analysis", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+            cls.showError(title="Error in Sensitivity Analysis", error=f"There exists some errors. \n {infos} \n If you can't solve this problem, please contact the developer!")
         
         cls.thread.errorOccur.connect(showError)
         cls.worker.result.connect(accept)
@@ -402,7 +405,7 @@ class Project:
         
         except Exception as e:
             
-            cls.showError(error=f"Sampling failed, please check the hyperparameters!\n The error is {e}")
+            cls.showError(error=f"Sampling failed, please check the hyperparameters! \n The error is {e}.")
             
             return False
         
@@ -425,7 +428,7 @@ class Project:
                 tempPath=cls.SA_runInfos['tempPath']
                 shutil.rmtree(tempPath)
             except Exception as e:
-                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself\n The error is {str(e)}")
+                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself. \n The error is {str(e)}.")
             
         cls.SA_worker=RunWorker(cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_problemInfos, cls.SA_runInfos)
         cls.SA_worker.result.connect(accept)
@@ -501,7 +504,7 @@ class Project:
             sa.analyze(problem=problem, **analyzeHyper)
             verboseWidget.append("\n".join(sa.problem.logLines))
         except Exception as e:
-            cls.showError(title="Error in sensibility analysis", content=f"The error is {e} \n If you can't solve this problem, please contact the developer!")
+            cls.showError(title="Error in sensibility analysis", content=f"The error is {e}. \n If you can't solve this problem, please contact the developer!")
         
     #################################################
     @classmethod
@@ -535,7 +538,7 @@ class Project:
             btn.setEnabled(True)
             
         def showError(infos):
-            cls.showError(title="Error in Optimization", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+            cls.showError(title="Error in Optimization", error=f"{infos}.\n If you can't solve this problem, please contact the developer!")
         
         cls.thread.errorOccur.connect(showError)
         cls.worker.result.connect(accept)
@@ -610,7 +613,7 @@ class Project:
         
         def showError(infos):
             
-            cls.showError(title="Error in Optimization", content=f"The error is {infos} \n If you cannot solve this problem, please contact the developer!")
+            cls.showError(title="Error in Optimization", content=f"The error is {infos}. \n If you cannot solve this problem, please contact the developer!")
         
         def deleteTempFiles():
             
@@ -618,7 +621,7 @@ class Project:
                 tempPath=cls.OP_runInfos['tempPath']
                 shutil.rmtree(tempPath)
             except Exception as e:
-                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself\n The error is {str(e)}")
+                cls.showError(error=f"Failed to delete temporary files, please remove them by yourself.\n The error is {str(e)}.")
         
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
@@ -681,7 +684,7 @@ class Project:
             btn.setEnabled(True)
             
         def showError(infos):
-            cls.showError(title="Error in Validation", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
+            cls.showError(title="Error in Validation", error=f"{infos}.\n If you can't solve this problem, please contact the developer!")
         
         cls.Val_thread.errorOccur.connect(showError)
         cls.Val_worker.result.connect(accept)
