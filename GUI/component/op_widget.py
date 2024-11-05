@@ -515,6 +515,8 @@ class OptimizationWidget(QWidget):
         
         Pro.initOP(self.verbose, self.optimizationBtn)
         
+        self.verbose.append("Initializing... Please wait!\n")
+        
     def optimizing(self):
         
         Pro.OP_problemInfos['name']=self.problemEdit.text()

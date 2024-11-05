@@ -427,16 +427,16 @@ class Project:
             except Exception as e:
                 cls.showError(error=f"Failed to delete temporary files, please remove them by yourself\n The error is {str(e)}")
             
-        cls.worker=RunWorker(cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_problemInfos, cls.SA_runInfos)
-        cls.worker.result.connect(accept)
-        cls.worker.result.connect(finish)
-        cls.worker.unfinished.connect(unfinish)
+        cls.SA_worker=RunWorker(cls.modelInfos, cls.SA_paraInfos, cls.SA_objInfos, cls.SA_problemInfos, cls.SA_runInfos)
+        cls.SA_worker.result.connect(accept)
+        cls.SA_worker.result.connect(finish)
+        cls.SA_worker.unfinished.connect(unfinish)
         
-        cls.thread=EvaluateThread(cls.worker, cls.SA_result['X'])
-        cls.worker.updateProcess.connect(update_progress)
-        cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.SA_thread=EvaluateThread(cls.SA_worker, cls.SA_result['X'])
+        cls.SA_worker.updateProcess.connect(update_progress)
+        cls.SA_thread.finished.connect(cls.SA_thread.deleteLater)
         
-        cls.thread.start()
+        cls.SA_thread.start()
     
     @classmethod
     def sensibility_analysis(cls, verboseWidget):
@@ -546,13 +546,13 @@ class Project:
     @classmethod
     def cancelSA(cls):
         
-        cls.worker.stop=True
+        cls.SA_worker.stop=True
     
     @classmethod
     def cancelOpt(cls):
         
-        cls.worker.stop=True
-        cls.thread.problem.isStop=True
+        cls.OP_worker.stop=True
+        cls.OP_thread.problem.isStop=True
     
     @classmethod
     def optimizing(cls, FEsBar, itersBar, FEsLabel, itersLabel, verbose, finish, unfinish):
@@ -623,38 +623,40 @@ class Project:
         iterEmit=IterEmit()
         verboseEmit=VerboseEmit()
         
-        cls.worker=RunWorker(cls.modelInfos, cls.OP_paraInfos, cls.OP_objInfos, cls.OP_problemInfos, cls.OP_runInfos)
-        cls.worker.updateProcess.connect(update_FEsBar)
+        cls.OP_worker=RunWorker(cls.modelInfos, cls.OP_paraInfos, cls.OP_objInfos, cls.OP_problemInfos, cls.OP_runInfos)
+        cls.OP_worker.updateProcess.connect(update_FEsBar)
         
         iterEmit.iterSend.connect(update_itersBar)
         verboseEmit.verboseSend.connect(update_verbose)
 
-        cls.thread=OptimizeThread(cls.worker, optimizer, cls.OP_problemInfos)
-        cls.thread.errorOccur.connect(showError)
-        cls.thread.problem.GUI=True
-        cls.thread.problem.iterEmit=iterEmit
-        cls.thread.problem.verboseEmit=verboseEmit
-        cls.thread.problem.isStop=False
-        cls.thread.problem.totalWidth=cls.OP_runInfos['verboseWidth']
-        cls.thread.problem.workDir=cls.projectInfos['projectPath']
+        cls.OP_thread=OptimizeThread(cls.OP_worker, optimizer, cls.OP_problemInfos)
+        cls.OP_thread.errorOccur.connect(showError)
+        cls.OP_thread.problem.GUI=True
+        cls.OP_thread.problem.iterEmit=iterEmit
+        cls.OP_thread.problem.verboseEmit=verboseEmit
+        cls.OP_thread.problem.isStop=False
+        cls.OP_thread.problem.totalWidth=cls.OP_runInfos['verboseWidth']
+        cls.OP_thread.problem.workDir=cls.projectInfos['projectPath']
         
-        cls.thread.finished.connect(cls.thread.deleteLater)
+        cls.OP_thread.finished.connect(cls.OP_thread.deleteLater)
         iterEmit.iterFinished.connect(finish)
         iterEmit.iterStop.connect(unfinish)
         
         iterEmit.iterFinished.connect(deleteTempFiles)
         iterEmit.iterStop.connect(deleteTempFiles)
-        cls.thread.finished.connect(saveResult)
+        cls.OP_thread.finished.connect(saveResult)
     
-        cls.thread.start()
+        cls.OP_thread.start()
+        
     ################################
+    
     @classmethod
     def initVal(cls, verboseWidget, btn):
         
         cls.Val_runInfos["numThreads"]=12 
 
-        cls.worker = InitWorker()
-        cls.thread = InitThread(cls.worker, cls.projectInfos, cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_runInfos)
+        cls.Val_worker = InitWorker()
+        cls.Val_thread = InitThread(cls.Val_worker, cls.projectInfos, cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_runInfos)
         
         Verbose.workDir=cls.projectInfos['projectPath']
         Verbose.total_width=verboseWidget.property('totalWidth')
@@ -664,8 +666,8 @@ class Project:
             cls.Val_problemInfos=infos["problemInfos"]
             cls.Val_runInfos=infos["runInfos"]
             cls.Val_objInfos=infos['objInfos']
-            cls.thread.quit()
-            cls.thread.deleteLater()
+            cls.Val_thread.quit()
+            cls.Val_thread.deleteLater()
             
             worker=VerboseWorker(cls.projectInfos, cls.modelInfos, cls.Val_paraInfos, cls.Val_objInfos, cls.Val_runInfos)
             
@@ -681,9 +683,9 @@ class Project:
         def showError(infos):
             cls.showError(title="Error in Validation", error=f"{infos}\n If you can't solve this problem, please contact the developer!")
         
-        cls.thread.errorOccur.connect(showError)
-        cls.worker.result.connect(accept)
-        cls.thread.start()
+        cls.Val_thread.errorOccur.connect(showError)
+        cls.Val_worker.result.connect(accept)
+        cls.Val_thread.start()
         
     @classmethod
     def singleSim(cls, x, finish):
