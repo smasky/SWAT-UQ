@@ -165,7 +165,7 @@ class DisplayOP(QFrame):
         fileName=self.resultFile.currentText()
         self.OPData=Pro.loadOPFile(fileName)
         self.canvas.show_plot()
-        
+            
         #Read Data
         data=self.OPData['History_Best'] #TODO
         xData=[]
@@ -202,8 +202,7 @@ class DisplayOP(QFrame):
         self.configPanel.configEmit.connect(self.canvas.setHyper)
         self.configPanel.configEmit.connect(self.canvas.refresh)
         self.canvas.saveEmit.connect(self.configPanel.cancel)
-            
-
+        
         self.configPanel.data=data
         self.canvas.data=data
         self.configPanel.confirm()
@@ -255,9 +254,9 @@ class MplCanvas(FigureCanvas):
             
         markType=self.hyper['markType']
         everyMark=self.hyper['everyMark']
-        markSize=self.hyper['markSize']
-        edgeWidth=self.hyper['edgeWidth']
-        lineWidth=self.hyper['lineWidth']
+        markSize=self.hyper['markSize'] if not mul else self.hyper['markSize']*self.multiply
+        edgeWidth=self.hyper['edgeWidth'] if not mul else self.hyper['edgeWidth']*self.multiply
+        lineWidth=self.hyper['lineWidth'] if not mul else self.hyper['lineWidth']*self.multiply
         lineStyle=self.hyper['lineStyle']
         lineColor=calRGBA(self.hyper['lineColor'])
         markFaceColor=calRGBA(self.hyper['markColor'])
@@ -268,22 +267,22 @@ class MplCanvas(FigureCanvas):
                        color=lineColor, label=labelName)
         
         xLabel=self.hyper['xLabel']
-        xLabelSize=self.hyper['xLabelSize']
+        xLabelSize=self.hyper['xLabelSize'] if not mul else self.hyper['xLabelSize']*self.multiply
         self.axes.set_xlabel(xLabel, fontsize=xLabelSize, fontweight='bold')
         
         yLabel=self.hyper['yLabel']
-        yLabelSize=self.hyper['yLabelSize']
+        yLabelSize=self.hyper['yLabelSize'] if not mul else self.hyper['yLabelSize']*self.multiply
         self.axes.set_ylabel(yLabel, fontsize=yLabelSize, fontweight='bold')
         
         figureTitle=self.hyper['figureTitle']
-        figureTitleSize=self.hyper['titleSize']
+        figureTitleSize=self.hyper['titleSize'] if not mul else self.hyper['titleSize']*self.multiply
         self.axes.set_title(figureTitle, fontsize=figureTitleSize, fontweight='bold')
         
-        legendSize=self.hyper['legendSize']
+        legendSize=self.hyper['legendSize'] if not mul else self.hyper['legendSize']*self.multiply
         self.axes.legend(prop={'weight':'bold', 'size':legendSize}, loc='upper right')
         
         if self.hyper['ifGrid']:
-            gridWith=self.hyper['gridWidth']
+            gridWith=self.hyper['gridWidth'] if not mul else self.hyper['gridWidth']*self.multiply
             self.axes.grid(True, which='major', axis='both', linewidth=gridWith)
         
         plt.rcParams['axes.labelweight'] = 'bold'  # 
@@ -294,14 +293,14 @@ class MplCanvas(FigureCanvas):
         self.axes.set_xlim(0, xMaximum)
         self.axes.set_ylim(yMinimum, yMaximum)
          
-        xTickWidth=self.hyper['xTickWidth']
-        xTickSize=self.hyper['xTickSize']
+        xTickWidth=self.hyper['xTickWidth'] if not mul else self.hyper['xTickWidth']*self.multiply
+        xTickSize=self.hyper['xTickSize'] if not mul else self.hyper['xTickSize']*self.multiply
         
         self.axes.tick_params(axis='x', direction='in', width=xTickWidth, which='both', 
                               bottom=True, top=False, labelsize=xTickSize)
         
-        yTickWidth=self.hyper['yTickWidth']
-        yTickSize=self.hyper['yTickSize']
+        yTickWidth=self.hyper['yTickWidth'] if not mul else self.hyper['yTickWidth']*self.multiply
+        yTickSize=self.hyper['yTickSize'] if not mul else self.hyper['yTickSize']*self.multiply
         self.axes.tick_params(axis='y', direction='in', width=yTickWidth, which='both', 
                               left=True, right=False, labelsize=yTickSize)
         
@@ -311,7 +310,7 @@ class MplCanvas(FigureCanvas):
         xTickInterval=self.hyper['xTickInterval']
         self.axes.xaxis.set_major_locator(MultipleLocator(xTickInterval))
         
-        boxWidth=self.hyper['boxWidth']
+        boxWidth=self.hyper['boxWidth'] if not mul else self.hyper['boxWidth']*self.multiply
         for spine in self.axes.spines.values():
             spine.set_linewidth(boxWidth)
         
@@ -584,20 +583,7 @@ class SubPanel(QFrame):
                 widget.menuFontsize=MediumSize-5
                 
                 widget.get=widget.currentText
-            
-            # elif type=='object':
-                
-            #     data=dict['data']
-            #     name=dict['name']
-            #     key=dict['default']
-            #     widget=PushButton('Click to Select Bars', self)
-            #     widget.setProperty('name', name)
-            #     widget.setProperty('data', data)
-            #     widget.setProperty('key', key)
-            #     widget.clicked.connect(self.showBarSelector)
-                
-            #     widget.get=(lambda w=widget: w.property('key'))
-                
+                     
             setFont(widget, MediumSize-5)
             widget.setProperty('name', name)
             widget.setProperty('type', type)
@@ -637,7 +623,6 @@ class SubPanel(QFrame):
             hyper[name]=value 
 
         return hyper
-    
 class ColorPushButton(PushButton):
     
     def __init__(self, text, color, parent=None):
