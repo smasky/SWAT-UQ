@@ -456,10 +456,10 @@ class MplCanvas(FigureCanvas):
         
         if barIndex is None:
             name=list(self.data.keys())
-            value=list(self.data.values())
+            value=[abs(data) for data in self.data.values()]
         else:
             name=barIndex
-            value=[self.data[key] for key in barIndex]
+            value=[abs(self.data[key]) for key in barIndex]
         
         if self.hyper['normalize']:
             value=(np.array(value)/np.sum(value)).tolist()
