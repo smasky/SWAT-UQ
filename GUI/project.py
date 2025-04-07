@@ -504,7 +504,7 @@ class Project:
             sa.analyze(problem=problem, **analyzeHyper)
             verboseWidget.append("\n".join(sa.problem.logLines))
         except Exception as e:
-            cls.showError(title="Error in sensibility analysis", content=f"The error is {e}. \n If you can't solve this problem, please contact the developer!")
+            cls.showError(title="Error in sensibility analysis", error=f"The error is {e}. \n If you can't solve this problem, please contact the developer!")
         
     #################################################
     @classmethod
