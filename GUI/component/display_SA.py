@@ -236,7 +236,6 @@ class ConfigPanel(FramelessDialog):
         vMainLayout.addWidget(barPanel)
         vMainLayout.addStretch(1)
         
-        
         self.yesBtn=PrimaryPushButton("Confirm", self)
         self.cancelBtn=PrimaryPushButton("Cancel", self)
         self.yesBtn.clicked.connect(self.confirm)
@@ -444,7 +443,7 @@ class MplCanvas(FigureCanvas):
     def refresh(self):
         
         self.plotPic()        
-    
+        
     def plotPic(self, mul=False):
         
         plt.rcParams['font.family'] = 'sans-serif'
