@@ -2,18 +2,28 @@
 
 <p align="center"><img src="./resource/SWAT-UQ.svg" width="400"/></p>
 
-**SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL), a comprehensive platform for uncertainty analysis and parameter optimization. This project aim to provide full integration of UQPyL and SWAT, enabling users to conduct sensitivity analysis, single-objective optimization, and multi-objective optimization with ease. There are two versions of SWAT-UQ: a. **Code Version** for advanced operations and customization; b. **GUI Version** for ease of use and intuitive interaction. With SWAT-UQ, users can seamlessly integrate powerful uncertainty quantification and optimization tools into their SWAT-based modeling workflows.
+**SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL), a comprehensive platform for uncertainty analysis and parameter optimization. This project aim to provide full integration of UQPyL and the Soil and Water Assessment Tool models (SWAT), enabling users to conduct sensitivity analysis, single-objective optimization, and multi-objective optimization with ease. There are two versions of SWAT-UQ: a. **Code Version** for advanced operations and customization; b. **GUI Version** for ease of use and intuitive interaction. With SWAT-UQ, users can seamlessly integrate powerful uncertainty quantification and optimization tools into their SWAT-based modeling workflows.
 
 ## Content
- - [Code Version](#introduction-of-swat-uq-code-version)
+ - [Code Version](#code-version-of-swat-uq)
+    - [Key Features](#key-features)
+ - [GUI Version](#gui-version-of-swat-uq)
 
- - [GUI Version](#introduction-of-swat-uq-gui-version)
+## Code Version of SWAT-UQ
+
+In the **Code Version**, we provide a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. Therefore, users can instantiate the `SWAT_UQ` class to  access all the methods and algorithms provided by UQPyL. Specifically, `SWAT_UQ` offers a set of functions that simplify and accelerate the process of building and sloving your problems (e.g., model calibration, best management practices)
+
+### Key Features
+
+1. **Parallel Operations:** Both parameter input/output operations within project folder and SWAT runs all support parallelization. (💡 **Noted:** We have tested that, in a 40-core server environment, the Code Version can stably support high-concurrency execution of 80 SWAT model instances.)
+
+2. **Full Automation Workflow:** 
 
 
-## Introduction of SWAT-UQ Code Version
 
+---
 
-## Introduction of SWAT-UQ GUI Version
+## GUI Version of SWAT-UQ 
 
 This GUI interface is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. The prime purpose of designing SWAT-UQ is to provide full and easy access to combine UQPyL with SWAT, helping users to conduct sensitivity analysis, single-objective optimization, and multi-objective optimization. Therefore, a key advantage of this platform is that users do not need to worry about coding; **it seamlessly automates complete workflow from sensitivity analysis to parameter optimization, finally data visualization.**
 
