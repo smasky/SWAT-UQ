@@ -112,15 +112,15 @@ In this example, only one data series is shown. Each series consists of two part
 **Header Definitions**:
 - **SER_ID:** the location of `ID` muse be replaced by a number, which is an unique label for the data series.
 - **OBJ_ID** or **CON_ID:** `OBJ` or `CON` determine the type of the data series. And the value of ID denotes the **unique label** of objective or constraint functions. 
-   💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same OBJ ID or CON ID.
+   💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same `OBJ ID` or `CON ID`.
 - **REACH_ID:** The REACH ID should be consistent with the SWAT project and can be set according to your requirements.
 - **VAR_COL:** Specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
 - **FUNC_TYPE:**  Defines the objective function type to compare observed and simulated data.
 
-**Data Section** is structured by `RowNumber`, `Index_Year`, `Data`:
-- **Number:** Not used in SWAT-UQ-DEV, only for data integrity checking.
+**Data Section** is structured by `NUM`, `INDEX_YEAR`, `DATA`:
+- **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
 - **INDEX_YEAR:** The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. The value of `YEAR` means the year index for the data.
-- **Data:** The type of data can be int, float.
+- **DATA:** The type of data can be int, float.
 
 
 
