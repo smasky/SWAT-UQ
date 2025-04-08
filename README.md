@@ -44,7 +44,7 @@ Before instantiating the `SWAT-UQ` class, some preparatory works are required.
 
 **Step 2:** On your hard drive, **create a separate folder** (named **Work Folder**) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
 
-**Step 3:** In Work Folder, create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
+**Step 3:** In the Work Folder, create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
 
 **File name:** parameter.par 
 
@@ -69,7 +69,8 @@ Each line of `parameter.par` is structured by `Parameter Name`, `Assigning Mode`
    - **`r`** means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
    - **`v`** denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
    - **`a`** stands for adding assignment, the true value is calculated by $originVal+val$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
- - **Min Value and Max Value:** Min and Max Value is the lower and upper bound of the parameter.
+ - **Min Value:** Min Value is the lower bound of the parameter.
+ - **Max Value:** Max Value is the upper bound of the parameter.
  - **Scope:** This specifies the target scope of the parameter. By default, it sets to `all`, meaning the value of the parameter is modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
  
  ```
@@ -81,9 +82,9 @@ The format follows either:
  - `BSN ID` - apply the parameter to all HRUs within the specified basin
  - `BSN ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
 
-**Step 4:** In Work Folder, create a **observed file** encoding UTF-8, which is used to construct objective functions for current problem.
+**Step 4:** In Work Folder, create an **observed file** encoding UTF-8, which is used to construct objective or constraint functions for current problem.
 
-The contents of **observed file** are shown below:
+For example:
 
 File Name: `observed.obj` 
 
@@ -105,21 +106,22 @@ TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 ...
 12 7_2012 22.44
 ```
-The **observed file** support multiple series. Here, we only use one data series as example.
-For each series data, there exists two parts: a. Header Definitions; b. Data Section.
+The observed file can support multiple series. 
+In this example, only one data series is shown. Each series consists of two parts: a. Header Definitions; b. Data Section.
 
-**Header Definitions** is structured by `SER_ID`, `OBJ_ID` or `CON_ID`, `REACH_ID`, `VAR_COL`, `FUNC_TYPE`, specifically speaking:
-- **SER_ID:** SER_ID denotes the **unique label** of current data series.
-- **OBJ_ID** or **CON_ID:** The usage of current data series is determined by `OBJ` or `CON`. And the ID denotes the **unique label** of objective or constraint functions. 💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same OBJ ID or CON ID.
+**Header Definitions**:
+- **SER_ID:** the location of `ID` muse be replaced by a number, which is an unique label for the data series.
+- **OBJ_ID** or **CON_ID:** `OBJ` or `CON` determine the type of the data series. And the value of ID denotes the **unique label** of objective or constraint functions. 
+   💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same OBJ ID or CON ID.
 - **REACH_ID:** The REACH ID should be consistent with the SWAT project and can be set according to your requirements.
-- **VAR_COL:** The value of VAR_COL determines the columns of data to be extracted in `*.rch` files. (Support 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
-- **FUNC_TYPE:** This value means the function type used to combine observed data and simulation data.
+- **VAR_COL:** Specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
+- **FUNC_TYPE:**  Defines the objective function type to compare observed and simulated data.
 
-**Data Section** is structured by `RowNumber`, `Index_Year`, `Data Value`:
-- **RowNumber:** useless for SWAT-UQ-DEV, only used for check data integrity.
-- **Index_Year:** The `Index` denotes days when SWAT outputs daily data or months when SWAT output monthly data. It determine by `IPRINT` in `file.cio` of SWAT project.
+**Data Section** is structured by `RowNumber`, `Index_Year`, `Data`:
+- **Number:** Not used in SWAT-UQ-DEV, only for data integrity checking.
+- **INDEX_YEAR:** The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. The value of `YEAR` means the year index for the data.
+- **Data:** The type of data can be int, float.
 
-💡 **Noted:** , please write all data into one file.
 
 
 
