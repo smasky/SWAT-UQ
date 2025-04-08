@@ -40,14 +40,15 @@ To get started, instantiate the `SWAT-UQ` class, which inherits from the `Proble
 
 Before instantiating the `SWAT-UQ` class, some preparatory works are required.
 
-**Step 1:** You should obtain a **SWAT project folder** (named SWAT EXE Folder), usually named 'TxtInOut'.
+**Step 1:** You should obtain a **SWAT project folder** (named **SWAT EXE Folder** for convenience).
 
-**Step 2:** On your hard drive, **create a separate folder** (named Work Folder) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
+**Step 2:** On your hard drive, **create a separate folder** (named **Work Folder**) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
 
-**Step 3:** In Work Folder, you need to create a **parameter file** encoded in UTF-8. This parameter file would contain the information of parameters you want to analyze. 
-Following content is an example:
+**Step 3:** In Work Folder, you need to create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
 
-parameter.
+**File name:** parameter.par 
+💡 **Noted:**  The file name is not restricted, but it is recommended to use the `.par` extension for consistency with the GUI version.
+💡 **Noted:** In this file, all elements must be separated by spaces or tabs.
 ```
 CN2 r -0.4 0.2 all
 GW_DELAY v 30.0 450.0 all
@@ -58,6 +59,31 @@ SMFMN v 0.0 20.0 all
 TIMP v 0.01 1.0 all
 SURLAG v 0.05 24.0 all
 ```
+
+Each line of `parameter.par` is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
+ - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file.
+ - **Assigning Mode:** Assigning Mode is represented by a single character, e.g., `r`, `v`, `a`. 
+   - `r` means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
+   - `v` denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
+   - `a` stands for adding assignment, the true value is calculated by $originVal+val$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
+ - **Min Value and Max Value:** Min and Max Value is the lower and upper bound of the parameter.
+ - **Scope:** This specifies the target scope of the parameter. By default, it sets to `all`, meaning the value of the parameter is modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
+ 
+ ```
+ CN2 r -0.4 0.2 all # Default Scope
+ CN2 r -0.4 0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
+ ```
+
+The format follows either:
+ - `BSN ID` - apply the parameter to all HRUs within the specified basin
+ - `BSN ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
+
+
+
+
+
+
+
 
 
 
