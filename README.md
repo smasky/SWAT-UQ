@@ -6,40 +6,77 @@
 
 **SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL) - a comprehensive platform for uncertainty analysis and parameter optimization. This project aims to provide full integration of UQPyL and **Soil and Water Assessment Tool** (SWAT), enabling users to easily perform sensitivity analysis, single-objective optimization, and multi-objective optimization and so on. 
 
-There are two available versions of SWAT-UQ to meet different user needs: 
- - **Code Version** - Designed for advanced users who require greater flexibility and customization in their modeling workflows.
- - **GUI Version** - Provides an intuitive graphical interface for ease of use, ideal for users who prefer minimal coding.
+There are two available versions of SWAT-UQ, tailored to meet different user needs:
+ - **SWAT-UQ-DEV (Develop Version)** - Designed for advanced users who require high flexibility and customization in building and managing their modeling workflows.
+ - **SWAT-UQ-GUI (GUI Version)** - Offers an intuitive graphical interface for streamlined operation, ideal for users seeking minimal coding involvement.
 
 With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantification and optimization capabilities into their SWAT-based hydrological modeling projects.
 
 ## Content
- - [Code Version](#code-version-of-swat-uq)
+ - [Develop Version](#develop-version-of-swat-uq)
     - [Key Features](#key-features)
+    - [Quick Start](#quick-start)
  - [GUI Version](#gui-version-of-swat-uq)
 
-## Code Version of SWAT-UQ
+## Develop Version of SWAT-UQ
 
-In the **Code Version**, we provide a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. Users can instantiate the `SWAT_UQ` class to directly access all methods and algorithms available in UQPyL. Specifically, `SWAT_UQ` offers a suite of functions to streamline and accelerate the process of building and solving problems (e.g., model calibration, best management practices).
+**SWAT-UQ-DEV** is a Python package designed for use in **script-based environments**. It defines a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. By instantiating `SWAT_UQ` class, users can directly access all methods and algorithms offered by UQPyL. In addition, `SWAT_UQ` contains a suite of built-in functions to streamline and accelerate the process of building and solving problems (e.g., model calibration, best management practices).
 
-### Key Features
+This version is particularly suited for users who wish to customize their workflows, integrate with other Python tools, or automate large-scale uncertainty quantification and optimization tasks.
+
+### ✨ Key Features
 
 1. **Parallel Execution:** Both data I/O operations within project folder and **SWAT model simulations** support parallelization. (💡 **Noted:** Benchmark tests on a 40-core server demonstrate that the current code version can stably run up to 80 SWAT instances concurrently.)
 
-2. **File Control:** For model calibration tasks — such as streamflow and water quality—users only need to prepare a set of `.txt` files to complete the entire setup process.
+2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
 
 3. **End-to-End Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the full modeling workflow: sensitivity analysis -> optimization -> back-substitution.
+
+### 🍭 Quick Start
+
+Here, we provide a step-by-step guide to solving SWAT-based problems with SWAT-UQ-DEV.
+
+To get started, instantiate the `SWAT-UQ` class, which inherits from the `Problem` class in UQPyL. This will give you access to all the methods and algorithms available in UQPyL (see the [UQPyL Documentation](https://github.com/smasky/UQPyL)).
+
+Before instantiating the `SWAT-UQ` class, some preparatory works are required.
+
+**Step 1:** You should obtain a **SWAT project folder** (named SWAT EXE Folder), usually named 'TxtInOut'.
+
+**Step 2:** On your hard drive, **create a separate folder** (named Work Folder) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
+
+**Step 3:** In Work Folder, you need to create a **parameter file** encoded in UTF-8. This parameter file would contain the information of parameters you want to analyze. 
+Following content is an example:
+
+parameter.
+```
+CN2 r -0.4 0.2 all
+GW_DELAY v 30.0 450.0 all
+ALPHA_BF v 0.0 1.0 all
+GWQMN v 0.0 500.0 all
+... 
+SMFMN v 0.0 20.0 all
+TIMP v 0.01 1.0 all
+SURLAG v 0.05 24.0 all
+```
+
+
+
+
+
+
+
 
 ---
 
 ## GUI Version of SWAT-UQ 
 
-This GUI interface is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. The prime purpose of designing SWAT-UQ is to provide full and easy access to combine UQPyL with SWAT, helping users to conduct sensitivity analysis, single-objective optimization, and multi-objective optimization. Therefore, a key advantage of this platform is that users do not need to worry about coding; **it seamlessly automates complete workflow from sensitivity analysis to parameter optimization, finally data visualization.**
+**SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally data visualization.
 
 <p align="center"><img src="./resource/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./resource/TableList.jpg" alt="Table List" width="400"/></p>
 
 <p align="center"><strong>Figure 1. SWAT-UQ at Get Start Interface</strong></p>
 
-The SWAT-UQ framework consists of three modules corresponding to preparation, execution, and post-processing. 
+SWAT-UQ-GUI consists of three modules corresponding to preparation, execution, and post-processing. 
 As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization B**).
 
 # Quick Start
