@@ -47,8 +47,11 @@ Before instantiating the `SWAT-UQ` class, some preparatory works are required.
 **Step 3:** In Work Folder, you need to create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
 
 **File name:** parameter.par 
+
 💡 **Noted:**  The file name is not restricted, but it is recommended to use the `.par` extension for consistency with the GUI version.
+
 💡 **Noted:** In this file, all elements must be separated by spaces or tabs.
+
 ```
 CN2 r -0.4 0.2 all
 GW_DELAY v 30.0 450.0 all
@@ -61,7 +64,7 @@ SURLAG v 0.05 24.0 all
 ```
 
 Each line of `parameter.par` is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
- - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file.
+ - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
  - **Assigning Mode:** Assigning Mode is represented by a single character, e.g., `r`, `v`, `a`. 
    - `r` means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
    - `v` denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
