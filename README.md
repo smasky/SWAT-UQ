@@ -44,7 +44,7 @@ Before instantiating the `SWAT-UQ` class, some preparatory works are required.
 
 **Step 2:** On your hard drive, **create a separate folder** (named **Work Folder**) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
 
-**Step 3:** In Work Folder, you need to create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
+**Step 3:** In Work Folder, create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
 
 **File name:** parameter.par 
 
@@ -81,7 +81,45 @@ The format follows either:
  - `BSN ID` - apply the parameter to all HRUs within the specified basin
  - `BSN ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
 
+**Step 4:** In Work Folder, create a **observed file** encoding UTF-8, which is used to construct objective functions for current problem.
 
+The contents of **observed file** are shown below:
+
+File Name: `observed.obj` 
+
+💡 **Noted:**  It is recommended to use the `.obj` extension for consistency with the GUI version.
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+REACH_ID_23 : ID of reach
+VAR_COL_6: Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
+TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
+
+1 1_2012 2.1
+2 2_2012 3.2
+3 3_2012 3.5
+4 4_2012 6.7
+5 5_2012 14.55
+6 6_2012 21.54
+...
+12 7_2012 22.44
+```
+
+In this file, for each series data, there exists two parts: a. Header Definitions; b. Data Section.
+
+**Header Definitions** is structured by `SER_ID`, `OBJ_ID` or `CON_ID`, `REACH_ID`, `VAR_COL`, `FUNC_TYPE`, specifically speaking:
+- **SER_ID:** SER_ID denotes the **unique label** of current data series.
+- **OBJ_ID** or **CON_ID:** The usage of current data series is determined by `OBJ` or `CON`. And the ID denotes the **unique label** of objective or constraint functions. 💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same OBJ ID or CON ID.
+- **REACH_ID:** The REACH ID should be consistent with the SWAT project and can be set according to your requirements.
+- **VAR_COL:** The value of VAR_COL determines the columns of data to be extracted in `*.rch` files. (Support 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
+- **FUNC_TYPE:** This value means the function type used to combine observed data and simulation data.
+
+**Data Section** is structured by `RowNumber`, `Index_Year`, `Data Value`:
+- **RowNumber:** useless for SWAT-UQ-DEV, only used for check data integrity.
+- **Index_Year:** The `Index` denotes days when SWAT outputs daily data or months when SWAT output monthly data. It determine by `IPRINT` in `file.cio` of SWAT project.
+
+💡 **Noted:** The **observed file** support multiple series, please write all data into one file.
 
 
 
