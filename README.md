@@ -2,7 +2,7 @@
 
 <p align="center"><img src="./resource/SWAT-UQ.svg" width="400"/></p>
 
-**SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL), a comprehensive platform for uncertainty analysis and parameter optimization. This project aims to provide full integration of UQPyL and the **Soil and Water Assessment Tool** (SWAT) models, enabling users to easily perform sensitivity analysis, single-objective optimization, and multi-objective optimization and so on. 
+**SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL) - a comprehensive platform for uncertainty analysis and parameter optimization. This project aims to provide full integration of UQPyL and **Soil and Water Assessment Tool** (SWAT), enabling users to easily perform sensitivity analysis, single-objective optimization, and multi-objective optimization and so on. 
 
 There are two available versions of SWAT-UQ to meet different user needs: 
  - **Code Version** - Designed for advanced users who require greater flexibility and customization in their modeling workflows.
