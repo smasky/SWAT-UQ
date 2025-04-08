@@ -17,15 +17,15 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 
 ## Code Version of SWAT-UQ
 
-In the **Code Version**, we provide a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. Therefore, users can instantiate the `SWAT_UQ` class to  access all the methods and algorithms provided by UQPyL. Specifically, `SWAT_UQ` offers a set of functions that simplify and accelerate the process of building and sloving your problems (e.g., model calibration, best management practices)
+In the **Code Version**, we provide a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. Users can instantiate the `SWAT_UQ` class to directly access all methods and algorithms available in UQPyL. Specifically, `SWAT_UQ` offers a suite of functions to streamline and accelerate the process of building and solving problems (e.g., model calibration, best management practices).
 
 ### Key Features
 
-1. **Parallel Operations:** Both parameter input/output operations within project folder and SWAT runs all support parallelization. (💡 **Noted:** We have tested that, in a 40-core server environment, the Code Version can stably support high-concurrency execution of 80 SWAT model instances.)
+1. **Parallel Execution:** Both data I/O operations within project folder and **SWAT model simulations** support parallelization. (💡 **Noted:** Benchmark tests on a 40-core server demonstrate that the current code version can stably run up to 80 SWAT instances concurrently.)
 
-2. **Full Automation Workflow:** Only prepare some control and data files 
+2. **File Control:** For model calibration tasks — such as streamflow and water quality—users only need to prepare a set of `.txt` files to complete the entire setup process.
 
-
+3. **End-to-End Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the full modeling workflow: sensitivity analysis -> optimization -> back-substitution.
 
 ---
 
