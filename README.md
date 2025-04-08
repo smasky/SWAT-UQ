@@ -93,7 +93,7 @@ File Name: `observed.obj`
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
 REACH_ID_23 : ID of reach
-VAR_COL_6: Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
+VAR_COL_6 : Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
 TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
 
 1 1_2012 2.1
@@ -105,8 +105,8 @@ TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 ...
 12 7_2012 22.44
 ```
-
-In this file, for each series data, there exists two parts: a. Header Definitions; b. Data Section.
+The **observed file** support multiple series. Here, we only use one data series as example.
+For each series data, there exists two parts: a. Header Definitions; b. Data Section.
 
 **Header Definitions** is structured by `SER_ID`, `OBJ_ID` or `CON_ID`, `REACH_ID`, `VAR_COL`, `FUNC_TYPE`, specifically speaking:
 - **SER_ID:** SER_ID denotes the **unique label** of current data series.
@@ -119,7 +119,7 @@ In this file, for each series data, there exists two parts: a. Header Definition
 - **RowNumber:** useless for SWAT-UQ-DEV, only used for check data integrity.
 - **Index_Year:** The `Index` denotes days when SWAT outputs daily data or months when SWAT output monthly data. It determine by `IPRINT` in `file.cio` of SWAT project.
 
-💡 **Noted:** The **observed file** support multiple series, please write all data into one file.
+💡 **Noted:** , please write all data into one file.
 
 
 
