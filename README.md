@@ -66,9 +66,9 @@ SURLAG v 0.05 24.0 all
 Each line of `parameter.par` is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
  - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
  - **Assigning Mode:** Assigning Mode is represented by a single character, e.g., `r`, `v`, `a`. 
-   - `r` means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
-   - `v` denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
-   - `a` stands for adding assignment, the true value is calculated by $originVal+val$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
+   - **`r`** means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
+   - **`v`** denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
+   - **`a`** stands for adding assignment, the true value is calculated by $originVal+val$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
  - **Min Value and Max Value:** Min and Max Value is the lower and upper bound of the parameter.
  - **Scope:** This specifies the target scope of the parameter. By default, it sets to `all`, meaning the value of the parameter is modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
  
