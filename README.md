@@ -17,7 +17,7 @@ In the **Code Version**, we provide a Python class named `SWAT_UQ`, which inheri
 
 1. **Parallel Operations:** Both parameter input/output operations within project folder and SWAT runs all support parallelization. (💡 **Noted:** We have tested that, in a 40-core server environment, the Code Version can stably support high-concurrency execution of 80 SWAT model instances.)
 
-2. **Full Automation Workflow:** 
+2. **Full Automation Workflow:** Only prepare some control and data files 
 
 
 
