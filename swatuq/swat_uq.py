@@ -637,15 +637,6 @@ class SWAT_UQ(Problem):
                     SUBToHRU[subID][int(matchID.group(2))] = int(matchID.group(1))
                     HRUInfos[int(matchID.group(1))] = (slope, subID, matchID.group(2))
         
-        # for sub in BSNToHRU:
-        #     fileName = sub + ".sub"
-        #     with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
-        #         lines = f.readlines()
-        #         for line in lines:
-        #             match = re.search(r'(\d+)\.mgt', line)
-        #             if match:
-        #                 watershed[sub].append(match.group(1))
-        
         self.modelInfos["SUB_IDToFileName"] = SUB_IDToFileName
         self.modelInfos["HRU_IDToFileName"] = HRU_IDToFileName
         self.modelInfos["SUBList"] = list(SUB_IDToFileName.keys())
