@@ -63,7 +63,7 @@ TIMP v 0.01 1.0 all
 SURLAG v 0.05 24.0 all
 ```
 
-Each line of `parameter.par` is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
+Each line of the parameter file is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
  - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
  - **Assigning Mode:** Assigning Mode is represented by a single character, e.g., `r`, `v`, `a`. 
    - **`r`** means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
@@ -93,9 +93,9 @@ File Name: `observed.obj`
 ```
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
-REACH_ID_23 : ID of reach
+REACH_23 : ID of reach
 VAR_COL_6 : Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
-TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
+FUNC_TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
 
 1 1_2012 2.1
 2 2_2012 3.2
@@ -106,16 +106,19 @@ TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 ...
 12 7_2012 22.44
 ```
-The observed file can support multiple series. 
-In this example, only one data series is shown. Each series consists of two parts: a. Header Definitions; b. Data Section.
+The observed file can consists of multiple data series, which may correspond to different locations, data types, or time periods.
 
-**Header Definitions**:
-- **SER_ID:** the location of `ID` muse be replaced by a number, which is an unique label for the data series.
-- **OBJ_ID** or **CON_ID:** `OBJ` or `CON` determine the type of the data series. And the value of ID denotes the **unique label** of objective or constraint functions. 
+In this example, only one data series is shown.
+
+Each series consists of two parts: a. Head Definition; b. Data Section.
+
+**Head Definition**: ()
+- **SER_ID:** The `ID` is an unique label for the data series.
+- **OBJ_ID** or **CON_ID:** `OBJ` or `CON` determine the type of the data series. And this `ID` denotes the **unique label** of objective or constraint functions. 
    💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same `OBJ ID` or `CON ID`.
-- **REACH_ID:** The REACH ID should be consistent with the SWAT project and can be set according to your requirements.
-- **VAR_COL:** Specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
-- **FUNC_TYPE:**  Defines the objective function type to compare observed and simulated data.
+- **REACH_ID:** The `ID` should be consistent with the SWAT project and can be set according to your requirements.
+- **VAR_COL_NUM:** The `NUM` specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
+- **FUNC_TYPE_NUM:** The `NUM` defines the objective function type to compare observed and simulated data.
 
 **Data Section** is structured by `NUM`, `INDEX_YEAR`, `DATA`:
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
