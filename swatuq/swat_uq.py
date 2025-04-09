@@ -50,8 +50,8 @@ RCH_VAR = {1 : "FLOW_IN", 2 : "FLOW_OUT",  3: "EVAP", 4: "TLOSS", 5: "SED_IN", 6
 HRU_VAR = {6 : "ET", 9 : "PERC"}
 SUB_VAR = {4 : "ET", 6 : "PERC"}
 
-HRU = ["chm", "gw", "hru", "mgt", "sdr", "sep", "sol", "ops"]
-WATERSHED = ["pnd", "rte", "sub", "swq", "wgn", "wus"]
+HRU_EXT = ["chm", "gw", "hru", "mgt", "sdr", "sep", "sol", "ops"]
+SUB_EXT = ["pnd", "rte", "sub", "swq", "wgn", "wus"]
 
 class SWAT_UQ(Problem):
     
@@ -112,7 +112,7 @@ class SWAT_UQ(Problem):
             print("=" * 70)
             print("\n" * 2)
         
-        self._initial_cio()
+        self._initial()
         self._record_default_values()
         self._get_evalData()
         
@@ -261,8 +261,8 @@ class SWAT_UQ(Problem):
         
         filePath = os.path.join(self.workPath, self.evalFileName)
         
-        serIDs = []; rchIDs = []; varCols = []; rchWgts = []; funcTypes = []; data = []; funcCombTypes = {}
-        funcCombs = {}
+        serIDs = [];  serWgts = {};  serLocs = {}; serCols = {}; funcTypes = {}; optCombTypes = {}
+        optCombs = {}; serData = {}
         
         self.obsObjs = 0
         self.obsCons = 0
@@ -274,82 +274,106 @@ class SWAT_UQ(Problem):
                 
                 lines = f.readlines()
                 
-                patternSeries = re.compile(r'SER_(\d+)\s+')
-                patternFunc = re.compile(r'([a-zA-Z]*)_(\d+)\s+')
-                patternReach = re.compile(r'REACH_ID_(\d+)\s+')
-                patternCol = re.compile(r'VAR_COL_(\d+)\s+')
-                patternType = re.compile(r'TYPE_(\d+)\s+')
-                patternValue = re.compile(r'(\d+)\s+[a-zA-Z]*_?OUT_(\d+)_(\d+)\s+(\d+\.?\d*)')
+                patternSeries = re.compile(r'SER_(\d+)')
+                patternOpt = re.compile(r'([a-zA-Z]*)_(\d+)')
+                patternWgt = re.compile(r'WGT_(\d+\.?\d*)')
+                patternLoc = re.compile(r'([a-zA-Z]*)_(\d+)')
+                patternCol = re.compile(r'COL_(\d+)')
+                patternFunc = re.compile(r'FUNC_(\d+)')
+                patternValue = re.compile(r'(\d+)\s+(\d+)_(\d+)\s+(\d+\.?\d*)')
                 
                 i = 0
                 while i < len(lines):
-                    line = lines[i]
-                    
-                    matchSeries = patternSeries.match(line)
+        
+                    matchSeries = patternSeries.match(lines[i])
                     
                     if matchSeries:
-                    
+                        #SER_ID
                         serID = int(matchSeries.group(1))
                         if serID in serIDs:
                             raise ValueError("The series ID is duplicated, please check the observed data file!")
                         else:
                             serIDs.append(serID)
                         
-                        matchFunc = patternFunc.match(lines[i+1])
-                        funcCombType = matchFunc.group(1)
-                        if funcCombType == "OBJ":
+                        #OBJ_ID OR CON_ID
+                        matchOpt = patternOpt.match(lines[i+1])
+                        optCombType = matchOpt.group(1)
+                        if optCombType == "OBJ":
                             self.obsObjs += 1
-                        elif funcCombType == "CON":
+                        elif optCombType == "CON":
                             self.obsCons += 1
                         else:
                             raise ValueError("The function combination type is not valid, only `OBJ` and `CON` are supported, please check the observed data file!")
-                        funcID = int(matchFunc.group(2))
-                        funcCombTypes[funcID] = funcCombType
-                        if funcID not in funcCombs.keys():
-                            funcCombs[funcID] = []
-                        funcCombs[funcID].append(serID)
                         
-                        funcType = int(patternType.match(lines[i+2]).group(1))
-                        funcTypes.append(funcType)
+                        optID = int(matchOpt.group(2))
+                        optCombTypes[optID] = optCombType
+                        if optID not in optCombs.keys():
+                            optCombs[optID] = []
+                        optCombs[optID].append(serID)
                         
-                        rchID = int(patternReach.match(lines[i+3]).group(1))
-                        rchIDs.append(rchID)
+                        #WGT_NUM
+                        matchWgt = patternWgt.match(lines[i+2])
+                        wgt = float(matchWgt.group(1))
+                        serWgts[serID] = wgt
                         
-                        varCol = int(patternCol.match(lines[i+4]).group(1))
-                        varCols.append(varCol)
+                        #RCH_ID, SUB_ID, HRU_ID
+                        matchLoc = patternLoc.match(lines[i+3])
+                        loc = matchLoc.group(1)
+                        locID = int(matchLoc.group(2))
+                        if loc in ["RCH", "SUB", "HRU"]:
+                            serLocs[serID] = (loc, locID)
+                        else:
+                            raise ValueError("Only `RCH`, `SUB` and `HRU` are supported, please check the load data location!")
                         
-                        weight = float(re.search(r'\d+\.?\d*',lines[i+5]).group())
-                        rchWgts.append(weight)
+                        #COL_NUM
+                        matchCol = patternCol.match(lines[i+4])
+                        col = int(matchCol.group(1))
+                        serCols[serID] = col
                         
-                        numData = int(re.search(r'\d+', lines[i+6]).group())
+                        #FUNC_NUM
+                        funcType = int(patternFunc.match(lines[i+5]).group(1))
+                        funcTypes[serID] = funcType
+                                   
+                        i = i + 6
                         
-                        i = i+7
-                        
-                        line = lines[i]
-                        while patternValue.match(line) is None:
+                        while patternValue.match(lines[i]) is None:
                             i += 1
-                            line = lines[i]   
-                               
-                        n = 0
+                        
+                        data = []
+                        
                         while True:
-                            line = lines[i]; n += 1
+                            
+                            line = lines[i]
                             matchData = patternValue.match(line)
-                            _, time, year = map(int, matchData.groups()[:-1])
-                            value = float(matchData.groups()[-1])
-                            if printFlag == 0:
-                                years = year - self.modelInfos["beginDate"].year
-                                if years == 0:
-                                    index = time - self.modelInfos["beginDate"].month
-                                else:
-                                    index = time + 12-self.modelInfos["beginDate"].month + (years-1)*12
-                            else:
-                                index = (datetime(year, 1, 1)+timedelta(days=time-1)-self.modelInfos["beginRecord"]).days
-                            data.append([serID, funcID, funcCombType, funcType, rchID, varCol, weight, int(index), int(year), int(time), value])
-                            if n == numData:
+                            
+                            if not matchData:
                                 break
+                            
+                            _, year, I = map(int, matchData.groups()[:-1])
+                            
+                            value = float(matchData.groups()[-1])
+                            
+                            if printFlag == 0:
+                                years = year - self.modelInfos["beginRecord"].year
+                                if years == 0:
+                                    index = I - self.modelInfos["beginRecord"].month
+                                else:
+                                    index = I + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
                             else:
-                                i += 1              
-                    i += 1
+                                index = (datetime(year, 1, 1) + timedelta(days = I - 1) - self.modelInfos["beginRecord"]).days
+                                
+                            data.append([int(year), int(index), value])
+                            
+                            i += 1
+                            
+                            if i >= len(lines):
+                                break
+                        
+                        serData[serID] = data
+                        
+                    else:
+                        i += 1
+                        
         except FileNotFoundError:
             raise FileNotFoundError("The observed data file is not found, please check the file name!")
         
@@ -415,7 +439,7 @@ class SWAT_UQ(Problem):
         """
         
         varInfosPath = os.path.join(self.workPath, self.paraFileName)
-        LB=[]; UB=[]; varType=[]; varSet={}; varName=[]; varMode=[]; setHruID=[]
+        LB=[]; UB=[]; varType=[]; varSet={}; varName=[]; varMode=[]; varScope=[]
         
         with open(varInfosPath, 'r') as f:
             
@@ -427,10 +451,10 @@ class SWAT_UQ(Problem):
                 mode = tmpList[1]
                 T = tmpList[2]
                 LB_UB =  tmpList[3].split("_")
-                HRUID = tmpList[4:]
+                scope = tmpList[4:]
                 
                 varName.append(name)
-                setHruID.append(HRUID)
+                varScope.append(scope)
                 
                 if mode in ['v', 'r', 'a']:
                     varMode.append(mode)
@@ -488,20 +512,23 @@ class SWAT_UQ(Problem):
                 modeFormatted = "{:^7}".format(self.varMode[i])
                 LBFormatted = "{:^15}".format(self.lb[0][i])
                 UBFormatted = "{:^15}".format(self.ub[0][i])
-                HruFormatted = "{:^20}".format(" ".join(setHruID[i]))
+                HruFormatted = "{:^20}".format(" ".join(varScope[i]))
                 print(nameFormatted+"||"+typeFormatted+"||"+modeFormatted+"||"+LBFormatted+"||"+UBFormatted+"||"+HruFormatted)
             print("="*120)
             print("\n"*1)
             
         self.varInfos = {}
         
-        watershedToHru = self.modelInfos["watershedToHru"]
-        watershedList = self.modelInfos["watershedList"]
-        hruList = self.modelInfos["hruList"]
+        SUBToHRU = self.modelInfos["SUBToHRU"]
+        SUBList = self.modelInfos["SUBList"]
+        HRUList = self.modelInfos["HRUList"]
+        
+        SUB_IDToFileName = self.modelInfos["SUB_IDToFileName"]
+        HRU_IDToFileName = self.modelInfos["HRU_IDToFileName"]
         
         for i, element in enumerate(self.varName):
             
-            suffix = self.parasInfos.query('para_name==@element')['file_name'].values[0]
+            ext = self.parasInfos.query('para_name==@element')['file_name'].values[0]
             position = self.parasInfos.query('para_name==@element')['position'].values[0]
             
             if(self.parasInfos.query('para_name==@element')['type'].values[0] == "int"):
@@ -509,33 +536,31 @@ class SWAT_UQ(Problem):
             else:
                 varType = 1 #float
             
-            if suffix in HRU:
-                if setHruID[i][0] == "all":
-                    files = [e+".{}".format(suffix) for e in hruList]
+            if ext in HRU_EXT:
+                if varScope[i][0] == "all":
+                    files = [HRU_IDToFileName[e]+".{}".format(ext) for e in HRUList]
                 else:
                     files = []
-                    for comb in setHruID[i]:
+                    for comb in varScope[i]:
                         if "(" not in comb:
-                            code = f"{'0' * (9 - 4 - len(comb))}{comb}{'0'*4}"
-                            for hru in watershedToHru[code]:
-                                files.append(f"{hru}.{suffix}")
+                            SUB_ID = int(comb)
+                            for _, HRU_ID in SUBToHRU[SUB_ID]:
+                                files.append(f"{HRU_IDToFileName[HRU_ID]}.{ext}")
                         else:
-                            sub = comb.split("(")[0]
-                            hru = comb.split("(")[1].strip(")").split(',')
-                            for e in hru:
-                                code = f"{'0' * (9 - 4 - len(sub))}{sub}{'0'*(4-len(e))}{e}"
-                                files.append(f"{code}.{suffix}")
-                                
-            elif suffix in WATERSHED:
-                if setHruID[i][0] == "all":
-                    files = [e+"."+suffix for e in watershedList]
+                            SUB_ID = comb.split("(")[0]
+                            HRU_IDs = comb.split("(")[1].strip(")").split(',')
+                            for HRU_Local_ID in HRU_IDs:
+                                HRU_ID = SUBToHRU[SUB_ID][int(HRU_Local_ID)]
+                                files.append(f"{HRU_IDToFileName[HRU_ID]}.{ext}")         
+            elif ext in SUB_EXT:
+                if varScope[i][0] == "all":
+                    files = [f"{SUB_IDToFileName[SUB_ID]}.{ext}" for SUB_ID in SUBList]
                 else:
                     files = []
-                    for e in setHruID[i]: 
-                        code = f"{'0' * (9 - 4 - len(e))}{e}{'0'*4}"
-                        files.append(code+"."+suffix)
+                    for SUB_ID in varScope[i]:
+                        files = [f"{SUB_IDToFileName[int(SUB_ID)]}.{ext}" for SUB_ID in SUBList]
                     
-            elif suffix == "bsn":
+            elif ext == "bsn":
                 files = ["basins.bsn"]
             
             for file in files:
@@ -560,7 +585,7 @@ class SWAT_UQ(Problem):
         with ThreadPoolExecutor(max_workers = self.maxWorkers) as executor:
             futures = []
             for fileName, infos in self.varInfos.items():
-                futures.append(executor.submit(read_value_swat, self.workPath, fileName, infos["name"], infos["position"], 1))
+                futures.append(executor.submit(read_value_swat, self.projectPath, fileName, infos["name"], infos["position"], 1))
         
         for future in futures:
             res = future.result()
@@ -570,14 +595,14 @@ class SWAT_UQ(Problem):
                 self.varInfos[fileName].setdefault("default", {})
                 self.varInfos[fileName]["default"][paraName] = values
           
-    def _initial_cio(self):
+    def _initial(self):
         '''
         This function is used to initialize the model information.
         It reads the control file `file.cio` and `fig.fig`, and records the model information.
         '''
         paras = ["IPRINT", "NBYR", "IYR", "IDAF", "IDAL", "NYSKIP"]
         pos = ["default"] * len(paras)
-        dictValues = read_value_swat(self.workPath, "file.cio", paras, pos, 0)
+        dictValues = read_value_swat(self.projectPath, "file.cio", paras, pos, 0)
         beginDate = datetime(int(dictValues["IYR"][0]), 1, 1) + timedelta(int(dictValues['IDAF'][0]) - 1)
         endDate = datetime(int(dictValues["IYR"][0]) + int(dictValues['NBYR'][0]) - 1, 1, 1) + timedelta(int(dictValues['IDAL'][0]) - 1)
         simulationDays = (endDate-beginDate).days + 1
@@ -598,12 +623,12 @@ class SWAT_UQ(Problem):
         SUB_IDToFileName = {}
         HRU_IDToFileName = {}
         
-        with open(os.path.join(self.workPath, "fig.fig"), "r") as f:
+        with open(os.path.join(self.projectPath, "fig.fig"), "r") as f:
             lines = f.readlines()
             
             i = 0
             while i < len(lines):
-                matchID = re.search(r'(\d+)\.bsn', lines[i])
+                matchID = re.search(r'Subbasin:\s*(\d+)', lines[i])
                 if matchID:
                     matchFileName = re.search(r'(\d+)\.sub', lines[i+1])
                     SUB_IDToFileName[int(matchID.group(1))] = matchFileName.group(1)
@@ -616,7 +641,7 @@ class SWAT_UQ(Problem):
         for subID, fileName in SUB_IDToFileName.items():
             fileName = fileName + ".sub"
             tempHRU = []
-            with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
+            with open(os.path.join(self.projectPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
                 for line in lines:
                     match = re.search(r'(\d+)\.hru', line)
@@ -625,17 +650,16 @@ class SWAT_UQ(Problem):
             
             for HRUFileName in tempHRU:
                 fileName = HRUFileName + ".hru"
-                with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
+                with open(os.path.join(self.projectPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
                     lines = f.readlines()
                     content = lines[0]
-                    matchID = re.search(r'(\d+)\.mgt', content)
+                    matchID = re.findall(r'HRU:\s*(\d+)', content)
                     matchSlope = re.search(r"Slope:\s*(\d+)-(\d+)", content)
                     
-                    slope = matchSlope.group(1).split("-")
-                    slope = [int(e) for e in slope]
-                    HRU_IDToFileName[int(matchID.group(1))] = HRUFileName
-                    SUBToHRU[subID][int(matchID.group(2))] = int(matchID.group(1))
-                    HRUInfos[int(matchID.group(1))] = (slope, subID, matchID.group(2))
+                    slope = [int(matchSlope.group(1)), int(matchSlope.group(2))]
+                    HRU_IDToFileName[int(matchID[0])] = HRUFileName
+                    SUBToHRU[subID][int(matchID[1])] = int(matchID[0])
+                    HRUInfos[int(matchID[0])] = (subID, int(matchID[1]), slope)
         
         self.modelInfos["SUB_IDToFileName"] = SUB_IDToFileName
         self.modelInfos["HRU_IDToFileName"] = HRU_IDToFileName
