@@ -20,9 +20,9 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 
 ## Develop Version of SWAT-UQ
 
-**SWAT-UQ-DEV** is a Python package designed for use in **script-based environments**. It defines a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. By instantiating `SWAT_UQ` class, users can directly access all methods and algorithms offered by UQPyL. In addition, `SWAT_UQ` contains a suite of built-in functions to streamline and accelerate the process of building and solving problems (e.g., model calibration, best management practices).
+**SWAT-UQ-DEV** is a Python package designed for **script-based environments**. It designs a Python class named `SWAT_UQ`, which inherits from `Problem` class of UQPyL. By instantiating `SWAT_UQ` class, users can directly access all methods and algorithms offered by UQPyL. In addition, `SWAT_UQ` contains a suite of built-in functions to streamline and accelerate the process of building and solving problems (e.g., model calibration, best management practices).
 
-This version is particularly suited for users who wish to customize their workflows, integrate with other Python tools, or automate large-scale uncertainty quantification and optimization tasks.
+This version is particularly suited for users who wish to customize their workflows, integrate with UQPyL, or other Python tools.
 
 ### ✨ Key Features
 
@@ -30,21 +30,21 @@ This version is particularly suited for users who wish to customize their workfl
 
 2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
 
-3. **End-to-End Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the full modeling workflow: sensitivity analysis -> optimization -> back-substitution.
+3. **End-to-End Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> back-substitution.
 
 ### 🍭 Quick Start
 
 Here, we provide a step-by-step guide to solving SWAT-based problems with SWAT-UQ-DEV.
 
-To get started, instantiate the `SWAT-UQ` class, which inherits from the `Problem` class in UQPyL. This will give you access to all the methods and algorithms available in UQPyL (see the [UQPyL Documentation](https://github.com/smasky/UQPyL)).
+To get started, instantiate the `SWAT-UQ` class, which inherits from the `Problem` class in UQPyL. This will enable all accesses to methods and algorithms available in UQPyL (see the [UQPyL Documentation](https://github.com/smasky/UQPyL)).
 
-Before instantiating the `SWAT-UQ` class, some preparatory works are required.
+Some preparatory works are required:
 
-**Step 1:** You should obtain a **SWAT project folder** (named **SWAT EXE Folder** for convenience).
+**Step 1:** Obtain a **SWAT project folder** (named **SWAT EXE Folder** for convenience).
 
-**Step 2:** On your hard drive, **create a separate folder** (named **Work Folder**) to store control files for setting up and solving your problems, as well as temporary files used when running the SWAT model in parallel.
+**Step 2:** Create **separate folder**  as **Work Folder** to store control files for setting up your problems, as well as temporary files used when running the SWAT model in parallel.
 
-**Step 3:** In the Work Folder, create a **parameter file** encoded in UTF-8. This file should contain the details of the parameters you want to analyze, as shown below:
+**Step 3:** In the Work Folder, create a **parameter file** encoded in UTF-8. This file would show the details of the parameters you want to analyze or optimize, as shown below:
 
 **File name:** parameter.par 
 
@@ -53,6 +53,7 @@ Before instantiating the `SWAT-UQ` class, some preparatory works are required.
 💡 **Noted:** In this file, all elements must be separated by spaces or tabs.
 
 ```
+Name Mode Min Max Scope
 CN2 r -0.4 0.2 all
 GW_DELAY v 30.0 450.0 all
 ALPHA_BF v 0.0 1.0 all
@@ -62,17 +63,19 @@ SMFMN v 0.0 20.0 all
 TIMP v 0.01 1.0 all
 SURLAG v 0.05 24.0 all
 ```
+The first line should be kept as a hint for users.
 
-Each line of the parameter file is structured by `Parameter Name`, `Assigning Mode`, `Min Value`, `Max Value` and `Scope`, specifically speaking:
- - **Parameter Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
- - **Assigning Mode:** Assigning Mode is represented by a single character, e.g., `r`, `v`, `a`. 
-   - **`r`** means relative assignment, therefore, the true value is calculated by $(1+val)*originVal$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
-   - **`v`** denotes absolute assignment, where the specified value in the file is directly used as the parameter value.
-   - **`a`** stands for adding assignment, the true value is calculated by $originVal+val$, where `val` is the value specified in the parameter file, and `originVal` is the origin value of the parameter.
- - **Min Value:** Min Value is the lower bound of the parameter.
- - **Max Value:** Max Value is the upper bound of the parameter.
- - **Scope:** This specifies the target scope of the parameter. By default, it sets to `all`, meaning the value of the parameter is modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
- 
+Following line of the parameter file should be structured by `Name`, `Mode`, `Min`, `Max` and `Scope`:
+ - **Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
+ - **Mode:** The title 'Mode' means assigning mode of parameters, which is represented by a single character, e.g., `r`, `v`, `a`. 
+   - where `val` is the value in this parameter file, and `originVal` is the origin value of SWAT project files.
+   - **`r`** denotes relative assignment. The true value would be calculated by $(1+val)*originVal$.
+   - **`v`** denotes absolute assignment, directly use `val`.
+   - **`a`** denotes for adding assignment, the true value is calculated by $originVal+val$.
+ - **Min:** The title 'Min' is the lower bound of the parameter.
+ - **Max:** The title 'Max' is the upper bound of the parameter.
+ - **Scope:** The title 'Scope' means the target scope of the parameter. By default, it sets to `all` - the parameter would be modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
+
  ```
  CN2 r -0.4 0.2 all # Default Scope
  CN2 r -0.4 0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
@@ -82,61 +85,52 @@ The format follows either:
  - `BSN ID` - apply the parameter to all HRUs within the specified basin
  - `BSN ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
 
-**Step 4:** In Work Folder, create an **observed file** encoding UTF-8, which is used to construct objective or constraint functions for current problem.
+Different basin should be separated by spaces or tabs.
+
+**Step 4:** In the Work Folder, create an **observed file** encoded UTF-8, used to construct objective or constraint functions for the current problem.
 
 For example:
 
 File Name: `observed.obj` 
 
-💡 **Noted:**  It is recommended to use the `.obj` extension for consistency with the GUI version.
+💡 **Noted:**  It is also recommended to use the `.obj` extension for consistency with the GUI version.
 
 ```
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
+WGT_1 : Weight of series combination
 REACH_23 : ID of reach
 VAR_COL_6 : Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
 FUNC_TYPE_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
 
-1 1_2012 2.1
-2 2_2012 3.2
-3 3_2012 3.5
-4 4_2012 6.7
-5 5_2012 14.55
-6 6_2012 21.54
+1 2012_1 2.1
+2 2012_2 3.2
+3 2012_3 3.5
+4 2012_4 6.7
+5 2012_5 14.55
+6 2012_6 21.54
 ...
-12 7_2012 22.44
+12 2012_12 22.44
 ```
-The observed file can consists of multiple data series, which may correspond to different locations, data types, or time periods.
+The **observed file** can consists of multiple data series, which may correspond to different locations, data types, or time periods.
 
-In this example, only one data series is shown.
+In this example, just one data series is shown.
 
-Each series consists of two parts: a. Head Definition; b. Data Section.
+Each series consists of two parts: a. **Head Definition**; b. **Data Section**.
 
-**Head Definition**: ()
-- **SER_ID:** The `ID` is an unique label for the data series.
-- **OBJ_ID** or **CON_ID:** `OBJ` or `CON` determine the type of the data series. And this `ID` denotes the **unique label** of objective or constraint functions. 
-   💡 **Noted:** SWAT-UQ-DEV support the multiple series obtain the same `OBJ ID` or `CON ID`.
+**Head Definition**: (Following label `ID` or `NUM` should be replaced by a number)
+- **SER_ID:** The `ID` should be an unique label for different data series.
+- **OBJ_ID** or **CON_ID:** The `OBJ` or `CON` determine the type of the data series. And this `ID` denotes the **unique label** of objective or constraint functions. 
+   💡 **Noted:** SWAT-UQ-DEV support the multiple series set the same `OBJ ID` or `CON ID`
+- **WGT_NUM:** The `NUM` denotes the linear weight for combing series obtaining the same `OBJ ID` or `CON ID`.
 - **REACH_ID:** The `ID` should be consistent with the SWAT project and can be set according to your requirements.
 - **VAR_COL_NUM:** The `NUM` specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
-- **FUNC_TYPE_NUM:** The `NUM` defines the objective function type to compare observed and simulated data.
+- **FUNC_TYPE_NUM:** The `NUM` defines the objective function type to compare observed and simulated data. (Valid values: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
 
-**Data Section** is structured by `NUM`, `INDEX_YEAR`, `DATA`:
+**Data Section** is structured by `NUM`, `YEAR_INDEX`, `DATA`:
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
-- **INDEX_YEAR:** The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. The value of `YEAR` means the year index for the data.
-- **DATA:** The type of data can be int, float.
-
-
-
-
-
-
-
-
-
-
-
-
-
+- **YEAR_INDEX:** The value of `YEAR` means the year index for the data. The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. 
+- **DATA:** The type of data can be int or float.
 
 ---
 
