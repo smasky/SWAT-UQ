@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import subprocess
 from datetime import datetime, timedelta
-from UQPyL.problems import PracticalProblem
+from UQPyL.problems import Problem
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from importlib.resources import path
 import GUI.data
