@@ -112,7 +112,7 @@ class SWAT_UQ(Problem):
             print("=" * 70)
             print("\n" * 2)
         
-        self._initial()
+        self._initial_cio()
         self._record_default_values()
         self._get_evalData()
         
@@ -570,10 +570,10 @@ class SWAT_UQ(Problem):
                 self.varInfos[fileName].setdefault("default", {})
                 self.varInfos[fileName]["default"][paraName] = values
           
-    def _initial(self):
+    def _initial_cio(self):
         '''
         This function is used to initialize the model information.
-        It reads the control file fig.fig and records the model information.
+        It reads the control file `file.cio` and `fig.fig`, and records the model information.
         '''
         paras = ["IPRINT", "NBYR", "IYR", "IDAF", "IDAL", "NYSKIP"]
         pos = ["default"] * len(paras)
@@ -593,31 +593,68 @@ class SWAT_UQ(Problem):
         self.modelInfos["beginRecord"] = beginRecord
         
         #read control file fig.fig
-        watershed = {}
+        SUBToHRU = {}
+        HRUInfos = {}
+        SUB_IDToFileName = {}
+        HRU_IDToFileName = {}
+        
         with open(os.path.join(self.workPath, "fig.fig"), "r") as f:
             lines = f.readlines()
-            for line in lines:
-                match = re.search(r'(\d+)\.sub', line)
-                if match:
-                    watershed[match.group(1)] = []
+            
+            i = 0
+            while i < len(lines):
+                matchID = re.search(r'(\d+)\.bsn', lines[i])
+                if matchID:
+                    matchFileName = re.search(r'(\d+)\.sub', lines[i+1])
+                    SUB_IDToFileName[int(matchID.group(1))] = matchFileName.group(1)
+                    SUBToHRU[int(matchID.group(1))] = {}
+                    i += 2
+                else:
+                    i += 1
         
         #read sub files
-        for sub in watershed:
-            fileName = sub + ".sub"
+        for subID, fileName in SUB_IDToFileName.items():
+            fileName = fileName + ".sub"
+            tempHRU = []
             with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
                 for line in lines:
-                    match = re.search(r'(\d+)\.mgt', line)
+                    match = re.search(r'(\d+)\.hru', line)
                     if match:
-                        watershed[sub].append(match.group(1))
+                        tempHRU.append(match.group(1))
+            
+            for HRUFileName in tempHRU:
+                fileName = HRUFileName + ".hru"
+                with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
+                    lines = f.readlines()
+                    content = lines[0]
+                    matchID = re.search(r'(\d+)\.mgt', content)
+                    matchSlope = re.search(r"Slope:\s*(\d+)-(\d+)", content)
+                    
+                    slope = matchSlope.group(1).split("-")
+                    slope = [int(e) for e in slope]
+                    HRU_IDToFileName[int(matchID.group(1))] = HRUFileName
+                    SUBToHRU[subID][int(matchID.group(2))] = int(matchID.group(1))
+                    HRUInfos[int(matchID.group(1))] = (slope, subID, matchID.group(2))
         
-        self.modelInfos["watershedList"] = list(watershed.keys())
-        self.modelInfos["hruList"] = list(itertools.chain.from_iterable(watershed.values()))
-        self.modelInfos["watershedToHru"] = watershed
-        self.modelInfos["nHRU"] = len(self.modelInfos["hruList"])
-        self.modelInfos["nWatershed"] = len(self.modelInfos["watershedList"])
-        self.modelInfos["nRCH"] = len(self.modelInfos["watershedList"])
-        # self.nRCH = self.modelInfos["nRCH"] #TODO: check if this is correct
+        # for sub in BSNToHRU:
+        #     fileName = sub + ".sub"
+        #     with open(os.path.join(self.workPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
+        #         lines = f.readlines()
+        #         for line in lines:
+        #             match = re.search(r'(\d+)\.mgt', line)
+        #             if match:
+        #                 watershed[sub].append(match.group(1))
+        
+        self.modelInfos["SUB_IDToFileName"] = SUB_IDToFileName
+        self.modelInfos["HRU_IDToFileName"] = HRU_IDToFileName
+        self.modelInfos["SUBList"] = list(SUB_IDToFileName.keys())
+        self.modelInfos["HRUList"] = list(HRU_IDToFileName.keys())
+        self.modelInfos["HRUInfos"] = HRUInfos
+        self.modelInfos["SUBToHRU"] = SUBToHRU
+        self.modelInfos["nHRU"] = len(self.modelInfos["HRUList"])
+        self.modelInfos["nSUB"] = len(self.modelInfos["SUBList"])
+        self.modelInfos["nRCH"] = len(self.modelInfos["SUBList"])
         
         #read the paras file
         HEAD = ["para_name",  "type", "file_name", "position"]
