@@ -1,5 +1,4 @@
 from setuptools import setup, Extension, find_packages
-from pybind11.setup_helpers import Pybind11Extension, build_ext
 import numpy
 import sys
 import pybind11
@@ -19,6 +18,7 @@ setup(
     author_email="wmtsmasky@gmail.com",
     description="A Python module that extends Python with C++ code using Pybind11.",
     ext_modules=pybind11_extensions,
+    packages=find_packages(),
     classifiers=[
         # 添加适合的类目，例如
         'Programming Language :: Python :: 3.6',

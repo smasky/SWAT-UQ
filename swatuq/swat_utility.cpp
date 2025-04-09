@@ -558,7 +558,7 @@ void _copy_origin_to_tmp(const std::string &source, const std::string &destinati
     fs::copy(source, destination, fs::copy_options::recursive);
 }
 
-PYBIND11_MODULE(swat_utility, m) {
+PYBIND11_MODULE(utility, m) {
     m.doc() = "Swat utility plugin"; // 可选的模块文档字符串
     m.def("read_value_swat", &_read_value_swat, "A function that reads and processes file data based on regex patterns.", py::call_guard<py::gil_scoped_release>());
     m.def("read_simulation", &_read_simulation, "A function that reads the 6th column from a file and returns as a numpy array",
