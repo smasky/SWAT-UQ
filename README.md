@@ -123,7 +123,7 @@ Each series consists of two parts: a. **Head Definition**; b. **Data Section**.
 - **OBJ_ID** or **CON_ID:** The `OBJ` or `CON` determine the type of the data series. And this `ID` denotes the **unique label** of objective or constraint functions. 
    💡 **Noted:** SWAT-UQ-DEV support the multiple series set the same `OBJ ID` or `CON ID`
 - **WGT_NUM:** The `NUM` denotes the linear weight for combing series obtaining the same `OBJ ID` or `CON ID`.
-- **REACH_ID:** The `ID` should be consistent with the SWAT project and can be set according to your requirements.
+- **RCH_ID**, **SUB_ID** or **HRU_ID:** The `RCH`, `SUB` or `HRU` determine the type of output file loaded. The `ID` should be consistent with the SWAT project (which RCH, SUB, HRU) and can be set according to your requirements.
 - **VAR_COL_NUM:** The `NUM` specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
 - **FUNC_TYPE_NUM:** The `NUM` defines the objective function type to compare observed and simulated data. (Valid values: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
 
@@ -131,6 +131,22 @@ Each series consists of two parts: a. **Head Definition**; b. **Data Section**.
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
 - **YEAR_INDEX:** The value of `YEAR` means the year index for the data. The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. 
 - **DATA:** The type of data can be int or float.
+
+**Step 5:** Build your problem in Python script environment.
+
+```Python
+# First import SWAT_UQ class
+from swatuq import SWAT_UQ
+
+# Second define requirement variables:
+
+projectPath = "D://DJ_FSB/"  # your SWAT Project Path
+workPath = "D://DJ_UQ/" # your Work Path
+
+
+
+
+```
 
 ---
 
