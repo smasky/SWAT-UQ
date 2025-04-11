@@ -87,6 +87,10 @@ class SWAT_UQ(Problem):
         os.makedirs(tempPath)
         self.workTempDir = tempPath
         
+        #copy the original project to the temp directory
+        self.workOriginPath = os.path.join(tempPath, "origin")
+        copy_origin_to_tmp(projectPath, self.workOriginPath)
+        
         #basic setting
         self.workPath = workPath
         self.paraFileName = paraFileName
@@ -107,10 +111,10 @@ class SWAT_UQ(Problem):
             print("The path of SWAT project is: ", self.workPath)
             print("The file name of optimizing parameters is: ", self.paraFileName)
             print("The file name of evaluation(observed) data is: ", self.evalFileName)
-            print("The name of SWAT executable is: ", self.swatExeName)
+            print("The name of SWAT executable is: ", self.swatExe)
             print("Temporary directory has been created in: ", self.workTempDir)
             print("=" * 70)
-            print("\n" * 2)
+            print("\n" * 1)
         
         self._initial()
         self._record_default_values()
@@ -120,12 +124,12 @@ class SWAT_UQ(Problem):
         self.workTempDirs = []
         
         for i in range(numParallel):
-            path = os.path.join(self.workTempDir, "instance{}".format(i))
+            path = os.path.join(self.workTempDir, "parallel{}".format(i))
             self.workTempDirs.append(path)
             self.workPathQueue.put(path)
                 
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
-            futures = [executor.submit(copy_origin_to_tmp, self.workPath, workTemp) for workTemp in self.workTempDirs]
+            futures = [executor.submit(copy_origin_to_tmp, self.projectPath, workTemp) for workTemp in self.workTempDirs]
         
         for future in futures:
             future.result()
@@ -261,8 +265,7 @@ class SWAT_UQ(Problem):
         
         filePath = os.path.join(self.workPath, self.evalFileName)
         
-        serIDs = [];  serWgts = {};  serLocs = {}; serCols = {}; funcTypes = {}; optCombTypes = {}
-        optCombs = {}; serData = {}
+        serIDs = []; serInfos = {}; optInfos = {}; locInfos = { "HRU": [], "SUB" : [], "RCH" : []}
         
         self.obsObjs = 0
         self.obsCons = 0
@@ -294,7 +297,8 @@ class SWAT_UQ(Problem):
                             raise ValueError("The series ID is duplicated, please check the observed data file!")
                         else:
                             serIDs.append(serID)
-                        
+                            serInfos[serID] = {}
+                            
                         #OBJ_ID OR CON_ID
                         matchOpt = patternOpt.match(lines[i+1])
                         optCombType = matchOpt.group(1)
@@ -306,40 +310,46 @@ class SWAT_UQ(Problem):
                             raise ValueError("The function combination type is not valid, only `OBJ` and `CON` are supported, please check the observed data file!")
                         
                         optID = int(matchOpt.group(2))
-                        optCombTypes[optID] = optCombType
-                        if optID not in optCombs.keys():
-                            optCombs[optID] = []
-                        optCombs[optID].append(serID)
+                        optInfos.setdefault(optID, {})
+                        serInfos[serID]["optID"] = optID
+                        optInfos[optID]["combType"] = optCombType
+                        optInfos[optID].setdefault("comb", [])
+                        optInfos[optID]["comb"].append(serID)
                         
                         #WGT_NUM
                         matchWgt = patternWgt.match(lines[i+2])
                         wgt = float(matchWgt.group(1))
-                        serWgts[serID] = wgt
+                        serInfos[serID]['wgt'] = wgt
                         
                         #RCH_ID, SUB_ID, HRU_ID
                         matchLoc = patternLoc.match(lines[i+3])
                         loc = matchLoc.group(1)
                         locID = int(matchLoc.group(2))
                         if loc in ["RCH", "SUB", "HRU"]:
-                            serLocs[serID] = (loc, locID)
+                            serInfos[serID]['loc'] = loc
+                            serInfos[serID]['locID'] = locID
+                            
                         else:
                             raise ValueError("Only `RCH`, `SUB` and `HRU` are supported, please check the load data location!")
                         
                         #COL_NUM
                         matchCol = patternCol.match(lines[i+4])
                         col = int(matchCol.group(1))
-                        serCols[serID] = col
+                        serInfos[serID]['col'] = col
+                        locInfos[loc].append(col)
                         
                         #FUNC_NUM
                         funcType = int(patternFunc.match(lines[i+5]).group(1))
-                        funcTypes[serID] = funcType
+                        serInfos[serID]['funcType'] = funcType
                                    
                         i = i + 6
                         
                         while patternValue.match(lines[i]) is None:
                             i += 1
                         
-                        data = []
+                        YEAR = []
+                        INDEX = []
+                        VALUE = []
                         
                         while True:
                             
@@ -361,15 +371,18 @@ class SWAT_UQ(Problem):
                                     index = I + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
                             else:
                                 index = (datetime(year, 1, 1) + timedelta(days = I - 1) - self.modelInfos["beginRecord"]).days
-                                
-                            data.append([int(year), int(index), value])
+                            
+                            YEAR.append(int(year)); INDEX.append(int(index)); VALUE.append(value)
                             
                             i += 1
                             
                             if i >= len(lines):
                                 break
                         
-                        serData[serID] = data
+                        YEAR = np.array(YEAR, dtype=int); INDEX = np.array(INDEX, dtype=int); VALUE = np.array(VALUE, dtype=float)
+                        readLines = self._get_lines_for_output_(INDEX, loc)
+                        serInfos[serID]['readLines'] = readLines
+                        serInfos[serID]['data'] = {'year' : YEAR, 'index' : INDEX, 'value' : value}
                         
                     else:
                         i += 1
@@ -380,27 +393,7 @@ class SWAT_UQ(Problem):
         except Exception as e:
             raise ValueError("There is an error in observed data file, please check!")
         
-        # dtype = {'series_id': int, 'rch_id': int, 'var_col': int, 'obj_type': int, 'obj_id': int, 'weight': float, 'index': int, 'year': int, 'time': int, 'value': float}                     
-        obsData = pd.DataFrame(data, columns=['series_id', 'func_id', 'func_comb_type', 'func_type', 'rch_id', 'var_col', 'weight','index', 'year', 'time', 'value'])        
-        dataInfos = {}
-        
-        for serID in serIDs:
-            data = obsData.query('series_id==@serID')
-            funcID = data['func_id'].iloc[0]
-            funcCombType = data['func_comb_type'].iloc[0]
-            funcType = data['func_type'].iloc[0]
-            rchID = data['rch_id'].iloc[0]
-            varCol = data['var_col'].iloc[0]
-            weight = data['weight'].iloc[0]
-            dataVal = data['value'].to_numpy(dtype=float)
-            dataIndex = data['index'].to_numpy(dtype=int)
-            readLines = self._get_lines_for_output_(dataIndex)
-            dataInfos[serID] = (serID, funcID, funcCombType, funcType, rchID, varCol, weight, readLines, dataVal) #TODO
-        
-        self.observeInfos["numSer"] = len(serIDs)
-        self.observeInfos["obsData"] = dataInfos
-        self.observeInfos["funcComb"] = funcCombs
-        self.observeInfos["funcCombTypes"] = funcCombTypes
+        self._modify_output_file(locInfos)
         
         if self.verboseFlag:
             print("="*25 + "Observed Information" + "="*25)
@@ -408,29 +401,36 @@ class SWAT_UQ(Problem):
             print("The number of objective functions is: ", self.obsObjs)
             print("The number of constraint functions is: ", self.obsCons)
             seriesIDFormatted = "{:^10}".format("Series_ID")
-            funcIDFormatted = "{:^10}".format("Func_ID")
-            funcCombTypeFormatted = "{:^20}".format("Func_Comb_Type")
+            optIDFormatted = "{:^10}".format("Opt_ID")
+            optCombTypeFormatted = "{:^20}".format("Opt_Comb_Type")
             funcTypeFormatted = "{:^10}".format("Func_Type")
-            rchIDFormatted = "{:^10}".format("Reach_ID")
-            varColFormatted = "{:^10}".format("Var_Col")
+            locFormatted = "{:^10}".format("Loc_ID")
+            varColFormatted = "{:^10}".format("varCol")
             weightFormatted = "{:^10}".format("Weight")
-            dataFormatted = "{:<30}".format("readLines")
-            print(seriesIDFormatted + "||" + funcIDFormatted + "||" + funcCombTypeFormatted + "||" + funcTypeFormatted + "||"+rchIDFormatted + "||" + varColFormatted + "||" + weightFormatted + "||" + dataFormatted)
-            for _, series in funcCombs.items():
-                for id in series:
-                    seriesIDFormatted = "{:^10}".format(dataInfos[id][0])
-                    funcIDFormatted = "{:^10}".format(dataInfos[id][1])
-                    funcCombTypeFormatted = "{:^20}".format(dataInfos[id][2])
-                    funcTypeFormatted = "{:^10}".format(FUNC_TYPE[dataInfos[id][3]])
-                    rchIDFormatted = "{:^10}".format(dataInfos[id][4])
-                    varColFormatted = "{:^10}".format(dataInfos[id][5])
-                    weightFormatted = "{:^10}".format(dataInfos[id][6])
-                    readLines = dataInfos[id][7]
+            lineFormatted = "{:<30}".format("readLines")
+            print(seriesIDFormatted + "||" + optIDFormatted + "||" + optCombTypeFormatted + "||" + funcTypeFormatted + "||"+locFormatted + "||" + varColFormatted + "||" + weightFormatted + "||" + lineFormatted)
+            
+            for optID, info in optInfos.items():
+                combType = info["combType"]
+                comb = info["comb"]
+                for serID in comb:
+                    serInfo = serInfos[serID]
+                    
+                    serIDFormatted = "{:^10}".format(serID)
+                    optIDFormatted = "{:^10}".format(optID)
+                    optCombTypeFormatted = "{:^20}".format(combType)
+                    funcTypeFormatted = "{:^10}".format(serInfo["funcType"])
+                    locFormatted = "{:^10}".format("{}_{}".format(serInfo["loc"], serInfo["locID"]))
+                    varColFormatted = "{:^10}".format(serInfo["col"])
+                    weightFormatted = "{:^10}".format(serInfo["wgt"])
+                    
+                    readLines = serInfo["readLines"]
                     lineStr = ""
                     for line in readLines:
                         lineStr += str(line[0])+"-"+str(line[1])+" "
-                    dataFormatted = "{:<30}".format(lineStr)
-                    print(seriesIDFormatted+"||"+funcIDFormatted+"||"+funcCombTypeFormatted+"||"+funcTypeFormatted+"||"+rchIDFormatted+"||"+varColFormatted+"||"+weightFormatted+"||"+dataFormatted)
+                    lineFormatted = "{:<30}".format(lineStr)
+                    print(serIDFormatted+"||"+optIDFormatted+"||"+optCombTypeFormatted+"||"+funcTypeFormatted+"||"+locFormatted+"||"+varColFormatted+"||"+weightFormatted+"||"+lineFormatted)
+                    
             print("="*70)
         
     def _record_default_values(self):
@@ -515,7 +515,7 @@ class SWAT_UQ(Problem):
                 HruFormatted = "{:^20}".format(" ".join(varScope[i]))
                 print(nameFormatted+"||"+typeFormatted+"||"+modeFormatted+"||"+LBFormatted+"||"+UBFormatted+"||"+HruFormatted)
             print("="*120)
-            print("\n"*1)
+            print("\n" * 1)
             
         self.varInfos = {}
         
@@ -693,8 +693,41 @@ class SWAT_UQ(Problem):
                 print("The print flag of SWAT is: ", "daily")
             print("=" * 70)
             print("\n" * 1)
+    
+    def _modify_output_file(self, locInfos):
+        
+        for _, locIDs in locInfos.items():
+            if len(locIDs) == 0:
+                locIDs.append(1)
+                
+            locIDs.sort()
             
-    def _get_lines_for_output_(self, index):
+            if len(locIDs) < 20:
+                locIDs.extend([0] * (20 - len(locIDs)))
+
+        lines = None
+        with open(os.path.join(self.workOriginPath, "file.cio"), "r") as f:
+            lines = f.readlines()
+
+            for i, line in enumerate(lines):
+                
+                if "RCH" in locInfos.keys():
+                    matchRch = re.search(r"Reach output variables:", line)
+                    if matchRch:
+                        lines[i+1] = " "*3 + "   ".join(map(str, locInfos["RCH"])) + "\n"
+                if "SUB" in locInfos.keys():
+                    matchSub = re.search(r"Subbasin output variables:", line)
+                    if matchSub:
+                        lines[i+1] = " "*3 + "   ".join(map(str, locInfos["SUB"])) + "\n"
+                if "HRU" in locInfos.keys():
+                    matchHru = re.search(r"HRU output variables:", line)
+                    if matchHru:
+                        lines[i+1] = " "*3 + "   ".join(map(str, locInfos["HRU"])) + "\n"
+            
+        with open(os.path.join(self.workOriginPath, "file.cio"), "w") as f:
+            f.writelines(lines)
+
+    def _get_lines_for_output_(self, index, loc):
         
         index.ravel().sort()
         curGroup = [index[0]]; linesGroup=[]
@@ -703,18 +736,23 @@ class SWAT_UQ(Problem):
             if index[i] == curGroup[-1]+1:
                 curGroup.append(index[i])
             else:
-                linesGroup += self._generate_data_lines(curGroup)
+                linesGroup += self._generate_data_lines(curGroup, loc)
                 curGroup = [index[i]]
         
-        linesGroup += self._generate_data_lines(curGroup)
+        linesGroup += self._generate_data_lines(curGroup, loc)
         
         return linesGroup
     
-    def _generate_data_lines(self, group):
+    def _generate_data_lines(self, group, loc):
         
         start = group[0]; end = group[-1]
         printFlag = self.modelInfos["printFlag"]
-        nRCH = self.modelInfos["nRCH"]
+        if loc == "RCH":
+            interval = self.modelInfos["nRCH"]
+        elif loc == "SUB":
+            interval = self.modelInfos["nSUB"]
+        elif loc == "HRU":
+            interval = self.modelInfos["nHRU"]
 
         lines = []
         if printFlag == 0:
@@ -723,32 +761,32 @@ class SWAT_UQ(Problem):
             if start <= firstPeriod:
                 if end <= firstPeriod:
                     endInYear = end
-                    lines.append([10+nRCH*start, 9+nRCH*(endInYear+1)])
+                    lines.append([10+interval*start, 9+interval*(endInYear+1)])
                     return lines
                 else:
                     endInYear = firstPeriod
-                lines.append([10+nRCH*start, 9+nRCH*(endInYear+1)])
+                lines.append([10+interval*start, 9+interval*(endInYear+1)])
             else:
                 years= start // 12
                 startInYear = start
                 endInYear = years*12 + 11
                 if end <= endInYear:
-                    lines.append([10 + nRCH * startInYear + nRCH * years, 9 + nRCH * (end + 1) + nRCH * years])
+                    lines.append([10 + interval * startInYear + interval * years, 9 + interval * (end + 1) + interval * years])
                     return lines
                 else:
-                    lines.append([10 + nRCH * startInYear, 9 + nRCH * (endInYear + 1) + nRCH * years])
+                    lines.append([10 + interval * startInYear, 9 + interval * (endInYear + 1) + interval * years])
             while True:
                 startInYear = endInYear + 1
                 endInYear = startInYear + 11
                 years = (startInYear - firstPeriod) // 12 + 1
                 if endInYear >= end:
-                    lines.append([10 + nRCH * startInYear + nRCH * years, 9 + nRCH * (end + 1) + nRCH * years])
+                    lines.append([10 + interval * startInYear + interval * years, 9 + interval * (end + 1) + interval * years])
                     break
                 else:
-                    lines.append([10 + nRCH * startInYear, 9 + nRCH * (endInYear + 1) + nRCH * years])
+                    lines.append([10 + interval * startInYear, 9 + interval * (endInYear + 1) + interval * years])
             return lines 
         elif printFlag == 1:
-            lines = [[10 + nRCH * start, 9 + nRCH * (end + 1)]]
+            lines = [[10 + interval * start, 9 + interval * (end + 1)]]
             return lines
         
     def _load_parameters(self, filePath = "swat_parameters.json"):

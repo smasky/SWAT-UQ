@@ -14,4 +14,7 @@ paraFileName = "paras_infos.txt"
 evalFileName = "ob1.txt"
 
 problem = SWAT_UQ(nInput = nInput, nOutput = nOutput, projectPath = projectPath, swatExeName = exeName,
-                    workPath = workPath, paraFileName = paraFileName, evalFileName = evalFileName)
+                    workPath = workPath, paraFileName = paraFileName, evalFileName = evalFileName,
+                    verboseFlag = True, numParallel = 2)
+
+
