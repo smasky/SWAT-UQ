@@ -7,9 +7,9 @@ from swatuq import SWAT_UQ
 nInput = 13
 nOutput = 1
 
-projectPath = "E:\\DJBasin\\TxtInOutFSB"
+projectPath = "D:\\djBasin\\TxtInOutFSB\\TxtInOutFSB"
 exeName = "swat.exe"
-workPath = "E:\\DJ_FSB"
+workPath = "D:\\DJ_FSB"
 paraFileName = "paras_infos.txt"
 evalFileName = "ob1.txt"
 
@@ -17,4 +17,11 @@ problem = SWAT_UQ(nInput = nInput, nOutput = nOutput, projectPath = projectPath,
                     workPath = workPath, paraFileName = paraFileName, evalFileName = evalFileName,
                     verboseFlag = True, numParallel = 2)
 
+from UQPyL.DoE import LHS
+
+lhs = LHS()
+
+X = lhs.sample(nt = 100, problem = problem)
+
+problem.evaluate(X)
 
