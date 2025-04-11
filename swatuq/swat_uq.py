@@ -38,13 +38,19 @@ def func_KGE(trueValues, simValues):
     return kge
 
 def func_Mean(trueValues, simValues):
-    return np.mean(simValues)
+    return np.mean(simValues, axis = 0)
 
 def func_Sum(trueValues, simValues):
-    return np.sum(simValues)
+    return np.sum(simValues, axis = 0)
 
-FUNC = {1: "func_NSE", 2: "func_RMSE", 3: "func_PCC", 4: "func_Pbias", 5: "func_KGE", 6: "func_Mean", 7:"func_Sum"}
-FUNC_TYPE = {1: "NSE", 2:"RMSE", 3:"PCC", 4:"Pbias", 5:"KGE", 6:"Mean", 7:"Sum"}
+def func_Max(trueValues, simValues):
+    return np.max(simValues, axis = 0)
+
+def func_Min(trueValues, simValues):
+    return np.min(simValues, axis = 0)
+
+FUNC = {1: "func_NSE", 2: "func_RMSE", 3: "func_PCC", 4: "func_Pbias", 5: "func_KGE", 6: "func_Mean", 7:"func_Sum", 8:"func_Max", 9:"func_Min"}
+FUNC_TYPE = {1: "NSE", 2:"RMSE", 3:"PCC", 4:"Pbias", 5:"KGE", 6:"Mean", 7:"Sum", 8:"Max", 9:"Min"}
 
 RCH_VAR = {1 : "FLOW_IN", 2 : "FLOW_OUT",  3: "EVAP", 4: "TLOSS", 5: "SED_IN", 6: "SED_OUT"}
 HRU_VAR = {6 : "ET", 9 : "PERC"}
@@ -54,7 +60,6 @@ HRU_EXT = ["chm", "gw", "hru", "mgt", "sdr", "sep", "sol", "ops"]
 SUB_EXT = ["pnd", "rte", "sub", "swq", "wgn", "wus"]
 
 class SWAT_UQ(Problem):
-    
     '''
     This class is designed for combining SWAT model with UQPyL.
     It can calibrate the parameters of SWAT model with observed data.
@@ -62,16 +67,14 @@ class SWAT_UQ(Problem):
     Importantly, it supports parallel running of SWAT model with multiple instances.
     '''
     
-    modelInfos = {}
-    observeInfos = {}
-    nHRU = 0; nRCH = 0; nSUB = 0
-    
     def __init__(self, nInput: int, nOutput: int, 
                  projectPath: str, swatExeName: str,
                  workPath: str, paraFileName: str, evalFileName: str, specialParaList: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
                  maxThreads: int = 12, numParallel: int = 5, 
                  verboseFlag = False, name: str = None, nCons: int = 0 ):
+        
+        self.modelInfos = {}
         
         self.verboseFlag = verboseFlag
 
@@ -129,7 +132,7 @@ class SWAT_UQ(Problem):
             self.workPathQueue.put(path)
                 
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
-            futures = [executor.submit(copy_origin_to_tmp, self.projectPath, workTemp) for workTemp in self.workTempDirs]
+            futures = [executor.submit(copy_origin_to_tmp, self.workOriginPath, workTemp) for workTemp in self.workTempDirs]
         
         for future in futures:
             future.result()
@@ -148,6 +151,41 @@ class SWAT_UQ(Problem):
         nCons = self.nConstraints
         cons = np.zeros((n, nCons)) if nCons > 0 else None
         
+        for i in range(n):
+            attrs = self._subprocess(X[i, :], i)
+            id = attrs['id']
+            if self.userObjFunc is None:
+                objs[id] = np.array(list(attrs['objs'].values()))
+            else:
+                objs[id] = self.userObjFunc(attrs)
+                
+        # with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
+        #     futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+        
+        #     for _ , future in enumerate(futures):
+        #         attrs = future.result()
+                
+        #         id = attrs['id']
+                
+        #         if self.userObjFunc is None:
+        #             #use default
+        #             objs[id] = np.array(list(attrs['objs'].values()))
+        #         else:
+        #             #use user define
+        #             objs[id] = self.userObjFunc(attrs)
+                
+        #         if nCons > 0:
+        #             if self.userConFunc is None:
+        #                 cons[id] = np.array(list(attrs['cons'].values()))
+        #             else:
+        #                 cons[id] = self.userConFunc(attrs)
+
+        return {'objs': objs, 'cons': cons}
+    
+    def objFunc(self, X):
+        n = X.shape[0]
+        objs = np.zeros((n, self.nOutput))
+        
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
             futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
         
@@ -162,23 +200,42 @@ class SWAT_UQ(Problem):
                 else:
                     #use user define
                     objs[id] = self.userObjFunc(attrs)
-                
-                if nCons > 0:
-                    if self.userConFunc is None:
-                        cons[id] = np.array(list(attrs['cons'].values()))
-                    else:
-                        cons[id] = self.userConFunc(attrs)
-
-        return {'objs': objs, 'cons': cons}
+            
+        return objs
     
-    def _subprocess(self, input_x, id):
+    def conFunc(self, X):
+        
+        n = X.shape[0]
+        
+        if self.nConstraints > 0:
+            cons = np.zeros((n, self.nConstraints))
+        else:
+            cons = None
+            return cons
+        
+        with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
+            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+            
+            for _ , future in enumerate(futures):
+                attrs = future.result()
+                
+                id = attrs['id']
+                
+                if self.userConFunc is None:
+                    cons[id] = np.array(list(attrs['cons'].values()))
+                else:
+                    cons[id] = self.userConFunc(attrs)
+                    
+        return cons
+    
+    def _subprocess(self, inputX, id):
         
         workPath = self.workPathQueue.get()
-        self._set_values(workPath, input_x)
-        
+        self._set_values(workPath, inputX)
+        attrs = {}
         try:
             process = subprocess.Popen(
-                os.path.join(workPath, self.swatExeName),
+                os.path.join(workPath, self.swatExe),
                 cwd = workPath,
                 stdin = subprocess.PIPE, 
                 stdout = subprocess.PIPE, 
@@ -186,61 +243,75 @@ class SWAT_UQ(Problem):
                 text = True)
             process.wait()
             
-            dataInfos = self.observeInfos["obsData"]
-            funcComb = self.observeInfos["funcComb"]
-            funcCombTypes = self.observeInfos["funcCombTypes"]
+            serInfos = self.modelInfos["serInfos"]
+            optInfos = self.modelInfos["optInfos"]
             
-            objDict = {}
-            consDict = {}
             objSeries = {}
-            consSeries = {}
+            objVal = {}
+            conSeries = {}
+            conVal = {}
             
-            for funcId in funcComb.keys():
-                seriesComb = funcComb[funcId]
-                funcCombType = funcCombTypes[funcId]
+            for optID, info in optInfos.items():
+                combType = info["combType"]
+                comb = info["comb"]
+                
+                if combType == "OBJ":
+                    objSeries[optID] = {}
+                    combSeries = objSeries[optID]
+                    combVal = objVal
+                else:
+                    conSeries[optID] = {}
+                    combSeries = conSeries[optID]
+                    combVal = conVal
+                
                 val = 0
                 
-                for serID in seriesComb:
-                    dataInfo = dataInfos[serID]
-                    funcID = dataInfo[1]
-                    funcCombType = dataInfo[2]
-                    funcType = dataInfo[3]
-                    rchId = dataInfo[4]
-                    varCol = dataInfo[5]
-                    weight = dataInfo[6]
-                    readLines = dataInfo[7]
-                    observedValue = dataInfo[8]
-                    
-                    simValueList = []
-                    for lines in readLines:
-                        startLine = int(lines[0])
-                        endLine = lines[1]
-                        subValue = np.array(read_simulation(os.path.join(workPath, "output.rch"), varCol+1, rchId, self.modelInfos["nRCH"], startLine, endLine))
-                        simValueList.append(subValue)
+                for serID in comb:
+                    dataInfo = serInfos[serID]["data"]
+                    funcType = serInfos[serID]["funcType"]
+                    loc = serInfos[serID]["loc"]
+                    locID = serInfos[serID]["locID"]
+                    wgt = serInfos[serID]["wgt"]
+                    col = serInfos[serID]["col"]
+                    readLines = serInfos[serID]["readLines"]
+                    obSeries = dataInfo["value"]
+
+                    if loc == "HRU":
+                        filePath = os.path.join(workPath, "output.hru")
+                        totalItem = self.modelInfos["nHRU"]
+                        extraCol = 6
+                    elif loc == "SUB":
+                        filePath = os.path.join(workPath, "output.sub")
+                        totalItem = self.modelInfos["nSUB"]
+                        extraCol = 4
+                    elif loc == "RCH":
+                        filePath = os.path.join(workPath, "output.rch")
+                        totalItem = self.modelInfos["nRCH"]
+                        extraCol = 5
                         
-                    simValue = np.concatenate(simValueList, axis = 0)
-                    val += eval(FUNC[funcType])(observedValue, simValue)*weight
+                    simList = []
                     
-                    if funcCombType == "OBJ":
-                        objSeries[serID] = (observedValue, simValue)
-                    else:
-                        consSeries[serID] = (observedValue, simValue)
-                
-                if funcCombType == "OBJ":
-                    objDict[funcID] = val
-                else:
-                    consDict[funcID] = val  
+                    for rl in readLines:
+                        startLine = rl[0]
+                        endLine = rl[1]
+                        subSim = np.array(read_simulation(filePath, col + extraCol, locID, totalItem, startLine, endLine))
+                        simList.append(subSim)
+                    
+                    simSeries = np.concatenate(simList, axis = 0)
+                    val += eval(FUNC[funcType])(obSeries, simSeries) * wgt
+                    
+                    combSeries[serID] = {"obs": obSeries, "sim": simSeries}
+                        
+                combVal[optID] = val
                 
             self.workPathQueue.put(workPath)
             
-            #simulation attributes
-            attrs = {}
             attrs['id'] = id
-            attrs['objs'] = objDict
-            attrs['cons'] = consDict
+            attrs['objs'] = objVal
+            attrs['cons'] = conVal
             attrs['objSeries'] = objSeries
-            attrs['consSeries'] = consSeries
-            attrs['x'] = input_x
+            attrs['consSeries'] = conSeries
+            attrs['x'] = inputX
             
         except Exception as e:
             attrs['error'] = e
@@ -265,7 +336,7 @@ class SWAT_UQ(Problem):
         
         filePath = os.path.join(self.workPath, self.evalFileName)
         
-        serIDs = []; serInfos = {}; optInfos = {}; locInfos = { "HRU": [], "SUB" : [], "RCH" : []}
+        serIDs = []; serInfos = {}; optInfos = {}; locInfos = { "HRU": [], "SUB" : [], "RCH" : [] }
         
         self.obsObjs = 0
         self.obsCons = 0
@@ -335,8 +406,9 @@ class SWAT_UQ(Problem):
                         #COL_NUM
                         matchCol = patternCol.match(lines[i+4])
                         col = int(matchCol.group(1))
-                        serInfos[serID]['col'] = col
                         locInfos[loc].append(col)
+                        
+                        serInfos[serID]['col'] = len(locInfos[loc]) # Temp Column Number
                         
                         #FUNC_NUM
                         funcType = int(patternFunc.match(lines[i+5]).group(1))
@@ -382,7 +454,7 @@ class SWAT_UQ(Problem):
                         YEAR = np.array(YEAR, dtype=int); INDEX = np.array(INDEX, dtype=int); VALUE = np.array(VALUE, dtype=float)
                         readLines = self._get_lines_for_output_(INDEX, loc)
                         serInfos[serID]['readLines'] = readLines
-                        serInfos[serID]['data'] = {'year' : YEAR, 'index' : INDEX, 'value' : value}
+                        serInfos[serID]['data'] = {'year' : YEAR, 'index' : INDEX, 'value' : VALUE}
                         
                     else:
                         i += 1
@@ -394,6 +466,10 @@ class SWAT_UQ(Problem):
             raise ValueError("There is an error in observed data file, please check!")
         
         self._modify_output_file(locInfos)
+        
+        self.modelInfos["serInfos"] = serInfos
+        self.modelInfos["optInfos"] = optInfos
+        self.modelInfos["serIDs"] = serIDs
         
         if self.verboseFlag:
             print("="*25 + "Observed Information" + "="*25)
@@ -757,15 +833,15 @@ class SWAT_UQ(Problem):
         lines = []
         if printFlag == 0:
             beginMonth = self.modelInfos["beginRecord"].month
-            firstPeriod = 12-beginMonth
+            firstPeriod = 12 - beginMonth
             if start <= firstPeriod:
                 if end <= firstPeriod:
                     endInYear = end
-                    lines.append([10+interval*start, 9+interval*(endInYear+1)])
+                    lines.append([10 + interval*start, 9 + interval * (endInYear + 1)])
                     return lines
                 else:
                     endInYear = firstPeriod
-                lines.append([10+interval*start, 9+interval*(endInYear+1)])
+                lines.append([10 + interval*start, 9 + interval * (endInYear + 1)])
             else:
                 years= start // 12
                 startInYear = start
@@ -783,7 +859,7 @@ class SWAT_UQ(Problem):
                     lines.append([10 + interval * startInYear + interval * years, 9 + interval * (end + 1) + interval * years])
                     break
                 else:
-                    lines.append([10 + interval * startInYear, 9 + interval * (endInYear + 1) + interval * years])
+                    lines.append([10 + interval * (startInYear + years), 9 + interval * (endInYear + 1) + interval * years])
             return lines 
         elif printFlag == 1:
             lines = [[10 + interval * start, 9 + interval * (end + 1)]]
@@ -800,5 +876,3 @@ class SWAT_UQ(Problem):
             return [(p["name"], p["type"], p["file_name"], p["position"]) for p in params_dict]
         except Exception as e:
             raise e
-#================================================================
-

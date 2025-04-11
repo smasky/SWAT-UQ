@@ -87,11 +87,11 @@ The format follows either:
 
 Different basin should be separated by spaces or tabs.
 
-**Step 4:** In the Work Folder, create an **observed file** encoded UTF-8, used to construct objective or constraint functions for the current problem.
+**Step 4:** In the Work Folder, create an **evaluation file** encoded UTF-8, used to construct objective or constraint functions using observed data.
 
 For example:
 
-File Name: `observed.obj` 
+File Name: `evaluation.obj` 
 
 💡 **Noted:**  It is also recommended to use the `.obj` extension for consistency with the GUI version.
 
@@ -99,9 +99,9 @@ File Name: `observed.obj`
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
 WGT_1 : Weight of series combination
-REACH_23 : ID of reach
-COL_6 : Extract Variable ( 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P )
-FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
+RCH_23 : ID of reach
+COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
 
 1 2012_1 2.1
 2 2012_2 3.2
@@ -112,6 +112,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 ...
 12 2012_12 22.44
 ```
+
 The **observed file** can consists of multiple data series, which may correspond to different locations, data types, or time periods.
 
 In this example, just one data series is shown.
@@ -124,8 +125,23 @@ Each series consists of two parts: a. **Head Definition**; b. **Data Section**.
    💡 **Noted:** SWAT-UQ-DEV support the multiple series set the same `OBJ ID` or `CON ID`
 - **WGT_NUM:** The `NUM` denotes the linear weight for combing series obtaining the same `OBJ ID` or `CON ID`.
 - **RCH_ID**, **SUB_ID** or **HRU_ID:** The `RCH`, `SUB` or `HRU` determine the type of output file loaded. The `ID` should be consistent with the SWAT project (which RCH, SUB, HRU) and can be set according to your requirements.
-- **VAR_COL_NUM:** The `NUM` specifies which data columns to extract from the `*.rch` file. (Valid values: 6 - FLOW, 13 - ORGN, 15 - ORGP, 17 - NO3, 19 - NH4, 21 - NO2, 47 - TOT_N, 48 - TOT_P)
-- **FUNC_TYPE_NUM:** The `NUM` defines the objective function type to compare observed and simulated data. (Valid values: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
+- **VAR_NUM:** The `NUM` specifies which data columns to extract from the `output.rch`, `output.hru` or `output.sub` file (Please see following table for checking valid values). 
+- **FUNC_NUM:** The `NUM` defines the objective function type to compare observed and simulated data. (Valid values: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum)
+
+The valid values of `VAR_NUM` (extract variable) in `output.rch`, `output.hru`, `output.sub` can be:
+| File Name | Valid Value |
+| ----------|-------------|
+| output.rch| 1-FLOW_IN, 2-FLOW_OUT, 3-EVAP, 4-TLOSS, 5-SED_IN, 6-SED_OUT, 8-ORGN_IN, 9-OGRN_OUT, 10-ORGP_IN, 11-ORGP_OUT, 12-NO3_IN, 13-NO3_OUT, 14-NH4-IN, 15-NH4-OUT, 16-NO2_IN, 17-NO2_OUT, 18-MINP_IN, 19-MINP_OUT, 20-CHLA_IN, 21-CHLA_OUT, 22-CBOD_IN, 23-CBOD_OUT ... 38-BACTP_OUT, 39-BACTLP_OUT... 43-TOT_N, 44-TOT_P |
+| output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
+| output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
+
+💡 **Noted:** Above number 
+
+
+
+
+
+
 
 **Data Section** is structured by `NUM`, `YEAR_INDEX`, `DATA`:
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
