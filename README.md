@@ -98,8 +98,8 @@ File Name: `evaluation.obj`
 ```
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
-WGT_1 : Weight of series combination
-RCH_23 : ID of reach
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
 COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
 FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
 
@@ -135,13 +135,7 @@ The valid values of `VAR_NUM` (extract variable) in `output.rch`, `output.hru`, 
 | output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
 | output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
 
-💡 **Noted:** Above number 
-
-
-
-
-
-
+💡 **Noted:** The numbers above are taken from the SWAT Manual. However, you can actually determine the order of the target variable by checking the output file.
 
 **Data Section** is structured by `NUM`, `YEAR_INDEX`, `DATA`:
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
