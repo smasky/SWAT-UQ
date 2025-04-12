@@ -87,7 +87,7 @@ Different basin should be separated by spaces or tabs.
 
 **Step 4:** In the Work Folder, create an **evaluation file** encoded UTF-8, used to construct objective or constraint functions using observed data.
 
-File Name: `eval.obj` 
+**File Name:** `eval.obj` 
 
 💡 **Noted:**  It is also recommended to use the `.obj` extension for consistency with the GUI version.
 
@@ -170,7 +170,6 @@ from UQPyL.optimization.single_objective import GA
 ga = GA()
 ga.run(problem = problem)
 ```
-
 
 
 ---
