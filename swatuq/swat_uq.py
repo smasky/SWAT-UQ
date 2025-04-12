@@ -67,12 +67,11 @@ class SWAT_UQ(Problem):
     Importantly, it supports parallel running of SWAT model with multiple instances.
     '''
     
-    def __init__(self, nInput: int, nOutput: int, 
-                 projectPath: str, swatExeName: str,
+    def __init__(self, projectPath: str, swatExeName: str,
                  workPath: str, paraFileName: str, evalFileName: str, specialParaList: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
                  maxThreads: int = 12, numParallel: int = 5, 
-                 verboseFlag = False, name: str = None, nCons: int = 0 ):
+                 verboseFlag = False, name: str = None):
         
         self.modelInfos = {}
         
@@ -121,7 +120,7 @@ class SWAT_UQ(Problem):
         
         self._initial()
         self._record_default_values()
-        self._get_evalData()
+        self._get_eval()
         
         self.workPathQueue = queue.Queue()
         self.workTempDirs = []
@@ -140,7 +139,7 @@ class SWAT_UQ(Problem):
         if self.nInput != len(self.varName):
             raise ValueError("The number of input variables is not equal to the number of parameters!")
         
-        super().__init__(nInput = nInput, nOutput = nOutput, 
+        super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
                             lb = self.lb, ub = self.ub, varType = self.varType, varSet = self.varSet)
 
     def evaluate(self, X):
@@ -332,14 +331,14 @@ class SWAT_UQ(Problem):
             for future in futures:
                 res = future.result()
     
-    def _get_evalData(self):
+    def _get_eval(self):
         
         filePath = os.path.join(self.workPath, self.evalFileName)
         
         serIDs = []; serInfos = {}; optInfos = {}; locInfos = { "HRU": [], "SUB" : [], "RCH" : [] }
         
-        self.obsObjs = 0
-        self.obsCons = 0
+        self.nOutput = 0
+        self.nConstraints = 0
         
         printFlag = self.modelInfos["printFlag"]
         
@@ -374,9 +373,9 @@ class SWAT_UQ(Problem):
                         matchOpt = patternOpt.match(lines[i+1])
                         optCombType = matchOpt.group(1)
                         if optCombType == "OBJ":
-                            self.obsObjs += 1
+                            self.nOutput += 1
                         elif optCombType == "CON":
-                            self.obsCons += 1
+                            self.nConstraints += 1
                         else:
                             raise ValueError("The function combination type is not valid, only `OBJ` and `CON` are supported, please check the observed data file!")
                         
@@ -474,8 +473,8 @@ class SWAT_UQ(Problem):
         if self.verboseFlag:
             print("="*25 + "Observed Information" + "="*25)
             print("The number of observed data series is: ", len(serIDs))
-            print("The number of objective functions is: ", self.obsObjs)
-            print("The number of constraint functions is: ", self.obsCons)
+            print("The number of objective functions is: ", self.nOutput)
+            print("The number of constraint functions is: ", self.nConstraints)
             seriesIDFormatted = "{:^10}".format("Series_ID")
             optIDFormatted = "{:^10}".format("Opt_ID")
             optCombTypeFormatted = "{:^20}".format("Opt_Comb_Type")
