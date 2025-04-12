@@ -87,8 +87,6 @@ Different basin should be separated by spaces or tabs.
 
 **Step 4:** In the Work Folder, create an **evaluation file** encoded UTF-8, used to construct objective or constraint functions using observed data.
 
-For example:
-
 File Name: `eval.obj` 
 
 💡 **Noted:**  It is also recommended to use the `.obj` extension for consistency with the GUI version.
@@ -111,7 +109,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 12 2012_12 22.44
 ```
 
-The **evaluation file** can consists of multiple data series, which may correspond to different locations, data types, or time periods.
+The **evaluation file** can consists of multiple data series, which may correspond to different locations, output variable, or time periods.
 
 In this example, just one data series is shown.
 
@@ -135,7 +133,7 @@ The valid values of `VAR_NUM` (extract variable) in `output.rch`, `output.hru`, 
 
 💡 **Noted:** The numbers above are taken from the SWAT Manual. However, you can actually determine the order of the target variable by checking the output file.
 
-**Data Section** is structured by `NUM`, `YEAR_INDEX`, `DATA`:
+**Data Section** is structured by `NUM`, `YEAR_INDEX`, `DATA`. And there is no need for continuous:
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
 - **YEAR_INDEX:** The value of `YEAR` means the year index for the data. The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. 
 - **DATA:** The type of data can be int or float.
@@ -152,7 +150,7 @@ projectPath = "E://swatProjectPath"  # your SWAT Project Path
 workPath = "E://workPath" # your Work Path
 exeName = "swat2012.exe" # the name of swat.exe you want to run
 paraFileName = "paras.par" # the parameter file you prepared
-evalFileName = "eval.obj"
+evalFileName = "eval.obj" # the evaluation file you prepared
 
 problem = SWAT_UQ(
    projectPath = projectPath, # set projectPath
