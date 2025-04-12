@@ -3,6 +3,7 @@ sys.path.insert(0, '.')
 
 
 from swatuq import SWAT_UQ
+from UQPyL.optimization.single_objective import GA
 
 nInput = 13
 nOutput = 1
