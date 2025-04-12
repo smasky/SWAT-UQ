@@ -46,11 +46,9 @@ Some preparatory works are required:
 
 **Step 3:** In the Work Folder, create a **parameter file** encoded in UTF-8. This file would show the details of the parameters you want to analyze or optimize, as shown below:
 
-**File name:** parameter.par 
+**File name:** `paras.par`
 
-💡 **Noted:**  The file name is not restricted, but it is recommended to use the `.par` extension for consistency with the GUI version.
-
-💡 **Noted:** In this file, all elements must be separated by spaces or tabs.
+💡 **Noted:**  The file name is not restricted, but it is recommended to use the `.par` extension for consistency with the GUI version. In this file, all elements must be separated by spaces or tabs.
 
 ```
 Name Mode Min Max Scope
@@ -91,7 +89,7 @@ Different basin should be separated by spaces or tabs.
 
 For example:
 
-File Name: `evaluation.obj` 
+File Name: `eval.obj` 
 
 💡 **Noted:**  It is also recommended to use the `.obj` extension for consistency with the GUI version.
 
@@ -113,7 +111,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 12 2012_12 22.44
 ```
 
-The **observed file** can consists of multiple data series, which may correspond to different locations, data types, or time periods.
+The **evaluation file** can consists of multiple data series, which may correspond to different locations, data types, or time periods.
 
 In this example, just one data series is shown.
 
@@ -150,16 +148,34 @@ from swatuq import SWAT_UQ
 
 # Second define requirement variables:
 
-projectPath = "D://DJ_FSB/"  # your SWAT Project Path
-workPath = "D://DJ_UQ/" # your Work Path
+projectPath = "E://swatProjectPath"  # your SWAT Project Path
+workPath = "E://workPath" # your Work Path
+exeName = "swat2012.exe" # the name of swat.exe you want to run
+paraFileName = "paras.par" # the parameter file you prepared
+evalFileName = "eval.obj"
 
+problem = SWAT_UQ(
+   projectPath = projectPath, # set projectPath
+   workPath = workPath, # set workPath
+   swatExeName = exeName # set swatExeName
+   paraFileName = paraFileName, # set paraFileName
+   evalFileName = evalFileName, # set evalFileName
+   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
+   numParallel = 2 # set the number of parallels
+)
 
+# The SWAT-related Problem is completed. You can enjoy all methods and algorithms of UQPyL.
 
+#For example:
+from UQPyL.optimization.single_objective import GA
 
+ga = GA()
+ga.run(problem = problem)
 ```
 
----
 
+
+---
 ## GUI Version of SWAT-UQ 
 
 **SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally data visualization.
