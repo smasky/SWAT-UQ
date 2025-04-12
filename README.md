@@ -15,8 +15,9 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 ## Content
  - [Develop Version](#develop-version-of-swat-uq)
     - [Key Features](#key-features)
-    - [Quick Start](#quick-start)
+    - [Quick Start](#-quick-start)
  - [GUI Version](#gui-version-of-swat-uq)
+    - [Quick Start](#-quick-start-1)
 
 ## Develop Version of SWAT-UQ
 
@@ -175,6 +176,8 @@ ga.run(problem = problem)
 ---
 ## GUI Version of SWAT-UQ 
 
+💡 **Noted:** SWAT-UQ-GUI is still in demo mode. Feel free to give it a try — the full version is on the way!
+
 **SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally data visualization.
 
 <p align="center"><img src="./resource/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./resource/TableList.jpg" alt="Table List" width="400"/></p>
@@ -184,7 +187,13 @@ ga.run(problem = problem)
 SWAT-UQ-GUI consists of three modules corresponding to preparation, execution, and post-processing. 
 As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization B**).
 
-# Quick Start
+### ✨ Key Features
+
+**End-to-end visualization:** SWAT-UQ-GUI supports fully visualized operations across the entire workflow — from problem definition and sensitivity analysis to optimization and final result validation.
+
+
+
+### 🍭 Quick Start
 
 Here, we provide a simple Quick Start guide. In future plans, we will provide detailed documentation and videos.  
 
@@ -280,22 +289,19 @@ Specifically, On the Visualization A and Visualization B, user can select the re
 
 **This concludes the Quick Start section for SWAT-UQ. For more advanced operations, please refer to the documentation.**
 
-# Call for Contributions
+## Call for Contributions
 
 We welcome contributions to expand our library with more sophisticated UQ methods, optimization algorithms and engineering problems.
 
 ---
 
-# Contact
+## Contact
 
 For any inquiries or contributions, please contact:
 
 **wmtSky**  
-Email: [wmtsky@hhu.edu.cn](mailto:wmtsky@hhu.edu.cn), [wmtsmasky@gmail.com](mailto:wmtsmasky@gmail.com)
+Email: [wmtsmasky@gmail.com](mailto:wmtsmasky@gmail.com)(Priority), [wmtsky@hhu.edu.cn](mailto:wmtsky@hhu.edu.cn)
 
 ---
 
 *This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.*
-
-![GitHub Stars](https://img.shields.io/github/stars/smasky/SWAT-UQ?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/smasky/SWAT-UQ?style=social)
