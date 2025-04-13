@@ -17,6 +17,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
     - [Key Features](#key-features)
     - [Quick Start](#-quick-start)
  - [GUI Version](#gui-version-of-swat-uq)
+    - [Key Features](#-key-features-1)
     - [Quick Start](#-quick-start-1)
 
 ## Develop Version of SWAT-UQ
@@ -31,7 +32,7 @@ This version is particularly suited for users who wish to customize their workfl
 
 2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
 
-3. **End-to-End Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> back-substitution.
+3. **Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> back-substitution.
 
 ### 🍭 Quick Start
 
@@ -176,26 +177,27 @@ ga.run(problem = problem)
 ---
 ## GUI Version of SWAT-UQ 
 
-💡 **Noted:** SWAT-UQ-GUI is still in demo mode. Feel free to give it a try — the full version is on the way!
+💡 **Noted:** SWAT-UQ-GUI is still in demo stage (Now, we advise to use SWAT-UQ-DEV). Feel free to give it a try — the full version is on the way!
 
-**SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally data visualization.
+**SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally **data visualization**.
 
 <p align="center"><img src="./resource/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./resource/TableList.jpg" alt="Table List" width="400"/></p>
 
-<p align="center"><strong>Figure 1. SWAT-UQ at Get Start Interface</strong></p>
+<p align="center"><strong>Figure 1. Get Start Card</strong></p>
 
 SWAT-UQ-GUI consists of three modules corresponding to preparation, execution, and post-processing. 
-As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide templates for histogram (**Visualization A**) and line chart (**Visualization B**).
+As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective Define**; Execution includes **Sensibility Analysis**, **Problem Optimization**, **Result Validation & Apply**; Post-processing provide interface for histogram (**Visualization A**) and point-line figure (**Visualization B**).
 
 ### ✨ Key Features
 
 **End-to-end visualization:** SWAT-UQ-GUI supports fully visualized operations across the entire workflow — from problem definition and sensitivity analysis to optimization and final result validation.
 
+**Modular & Extensible Architecture:** SWAT-UQ-GUI adopts a modular structure that’s easy to extend — new methods and tools can be integrated without disrupting existing workflows.
 
 
 ### 🍭 Quick Start
 
-Here, we provide a simple Quick Start guide. In future plans, we will provide detailed documentation and videos.  
+Here, we provide a Quick Start. In future plans, we will provide detailed documentation and videos.
 
 Please choose the latest release version of SWAT-UQ.  
 **Demo Version has been released:** [SWAT-UQ](https://github.com/smasky/SWAT-UQ/releases/tag/v0.0)
