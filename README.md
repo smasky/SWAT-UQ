@@ -30,7 +30,7 @@ This version is particularly suited for users who wish to customize their workfl
 
 ### ✨ Key Features
 
-1. **Parallel Execution:** Both data I/O operations within project folder and **SWAT model simulations** support parallelization. (💡 **Noted:** Benchmark tests on a 40-core server demonstrate that the current code version can stably run up to 80 SWAT instances concurrently.)
+1. **Parallel Execution:** Both data I/O operations within project folder and **SWAT model simulations** support parallelization. ( 🎉 Benchmark tests on a 40-core server demonstrate that the current code version can stably run up to 80 SWAT instances concurrently.)
 
 2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
 
@@ -44,7 +44,7 @@ To get started, instantiate the `SWAT-UQ` class, which inherits from the `Proble
 
 Some preparatory works are required:
 
-**Step 1:** Obtain a **SWAT project folder** (named **SWAT EXE Folder** for convenience).
+**Step 1:** Obtain a **SWAT project folder** (named **SWAT Project Folder** for convenience).
 
 **Step 2:** Create **separate folder**  as **Work Folder** to store control files for setting up your problems, as well as temporary files used when running the SWAT model in parallel.
 
@@ -65,6 +65,7 @@ SMFMN v 0.0 20.0 all
 TIMP v 0.01 1.0 all
 SURLAG v 0.05 24.0 all
 ```
+
 The first line should be kept as a hint for users.
 
 Following line of the parameter file should be structured by `Name`, `Mode`, `Min`, `Max` and `Scope`:
@@ -76,7 +77,7 @@ Following line of the parameter file should be structured by `Name`, `Mode`, `Mi
    - **`a`** denotes for adding assignment, the true value is calculated by $originVal+val$.
  - **Min:** The title 'Min' is the lower bound of the parameter.
  - **Max:** The title 'Max' is the upper bound of the parameter.
- - **Scope:** The title 'Scope' means the target scope of the parameter. By default, it sets to `all` - the parameter would be modified globally. Alternatively, you can specify a particular BSN ID or a combination of BSN ID and HRU IDs to apply the parameter selectively. For example:
+ - **Scope:** The title 'Scope' means the target scope of the parameter. By default, it sets to `all` - the parameter would be modified globally. Alternatively, you can specify a particular BSN ID or a combination of SUB ID and HRU IDs to apply the parameter selectively. For example:
 
  ```
  CN2 r -0.4 0.2 all # Default Scope
@@ -84,8 +85,8 @@ Following line of the parameter file should be structured by `Name`, `Mode`, `Mi
  ```
 
 The format follows either:
- - `BSN ID` - apply the parameter to all HRUs within the specified basin
- - `BSN ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
+ - `SUB ID` - apply the parameter to all HRUs within the specified basin
+ - `SUB ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)` - apply the parameter to specific HRUs within the given basin
 
 Different basin should be separated by spaces or tabs.
 
