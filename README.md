@@ -175,7 +175,13 @@ from UQPyL.optimization.single_objective import GA
 ga = GA()
 ga.run(problem = problem)
 ```
+**Step 6:** apply optimal parameters to project folder
 
+```Python
+# X should be a list or a NumPy 1D or 2D array
+problem.apply_parameter(X, replace=False)  # Applies parameters X to workOriginPath without modifying the original project files
+problem.apply_parameter(X, replace=True)   # Applies parameters X directly to the original project directory
+```
 
 ---
 ## GUI Version of SWAT-UQ 

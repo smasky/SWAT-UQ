@@ -176,6 +176,17 @@ ga = GA()
 ga.run(problem = problem)
 ```
 
+**步骤6:** 将最优参数应用到工程文件夹
+
+```Python
+
+#X应为list或者numpy.1d/2darray
+problem.apply_parameter(X, replace = False) # 将参数X应用到workOriginPath, 不修改原始工程。
+problem.apply_parameter(X, replace = True) # 将参数X应用到原始工程文件夹
+
+```
+
+
 ## SWAT-UQ 界面操作版
 
 💡 **提示:** 目前推荐使用SWAT-UQ-DEV，DEV版本更领先，GUI版本有待后续更新！
