@@ -1,0 +1,36 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "Cython",
+    "pybind11",
+    "numpy",
+]
+
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+license-files = []
+
+[project]
+name = "swatuq"
+version = "1.0.1"
+authors = [
+    {name = "wmtSky", email = "wmtsmasky@gmail.com"}
+]
+description = "A extend project of UQPyL, which provides develop and GUI versions."
+readme = "README.md"
+dependencies = [
+
+    "UQPyL >= 2.1.0 "
+]
+classifiers = [
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
