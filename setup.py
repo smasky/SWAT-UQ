@@ -13,7 +13,7 @@ pybind11_extensions = [
 
 setup(
     name="swatuq",
-    version="1.0.1",
+    version="1.0.2",
     author="wmtSky",
     author_email="wmtsmasky@gmail.com",
     description="A extend project of UQPyL, which provides develop and GUI versions.",

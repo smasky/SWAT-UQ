@@ -10,6 +10,7 @@ temp/
 validation/
 build/
 dist/
+swatuq.egg-info/
 
 
 Test/*.pickle
