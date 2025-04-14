@@ -150,34 +150,34 @@ class SWAT_UQ(Problem):
         nCons = self.nConstraints
         cons = np.zeros((n, nCons)) if nCons > 0 else None
         
-        for i in range(n):
-            attrs = self._subprocess(X[i, :], i)
-            id = attrs['id']
-            if self.userObjFunc is None:
-                objs[id] = np.array(list(attrs['objs'].values()))
-            else:
-                objs[id] = self.userObjFunc(attrs)
+        # for i in range(n):
+        #     attrs = self._subprocess(X[i, :], i)
+        #     id = attrs['id']
+        #     if self.userObjFunc is None:
+        #         objs[id] = np.array(list(attrs['objs'].values()))
+        #     else:
+        #         objs[id] = self.userObjFunc(attrs)
                 
-        # with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
-        #     futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+        with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
+            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
         
-        #     for _ , future in enumerate(futures):
-        #         attrs = future.result()
+            for _ , future in enumerate(futures):
+                attrs = future.result()
                 
-        #         id = attrs['id']
+                id = attrs['id']
                 
-        #         if self.userObjFunc is None:
-        #             #use default
-        #             objs[id] = np.array(list(attrs['objs'].values()))
-        #         else:
-        #             #use user define
-        #             objs[id] = self.userObjFunc(attrs)
+                if self.userObjFunc is None:
+                    #use default
+                    objs[id] = np.array(list(attrs['objs'].values()))
+                else:
+                    #use user define
+                    objs[id] = self.userObjFunc(attrs)
                 
-        #         if nCons > 0:
-        #             if self.userConFunc is None:
-        #                 cons[id] = np.array(list(attrs['cons'].values()))
-        #             else:
-        #                 cons[id] = self.userConFunc(attrs)
+                if nCons > 0:
+                    if self.userConFunc is None:
+                        cons[id] = np.array(list(attrs['cons'].values()))
+                    else:
+                        cons[id] = self.userConFunc(attrs)
 
         return {'objs': objs, 'cons': cons}
     
@@ -227,6 +227,16 @@ class SWAT_UQ(Problem):
                     
         return cons
     
+    def apply_parameters(self, X, replace = False):
+        
+        X = X.ravel()
+        if replace:
+            self._set_values(self.workOriginPath, X)
+            print(f"The parameters have been applied to {self.workOriginPath}!")
+        else:
+            self._set_values(self.projectPath, X)
+            print(f"The parameters have been applied to {self.projectPath}!")
+        
     def _subprocess(self, inputX, id):
         
         workPath = self.workPathQueue.get()
