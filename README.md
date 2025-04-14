@@ -17,6 +17,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 ## Content
  - [Develop Version](#develop-version-of-swat-uq)
     - [Key Features](#key-features)
+    - [Installation](#-installation)
     - [Quick Start](#-quick-start)
  - [GUI Version](#gui-version-of-swat-uq)
     - [Key Features](#-key-features-1)
@@ -35,6 +36,21 @@ This version is particularly suited for users who wish to customize their workfl
 2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
 
 3. **Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> back-substitution.
+
+### ⚙️ Installation
+
+ ![Static Badge](https://img.shields.io/badge/Python-3.6%2C%203.7%2C%203.8%2C%203.9%2C%203.10%2C%203.11%2C%203.12-blue) ![Static Badge](https://img.shields.io/badge/OS-Windows%2C%20Linux-orange)
+
+ **Recommended (PyPi or Conda):**
+
+```bash
+pip install -U swatuq
+```
+
+```bash
+conda install swatuq --upgrade
+```
+
 
 ### 🍭 Quick Start
 
@@ -102,7 +118,7 @@ OBJ_1 : ID of objective function
 WGT_1.0 : Weight of series combination
 RCH_23 : ID of RCH, or SUB, or HRU
 COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
-FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
 
 1 2012_1 2.1
 2 2012_2 3.2
