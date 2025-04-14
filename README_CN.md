@@ -124,7 +124,9 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 **头部定义(Head Definition)说明**: (以下带有 ID 或 NUM 的标签需用具体数字替代)
 
 - **SER_ID:** 该ID是该数据序列的唯一标识符，需用不同的int型数字区分不同数据序列。
+
 - **OBJ_ID** 或 **CON_ID:** `OBJ`表示该序列用于构建目标函数(Objective Function);`CON`表示该序列用于构建约束函数(Constraint Function)；其后的 ID 是对应函数的唯一标识符。
+
 💡**提示:** SWAT-UQ-DEV支持多个数据序列(Data series)共用同一个OBJ_ID或CON_ID。共同ID的数据序列将使用后续定义的权重来线性组合。
 
 - **WGT_NUM:** 此`NUM`表示该序列在组合为同一OBJ_ID或CON_ID时的线性权重。`NUM`应为int或float型数字
@@ -133,7 +135,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 
 - **VAR_NUM:** 此`NUM`表示要从`output.rch`, `output.sub`或`output.hru`文件中提取的变量列号(请参考后续表格以获取正确数值)。
 
-- **FUNC_NUM:** 此`NUM`用于定义基于观测值与模拟值的目标或约束函数类型。`NUM`取值如下: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min
+- **FUNC_NUM:** 此`NUM`用于定义基于观测值与模拟值的目标或约束函数类型。(`NUM`取值如下: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
 
 各输出文件（output.rch、output.sub、output.hru）中可提取变量的列号一览表
 | File Name | Valid Value |
@@ -141,6 +143,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 | output.rch| 1-FLOW_IN, 2-FLOW_OUT, 3-EVAP, 4-TLOSS, 5-SED_IN, 6-SED_OUT, 8-ORGN_IN, 9-OGRN_OUT, 10-ORGP_IN, 11-ORGP_OUT, 12-NO3_IN, 13-NO3_OUT, 14-NH4-IN, 15-NH4-OUT, 16-NO2_IN, 17-NO2_OUT, 18-MINP_IN, 19-MINP_OUT, 20-CHLA_IN, 21-CHLA_OUT, 22-CBOD_IN, 23-CBOD_OUT ... 38-BACTP_OUT, 39-BACTLP_OUT... 43-TOT_N, 44-TOT_P |
 | output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
 | output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
+
 
 
 
