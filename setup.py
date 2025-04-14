@@ -13,14 +13,18 @@ pybind11_extensions = [
 
 setup(
     name="swatuq",
-    version="1.0.0",
+    version="1.0.1",
     author="wmtSky",
     author_email="wmtsmasky@gmail.com",
-    description="A Python module that extends Python with C++ code using Pybind11.",
+    description="A extend project of UQPyL, which provides develop and GUI versions.",
     ext_modules=pybind11_extensions,
     packages=find_packages(),
+    package_data={
+        'swatuq': ['swat_parameters.json'],
+    },
+    long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     classifiers=[
-        # 添加适合的类目，例如
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
