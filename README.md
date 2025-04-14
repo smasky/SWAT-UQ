@@ -202,7 +202,8 @@ As **Figure 1** shows, preparation involves **Parameter Setting**, **Objective D
 
 Here, we provide a Quick Start. In future plans, we will provide detailed documentation and videos.
 
-Please choose the latest release version of SWAT-UQ.  
+Please choose the latest release version of SWAT-UQ.
+
 **Demo Version has been released:** [SWAT-UQ](https://github.com/smasky/SWAT-UQ/releases/tag/v0.0)
 
 **Step1:** On the **Get Started** interface, click the **New Project** card to create a project or the **Open Project** card to open an existing one. You can also select the **Example** card for reference cases or the **Help** card for assistance.
@@ -223,7 +224,8 @@ For the Open Project Card (right picture of Figure 2), users should select the f
 
 To be specific, as shown in Figure 3, the Parameter Setting Card enables users to define the parameters they wish to tune. There are two ways to add parameters to the information table: either by importing them from an existing file or by clicking the Add button to open the **Parameter Selection** widget. In this table, all selectable parameters are organized by the suffix of the SWAT project files. Additionally, the search bar provides a convenient way to locate specific parameters quickly.
 
-<p align="center"><img src="./resource/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p> 
+<p align="center"><img src="./resource/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p>
+
 <p align="center"><strong>Figure 4. Parameter Setting Table </strong></p>
 
 After adding parameters, users can set the tuning mode, lower and upper bounds, and specify tuning files (default: all) for each parameter (**Figure 3 shows**). Finally, these settings should be saved to the UQ project folder by clicking "Saving Current Parameter" button.
