@@ -14,7 +14,7 @@ license-files = []
 
 [project]
 name = "swatuq"
-version = "1.0.2"
+version = "1.0.3"
 authors = [
     {name = "wmtSky", email = "wmtsmasky@gmail.com"}
 ]
