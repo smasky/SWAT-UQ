@@ -302,13 +302,13 @@ Specifically, On the Visualization A and Visualization B, user can select the re
 
 **This concludes the Quick Start section for SWAT-UQ. For more advanced operations, please refer to the documentation.**
 
-## Call for Contributions
+## 🔥 Call for Contributions
 
 We welcome contributions to expand our library with more sophisticated UQ methods, optimization algorithms and engineering problems.
 
 ---
 
-## Contact
+## 📧 Contact
 
 For any inquiries or contributions, please contact:
 
