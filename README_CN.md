@@ -14,12 +14,11 @@ SWAT-UQ 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的扩展子项目。
 SWAT-UQ使用户能够将先进的不确定性分析方法与优化算法，便捷地融入基于SWAT模型的水文建模流程之中。
 
 ## content
-- [开发版]
-    - [功能特点]
-    - [快速开始]
-- [界面图形版]
-    - [功能特点]
-    - [快速开始]
+- [开发版](#swat-uq-开发版)
+    - [功能特点](#-功能特点)
+    - [快速开始](#-快速开始)
+- [欢迎合作](#-欢迎合作)
+- [联系方式](#-联系方式)
 
 ## SWAT-UQ 开发版
 
@@ -35,7 +34,7 @@ SWAT-UQ使用户能够将先进的不确定性分析方法与优化算法，便�
 
 3. **工作流集成:** 在 UQPyL 的支持下，用户能够高效地执行完整的基于建模的工作流：敏感性分析 -> 优化 -> 参数回代分析。
 
-### 快速开始
+### 🍭 快速开始
 
 在本节，我们提供了使用SWAT-UQ-DEV解决基于SWAT模型的分析及优化问题的指南。
 
@@ -144,7 +143,54 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 | output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
 | output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
 
+**步骤5:** 在Python环境，构建基于SWAT模型的问题
 
+```Python
+# First import SWAT_UQ class
+from swatuq import SWAT_UQ
 
+# Second define requirement variables:
 
+projectPath = "E://swatProjectPath"  # your SWAT Project Path
+workPath = "E://workPath" # your Work Path
+exeName = "swat2012.exe" # the name of swat.exe you want to run
+paraFileName = "paras.par" # the parameter file you prepared
+evalFileName = "eval.obj" # the evaluation file you prepared
 
+problem = SWAT_UQ(
+   projectPath = projectPath, # set projectPath
+   workPath = workPath, # set workPath
+   swatExeName = exeName # set swatExeName
+   paraFileName = paraFileName, # set paraFileName
+   evalFileName = evalFileName, # set evalFileName
+   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
+   numParallel = 2 # set the number of parallels
+)
+
+# The SWAT-related Problem is completed. You can enjoy all methods and algorithms of UQPyL.
+
+#For example:
+from UQPyL.optimization.single_objective import GA
+
+ga = GA()
+ga.run(problem = problem)
+```
+
+## SWAT-UQ 界面操作版
+
+💡 **提示:** 目前推荐使用SWAT-UQ-DEV，DEV版本更领先，GUI版本有待后续更新！
+
+## 🔥 欢迎合作
+
+欢迎大家参与贡献，共同扩展UQPyL，加入更多先进的敏感性方法、优化算法以及实际工程问题的示例。
+
+## 📧 联系方式
+
+如有任何问题，请联系：
+
+**wmtSky**  
+Email: [wmtsmasky@gmail.com](mailto:wmtsmasky@gmail.com)(优先), [wmtsky@hhu.edu.cn](mailto:wmtsky@hhu.edu.cn)
+
+---
+
+**本项目遵循 MIT 许可协议 - 具体内容详见 [LICENSE](https://github.com/smasky/SWAT-UQ/LICENSE)**
