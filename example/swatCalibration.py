@@ -22,4 +22,3 @@ lhs = LHS()
 X = lhs.sample(nt = 100, problem = problem)
 
 problem.evaluate(X)
-

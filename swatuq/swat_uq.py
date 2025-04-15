@@ -71,7 +71,7 @@ class SWAT_UQ(Problem):
                  workPath: str, paraFileName: str, evalFileName: str, specialParaList: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
                  maxThreads: int = 12, numParallel: int = 5, 
-                 verboseFlag = False, name: str = None):
+                 verboseFlag = False, name: str = None, optType = 'min'):
         
         self.modelInfos = {}
         
@@ -120,7 +120,7 @@ class SWAT_UQ(Problem):
         
         self._initial()
         self._record_default_values()
-        self._get_eval()
+        self._init_eval()
         
         self.workPathQueue = queue.Queue()
         self.workTempDirs = []
@@ -140,7 +140,7 @@ class SWAT_UQ(Problem):
             raise ValueError("The number of input variables is not equal to the number of parameters!")
         
         super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
-                            lb = self.lb, ub = self.ub, varType = self.varType, varSet = self.varSet)
+                            lb = self.lb, ub = self.ub, varType = self.varType, varSet = self.varSet, optType = optType)
 
     def evaluate(self, X):
         
@@ -231,12 +231,125 @@ class SWAT_UQ(Problem):
         
         X = X.ravel()
         if replace:
+            self._set_values(self.projectPath, X)
+            self._set_values(self.workOriginPath, X)
+            print(f"The parameters have been applied to {self.projectPath} and {self.workOriginPath}!")
+        else:
             self._set_values(self.workOriginPath, X)
             print(f"The parameters have been applied to {self.workOriginPath}!")
-        else:
-            self._set_values(self.projectPath, X)
-            print(f"The parameters have been applied to {self.projectPath}!")
+    
+    def validate_parameters(self, X, validate_file = None, objFunc = None, conFunc = None):
         
+        if validate_file is None:
+            validate_file = self.evalFileName
+        
+        if self.workValidationPath is None:
+            self.workValidationPath = os.path.join(self.workTempDir, "validation")
+            copy_origin_to_tmp(self.projectPath, self.workValidationPath)
+        
+        X = X.ravel()
+        self.apply_parameters(X)
+        
+        valInfos = self._read_eval(self.workValidationPath, validate_file)
+        
+        self._set_values(self.workValidationPath, X)
+        
+        process = subprocess.Popen(
+                os.path.join(self.workValidationPath, self.swatExe),
+                cwd = self.workValidationPath,
+                stdin = subprocess.PIPE, 
+                stdout = subprocess.PIPE, 
+                stderr = subprocess.PIPE,
+                text = True)
+        process.wait()
+        
+        serInfos = valInfos["serInfos"]
+        optInfos = valInfos["optInfos"]
+        
+        attrs = {}
+        
+        objSeries = {}
+        objVal = {}
+        conSeries = {}
+        conVal = {}
+        
+        for serID, info in serInfos.items():
+            for optID, info in optInfos.items():
+                combType = info["combType"]
+                comb = info["comb"]
+                
+                if combType == "OBJ":
+                    objSeries[optID] = {}
+                    combSeries = objSeries[optID]
+                    combVal = objVal
+                else:
+                    conSeries[optID] = {}
+                    combSeries = conSeries[optID]
+                    combVal = conVal
+                
+                val = 0
+                
+                for serID in comb:
+                    dataInfo = serInfos[serID]["data"]
+                    funcType = serInfos[serID]["funcType"]
+                    loc = serInfos[serID]["loc"]
+                    locID = serInfos[serID]["locID"]
+                    wgt = serInfos[serID]["wgt"]
+                    col = serInfos[serID]["col"]
+                    readLines = serInfos[serID]["readLines"]
+                    obSeries = dataInfo["value"]
+
+                    if loc == "HRU":
+                        filePath = os.path.join(self.workValidationPath, "output.hru")
+                        totalItem = self.modelInfos["nHRU"]
+                        extraCol = 6
+                    elif loc == "SUB":
+                        filePath = os.path.join(self.workValidationPath, "output.sub")
+                        totalItem = self.modelInfos["nSUB"]
+                        extraCol = 4
+                    elif loc == "RCH":
+                        filePath = os.path.join(self.workValidationPath, "output.rch")
+                        totalItem = self.modelInfos["nRCH"]
+                        extraCol = 5
+                        
+                    simList = []
+                    
+                    for rl in readLines:
+                        startLine = rl[0]
+                        endLine = rl[1]
+                        subSim = np.array(read_simulation(filePath, col + extraCol, locID, totalItem, startLine, endLine))
+                        simList.append(subSim)
+                    
+                    simSeries = np.concatenate(simList, axis = 0)
+                    val += eval(FUNC[funcType])(obSeries, simSeries) * wgt
+                    
+                    combSeries[serID] = {"obs": obSeries, "sim": simSeries}
+                        
+                combVal[optID] = val
+                       
+            attrs['id'] = id
+            attrs['objs'] = objVal
+            attrs['cons'] = conVal
+            attrs['objSeries'] = objSeries
+            attrs['consSeries'] = conSeries
+            attrs['x'] = X
+            
+            if objFunc is None and self.userObjFunc is None:
+                objs = np.array(list(attrs['objs'].values()))
+            elif objFunc is not None:
+                objs = objFunc(attrs)
+            else:
+                objs = self.userObjFunc(attrs)
+            
+            if conFunc is None:
+                cons = np.array(list(attrs['cons'].values()))
+            elif conFunc is not None:
+                cons = conFunc(attrs)
+            else:
+                cons = self.userConFunc(attrs)
+            
+            return {'objs': objs, 'cons': cons}
+             
     def _subprocess(self, inputX, id):
         
         workPath = self.workPathQueue.get()
@@ -341,30 +454,32 @@ class SWAT_UQ(Problem):
             for future in futures:
                 res = future.result()
     
-    def _get_eval(self):
+    def _read_eval(self, fileFolder, fileName):
         
-        filePath = os.path.join(self.workPath, self.evalFileName)
+        evalInfos = {}
+        
+        nOutput = 0; nConstraints = 0
+        
+        filePath = os.path.join(self.workPath, fileName)
         
         serIDs = []; serInfos = {}; optInfos = {}; locInfos = { "HRU": [], "SUB" : [], "RCH" : [] }
         
-        self.nOutput = 0
-        self.nConstraints = 0
-        
         printFlag = self.modelInfos["printFlag"]
         
-        try:
-            with open(filePath, "r") as f:
-                
-                lines = f.readlines()
-                
-                patternSeries = re.compile(r'SER_(\d+)')
-                patternOpt = re.compile(r'([a-zA-Z]*)_(\d+)')
-                patternWgt = re.compile(r'WGT_(\d+\.?\d*)')
-                patternLoc = re.compile(r'([a-zA-Z]*)_(\d+)')
-                patternCol = re.compile(r'COL_(\d+)')
-                patternFunc = re.compile(r'FUNC_(\d+)')
-                patternValue = re.compile(r'(\d+)\s+(\d+)_(\d+)\s+(\d+\.?\d*)')
-                
+        with open(filePath, "r") as f:
+            
+            lines = f.readlines()
+            
+            patternSeries = re.compile(r'SER_(\d+)')
+            patternOpt = re.compile(r'([a-zA-Z]*)_(\d+)')
+            patternWgt = re.compile(r'WGT_(\d+\.?\d*)')
+            patternLoc = re.compile(r'([a-zA-Z]*)_(\d+)')
+            patternCol = re.compile(r'COL_(\d+)')
+            patternFunc = re.compile(r'FUNC_(\d+)')
+            patternValue = re.compile(r'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.?\d*)')
+            
+            try:
+            
                 i = 0
                 while i < len(lines):
         
@@ -383,9 +498,9 @@ class SWAT_UQ(Problem):
                         matchOpt = patternOpt.match(lines[i+1])
                         optCombType = matchOpt.group(1)
                         if optCombType == "OBJ":
-                            self.nOutput += 1
+                            nOutput += 1
                         elif optCombType == "CON":
-                            self.nConstraints += 1
+                            nConstraints += 1
                         else:
                             raise ValueError("The function combination type is not valid, only `OBJ` and `CON` are supported, please check the observed data file!")
                         
@@ -422,7 +537,7 @@ class SWAT_UQ(Problem):
                         #FUNC_NUM
                         funcType = int(patternFunc.match(lines[i+5]).group(1))
                         serInfos[serID]['funcType'] = funcType
-                                   
+                                    
                         i = i + 6
                         
                         while patternValue.match(lines[i]) is None:
@@ -440,18 +555,20 @@ class SWAT_UQ(Problem):
                             if not matchData:
                                 break
                             
-                            _, year, I = map(int, matchData.groups()[:-1])
+                            _, year, month, day = map(int, matchData.groups()[:-1])
                             
                             value = float(matchData.groups()[-1])
+                            
+                            date = datetime(year, month, day)
                             
                             if printFlag == 0:
                                 years = year - self.modelInfos["beginRecord"].year
                                 if years == 0:
-                                    index = I - self.modelInfos["beginRecord"].month
+                                    index = date.month - self.modelInfos["beginRecord"].month
                                 else:
-                                    index = I + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
+                                    index = date.month  + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
                             else:
-                                index = (datetime(year, 1, 1) + timedelta(days = I - 1) - self.modelInfos["beginRecord"]).days
+                                index = (date - self.modelInfos["beginRecord"]).days
                             
                             YEAR.append(int(year)); INDEX.append(int(index)); VALUE.append(value)
                             
@@ -467,56 +584,70 @@ class SWAT_UQ(Problem):
                         
                     else:
                         i += 1
-                        
-        except FileNotFoundError:
-            raise FileNotFoundError("The observed data file is not found, please check the file name!")
-        
-        except Exception as e:
-            raise ValueError("There is an error in observed data file, please check!")
-        
-        self._modify_output_file(locInfos)
-        
-        self.modelInfos["serInfos"] = serInfos
-        self.modelInfos["optInfos"] = optInfos
-        self.modelInfos["serIDs"] = serIDs
-        
-        if self.verboseFlag:
-            print("="*25 + "Observed Information" + "="*25)
-            print("The number of observed data series is: ", len(serIDs))
-            print("The number of objective functions is: ", self.nOutput)
-            print("The number of constraint functions is: ", self.nConstraints)
-            seriesIDFormatted = "{:^10}".format("Series_ID")
-            optIDFormatted = "{:^10}".format("Opt_ID")
-            optCombTypeFormatted = "{:^20}".format("Opt_Comb_Type")
-            funcTypeFormatted = "{:^10}".format("Func_Type")
-            locFormatted = "{:^10}".format("Loc_ID")
-            varColFormatted = "{:^10}".format("varCol")
-            weightFormatted = "{:^10}".format("Weight")
-            lineFormatted = "{:<30}".format("readLines")
-            print(seriesIDFormatted + "||" + optIDFormatted + "||" + optCombTypeFormatted + "||" + funcTypeFormatted + "||"+locFormatted + "||" + varColFormatted + "||" + weightFormatted + "||" + lineFormatted)
             
-            for optID, info in optInfos.items():
-                combType = info["combType"]
-                comb = info["comb"]
-                for serID in comb:
-                    serInfo = serInfos[serID]
-                    
-                    serIDFormatted = "{:^10}".format(serID)
-                    optIDFormatted = "{:^10}".format(optID)
-                    optCombTypeFormatted = "{:^20}".format(combType)
-                    funcTypeFormatted = "{:^10}".format(serInfo["funcType"])
-                    locFormatted = "{:^10}".format("{}_{}".format(serInfo["loc"], serInfo["locID"]))
-                    varColFormatted = "{:^10}".format(serInfo["col"])
-                    weightFormatted = "{:^10}".format(serInfo["wgt"])
-                    
-                    readLines = serInfo["readLines"]
-                    lineStr = ""
-                    for line in readLines:
-                        lineStr += str(line[0])+"-"+str(line[1])+" "
-                    lineFormatted = "{:<30}".format(lineStr)
-                    print(serIDFormatted+"||"+optIDFormatted+"||"+optCombTypeFormatted+"||"+funcTypeFormatted+"||"+locFormatted+"||"+varColFormatted+"||"+weightFormatted+"||"+lineFormatted)
+            except FileNotFoundError:
+                raise FileNotFoundError("The observed data file is not found, please check the file name!")
+            
+            except Exception as e:
+                raise ValueError("There is an error in {}, please check!".format(filePath))
+            
+            self._modify_output_file(locInfos, fileFolder)
+            
+            evalInfos["serInfos"] = serInfos
+            evalInfos["optInfos"] = optInfos
+            evalInfos["serIDs"] = serIDs
+            evalInfos["nOutput"] = nOutput
+            evalInfos["nConstraints"] = nConstraints
+            
+            if self.verboseFlag:
+                print("="*25 + "Observed Information" + "="*25)
+                print("The number of observed data series is: ", len(serIDs))
+                print("The number of objective functions is: ", nOutput)
+                print("The number of constraint functions is: ", nConstraints)
+                seriesIDFormatted = "{:^10}".format("Series_ID")
+                optIDFormatted = "{:^10}".format("Opt_ID")
+                optCombTypeFormatted = "{:^20}".format("Opt_Comb_Type")
+                funcTypeFormatted = "{:^10}".format("Func_Type")
+                locFormatted = "{:^10}".format("Loc_ID")
+                varColFormatted = "{:^10}".format("varCol")
+                weightFormatted = "{:^10}".format("Weight")
+                lineFormatted = "{:<30}".format("readLines")
+                print(seriesIDFormatted + "||" + optIDFormatted + "||" + optCombTypeFormatted + "||" + funcTypeFormatted + "||"+locFormatted + "||" + varColFormatted + "||" + weightFormatted + "||" + lineFormatted)
+                
+                for optID, info in optInfos.items():
+                    combType = info["combType"]
+                    comb = info["comb"]
+                    for serID in comb:
+                        serInfo = serInfos[serID]
+                        
+                        serIDFormatted = "{:^10}".format(serID)
+                        optIDFormatted = "{:^10}".format(optID)
+                        optCombTypeFormatted = "{:^20}".format(combType)
+                        funcTypeFormatted = "{:^10}".format(serInfo["funcType"])
+                        locFormatted = "{:^10}".format("{}_{}".format(serInfo["loc"], serInfo["locID"]))
+                        varColFormatted = "{:^10}".format(serInfo["col"])
+                        weightFormatted = "{:^10}".format(serInfo["wgt"])
+                        
+                        readLines = serInfo["readLines"]
+                        lineStr = ""
+                        for line in readLines:
+                            lineStr += str(line[0])+"-"+str(line[1])+" "
+                        lineFormatted = "{:<30}".format(lineStr)
+                        print(serIDFormatted+"||"+optIDFormatted+"||"+optCombTypeFormatted+"||"+funcTypeFormatted+"||"+locFormatted+"||"+varColFormatted+"||"+weightFormatted+"||"+lineFormatted)
                     
             print("="*70)
+            
+            return evalInfos
+            
+    def _init_eval(self):
+                
+        evalInfos = self._read_eval(self.workOriginPath, self.evalFileName)
+        
+        self.modelInfos["serInfos"] = evalInfos["serInfos"]
+        self.modelInfos["optInfos"] = evalInfos["optInfos"]
+        self.modelInfos["serIDs"] = evalInfos["serIDs"]
+        self.nOutput  = evalInfos["nOutput"]
+        self.nConstraints = evalInfos["nConstraints"]
         
     def _record_default_values(self):
         """
@@ -779,7 +910,7 @@ class SWAT_UQ(Problem):
             print("=" * 70)
             print("\n" * 1)
     
-    def _modify_output_file(self, locInfos):
+    def _modify_output_file(self, locInfos, filePath):
         
         for _, locIDs in locInfos.items():
             if len(locIDs) == 0:
@@ -791,7 +922,7 @@ class SWAT_UQ(Problem):
                 locIDs.extend([0] * (20 - len(locIDs)))
 
         lines = None
-        with open(os.path.join(self.workOriginPath, "file.cio"), "r") as f:
+        with open(os.path.join(filePath, "file.cio"), "r") as f:
             lines = f.readlines()
 
             for i, line in enumerate(lines):

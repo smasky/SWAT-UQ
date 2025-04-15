@@ -18,6 +18,12 @@
         "position": "default"
     },
     {
+        "name": "GWQMN",
+        "type": "float",
+        "file_name": "gw",
+        "position": "default"
+    },
+    {
         "name": "GW_REVAP",
         "type": "float",
         "file_name": "gw",
