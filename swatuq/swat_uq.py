@@ -100,7 +100,7 @@ class SWAT_UQ(Problem):
         self.specialParaList = specialParaList
         
         self.projectPath = projectPath
-        self.swatExe = os.path.join(projectPath, swatExeName)
+        self.swatExe = swatExeName
         
         self.maxWorkers = maxThreads
         self.numParallel = numParallel
@@ -714,7 +714,7 @@ class SWAT_UQ(Problem):
         self.nInput = len(self.varName)
         
         if self.verboseFlag:
-            print("="*50+"Parameter Information"+"="*50)
+            print("="*25+"Parameter Information"+"="*25)
             nameFormatted = "{:^20}".format("Parameter name")
             typeFormatted ="{:^7}".format("Type")
             modeFormatted = "{:^7}".format("Mode")
@@ -730,7 +730,7 @@ class SWAT_UQ(Problem):
                 UBFormatted = "{:^15}".format(self.ub[0][i])
                 HruFormatted = "{:^20}".format(" ".join(varScope[i]))
                 print(nameFormatted+"||"+typeFormatted+"||"+modeFormatted+"||"+LBFormatted+"||"+UBFormatted+"||"+HruFormatted)
-            print("="*120)
+            print( "=" * 70 )
             print("\n" * 1)
             
         self.varInfos = {}
