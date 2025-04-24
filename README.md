@@ -1,6 +1,6 @@
 # SWAT-UQ: Uncertainty Quantification for SWAT
 
-<p align="center"><img src="./resource/SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="./docs/pic/SWAT-UQ.svg" width="400"/></p>
 
 [![PyPI version](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - Downloads](https://img.shields.io/pypi/dm/swatuq) ![PyPI - License](https://img.shields.io/pypi/l/swatuq) ![GitHub last commit](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![Static Badge](https://img.shields.io/badge/Author-wmtSky-orange) ![Static Badge](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
@@ -218,7 +218,7 @@ problem.apply_parameter(X, replace=True)   # Applies parameters X directly to th
 
 **SWAT-UQ-GUI** is designed for parameter uncertainty quantification (UQ) of the **SWAT** model. Its core functionalities are built upon [UQPyL](https://github.com/smasky/UQPyL), our public released Python package for UQ. A key advantage of this platform is that users do not need to worry about coding. It seamlessly automates complete workflow from **sensitivity analysis** to **parameter optimization**, **result checking**, finally **data visualization**.
 
-<p align="center"><img src="./resource/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./resource/TableList.jpg" alt="Table List" width="400"/></p>
+<p align="center"><img src="./docs/pic/MainUI.jpg" alt="Main GUI" width="400"/> <img src="./docs/pic/TableList.jpg" alt="Table List" width="400"/></p>
 
 <p align="center"><strong>Figure 1. Get Start Card</strong></p>
 
@@ -242,7 +242,7 @@ Please choose the latest release version of SWAT-UQ.
 
 **Step1:** On the **Get Started** interface, click the **New Project** card to create a project or the **Open Project** card to open an existing one. You can also select the **Example** card for reference cases or the **Help** card for assistance.
 
-<p align="center"><img src="./resource/New_Project.png" alt="New Widget" width="300"/> <img src="./resource/Open_Project.png" alt="Open Widget" width="300"/></p>
+<p align="center"><img src="./docs/pic/New_Project.png" alt="New Widget" width="300"/> <img src="./docs/pic/Open_Project.png" alt="Open Widget" width="300"/></p>
 
 <p align="center"><strong>Figure 2. New Project Card and Open Project Card</strong></p>
 
@@ -252,13 +252,13 @@ For the Open Project Card (right picture of Figure 2), users should select the f
 
 **Step2:** On the **Parameter Setting** and **Objective Definition**, the parameter file (.par) and the objective file (.obj) should be created. These files are crucial as they specify which parameters will be modified and what objectives will be evaluated by the program.
 
-<p align="center"><img src="./resource/Parameter_Setting.jpg" alt="Main GUI" width="400"/> <img src="./resource/Objective_Widget.jpg" alt="Table List" width="400"/></p> 
+<p align="center"><img src="./docs/pic/Parameter_Setting.jpg" alt="Main GUI" width="400"/> <img src="./docs/pic/Objective_Widget.jpg" alt="Table List" width="400"/></p> 
 
 <p align="center"><strong>Figure 3. Parameter Setting Card and Figure 4. Objective Define Card</strong></p>
 
 To be specific, as shown in Figure 3, the Parameter Setting Card enables users to define the parameters they wish to tune. There are two ways to add parameters to the information table: either by importing them from an existing file or by clicking the Add button to open the **Parameter Selection** widget. In this table, all selectable parameters are organized by the suffix of the SWAT project files. Additionally, the search bar provides a convenient way to locate specific parameters quickly.
 
-<p align="center"><img src="./resource/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p>
+<p align="center"><img src="./docs/pic/Parameter_Selection.png" alt="Parameter Selection" width="300"/></p>
 
 <p align="center"><strong>Figure 4. Parameter Setting Table </strong></p>
 
@@ -266,7 +266,7 @@ After adding parameters, users can set the tuning mode, lower and upper bounds, 
 
 There are also two ways to define the objective function: by importing from existing files or by user definition. For user definition, you should click "Add" button. 
 
-<p align="center"><img src="./resource/Objective_Define.png" alt="Objective Define" width="300"/></p> 
+<p align="center"><img src="./docs/pic/Objective_Define.png" alt="Objective Define" width="300"/></p> 
 <p align="center"><strong>Figure 5. Objective Define Table </strong></p>
 
 As shown in Figure 5, users need to accurately fill in the objective ID, series ID, objective type, variable type, weight, and other relevant information. It is important to note that both the series ID and objective ID can be repeated, allowing for combinations of multiple series or weighted combinations of series. For more details, please refer to the comprehensive documentation.
@@ -279,13 +279,13 @@ Using Sensitivity Analysis as an example, as shown in the left image of Figure 6
 
 Once all initial settings are all ready, click the "Next" button to proceed to the simulation and analysis process. The right image of Figure 6 displays the settings of simulation, including the selection of SWAT executable file, parallel numbers and problem name. Finally, click the "Initialize," "Sampling," and "Simulation" buttons in sequence, and wait for simulation completing. **SWAT-UQ can display the simulation progress in real-time, and users can also pause it to reconfigure settings. It would save the analysis result into UQ project folder (./Result/data/). The result file would be used to check or draw visualization picture.**
 
-<p align="center"><img src="./resource/Sensibility_Analysis.jpg" alt="SA_Setup" width="400"/> <img src="./resource/Sensibility_Analysis_Simulation.jpg" alt="SA_Simulation" width="400"/></p>
+<p align="center"><img src="./docs/pic/Sensibility_Analysis.jpg" alt="SA_Setup" width="400"/> <img src="./docs/pic/Sensibility_Analysis_Simulation.jpg" alt="SA_Simulation" width="400"/></p>
 
 <p align="center"><strong> Figure 6. Sensibility Analysis Interface </strong></p>
 
 For parameter optimization, users should still select parameter file and objective file at first. When users check more than two objectives, the multi-objective optimization would be activated; conversely, if only one objective is selected, single-objective optimization is used. After fine-tuning hyper-parameters, the optimization process would be started, like sensibility analysis. **SWAT-UQ can display the optimization progress in real-time, along with the optimal parameter values for each iteration.**
 
-<p align="center"><img src="./resource/Optimization.jpg" alt="OP_Setup" width="400"/> <img src="./resource/Optimization_Simulation.jpg" alt="OP_Simulation" width="400"/></p>
+<p align="center"><img src="./docs/pic/Optimization.jpg" alt="OP_Setup" width="400"/> <img src="./docs/pic/Optimization_Simulation.jpg" alt="OP_Simulation" width="400"/></p>
 
 <p align="center"><strong> Figure 7. Parameter Optimization Interface </strong></p>
 
@@ -307,24 +307,24 @@ Here, we list the available sensibility analysis method and optimization method.
 
 **Step 4:** Result Validation and Apply. On Result Validation & Apply interface, SWAT-UQ allows users to simulate a specific set of parameters individually and extract the desired time series data, or apply the optimal parameters directly to the SWAT project files. This parameter set can be user-defined or sourced from completed optimization result files.
 
-<p align="center"><img src="./resource/Validation.jpg" alt="OP_Setup" width="400"/></p>
+<p align="center"><img src="./docs/pic/Validation.jpg" alt="OP_Setup" width="400"/></p>
 
 <p align="center"><strong> Figure 8. Result Validation Interface </strong></p>
 
 **Step 5:** Result Visualization. The current SWAT-UQ provides two types of plot pictures: a bar chart for sensitivity analysis (Visualization A Interface) and an iteration convergence plot for parameter optimization (Visualization B Interface). Of course, additional types of plots will be continuously added in future versions.
 **Figures 9 and 10 shows the visualization pictures from two interfaces.**
 
-<p align="center"><img src="./resource/FAST.png" alt="SA_Result" width="800"/></p>
+<p align="center"><img src="./docs/pic/FAST.png" alt="SA_Result" width="800"/></p>
 
 <p align="center"><strong> Figure 9. Sensibility Analysis Visualization </strong></p>
 
-<p align="center"><img src="./resource/GA.png" alt="OP_Result" width="600"/></p>
+<p align="center"><img src="./docs/pic/GA.png" alt="OP_Result" width="600"/></p>
 
 <p align="center"><strong> Figure 10. Optimization Visualization </strong></p>
 
 Specifically, On the Visualization A and Visualization B, user can select the result file. SWAT-UQ would generates initial visualizations. **Users can click the "Config" button to open the settings panel and tune various parameters of the plot based on the preset values, as Figure 11 indicates.**
 
-<p align="center"><img src="./resource/Visualization_A.png" alt="Visualization_A" width="400"/> <img src="./resource/Visualization_B.png" alt="Visualization_B" width="400"/></p>
+<p align="center"><img src="./docs/pic/Visualization_A.png" alt="Visualization_A" width="400"/> <img src="./docs/pic/Visualization_B.png" alt="Visualization_B" width="400"/></p>
 
 <p align="center"><strong> Figure 11. Visualization Interface </strong></p>
 
