@@ -13,6 +13,16 @@ SWAT-UQ 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的扩展子项目。
 
 SWAT-UQ使用户能够将先进的不确定性分析方法与优化算法，便捷地融入基于SWAT模型的水文建模流程之中。
 
+## 🔗 实用链接
+
+- **官网网站**: [参数敏感性分析及优化实验室](http://www.uq-pyl.com) (**TODO**: 需要更新)
+- **开源代码**: [GitHub 仓库](https://github.com/smasky/SWAT-UQ/)
+- **官方文档**: [查看文档](https://swat-uq.readthedocs.io/en/latest/)
+- **文章引用**: SWAT-UQ(未来将发表)
+
+---
+
+
 ## content
 - [开发版](#swat-uq-开发版)
     - [功能特点](#-功能特点)
