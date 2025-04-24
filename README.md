@@ -6,22 +6,34 @@
 
 **SWAT-UQ** is an extend project of [UQPyL](https://github.com/smasky/UQPyL) - a comprehensive platform for uncertainty analysis and parameter optimization. This project aims to provide full integration of UQPyL and **Soil and Water Assessment Tool** (SWAT), enabling users to easily perform sensitivity analysis, single-objective optimization, and multi-objective optimization and so on. 
 
-👉[中文文档](https://github.com/smasky/SWAT-UQ/blob/main/README_CN.md)
+👉[中文简洁](https://github.com/smasky/SWAT-UQ/blob/main/README_CN.md)
+
+👉[Documentation](https://swat-uq.readthedocs.io/en/latest/)
 
 There are two available versions of SWAT-UQ, tailored to meet different user needs:
  - **SWAT-UQ-DEV (Develop Version)** - Designed for advanced users who require high flexibility and customization in building and managing their modeling workflows.
  - **SWAT-UQ-GUI (GUI Version)** - Offers an intuitive graphical interface for streamlined operation, ideal for users seeking minimal coding involvement.
 
-With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantification and optimization capabilities into their SWAT-based hydrological modeling projects.
+With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantification and optimization algorithms into their SWAT-based hydrological modeling projects.
+
+## Useful Links
+
+- **Website**: [UQPyL Official Site](http://www.uq-pyl.com) (**TODO**: Needs update)
+- **Source Code**: [GitHub Repository](https://github.com/smasky/SWAT-UQ/)
+- **Documentation**: [ReadTheDocs](https://swat-uq.readthedocs.io/en/latest/)
+- **Citation Infos**: [SWAT-UQ](Future Plan)
+
+---
+
 
 ## Content
  - [Develop Version](#develop-version-of-swat-uq)
     - [Key Features](#key-features)
-    - [Installation](#-installation)
-    - [Quick Start](#-quick-start)
+    - [Installation](#installation)
+    - [Quick Start](#quick-start)
  - [GUI Version](#gui-version-of-swat-uq)
-    - [Key Features](#-key-features-1)
-    - [Quick Start](#-quick-start-1)
+    - [Key Features](#key-features-1)
+    - [Quick Start](#quick-start-1)
 
 ## Develop Version of SWAT-UQ
 
