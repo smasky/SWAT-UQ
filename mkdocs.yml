@@ -10,6 +10,11 @@ theme:
 
 nav:
   - Introduction: 'index.md'
+  - Tutorial:
+    - SWAT-UQ-DEV: 'swat_uq_dev.md'
+    - SWAT-UQ-GUI: 'swat_uq_gui.md'
+  - Example Collection:
+    - Example 1: 'example_runoff_calibration.md'
 
 extra_css:
   - css/nav_.css
