@@ -81,7 +81,123 @@ First, we would conduct sensitivity analysis (SA) for SWAT model. Refer to SWAT 
 | P23 | SMFMN | BSN | Value | [0.0, 20.0] |
 | P24 | TIMP | BSN | Value | [0.01, 1.00] |
 
-As the [tutorial](./swat_uq_dev.md#quick-start) introduce, 
+As the [tutorial](./swat_uq_dev.md#quick-start) introduce, we first prepare the **parameter file**:
+
+File name: `paras_sa.par`
+
+```
+Name Mode Type Min Max Scope
+CN2 r f -0.4 0.2 all
+GW_DELAY v f 30 450 all
+ALPHA_BF v f 0.0 1.0 all
+GWQMN v f 0.0 500.0 all
+GW_REVAP v f 0.02 0.20 all
+RCHRG_DP v f 0.0 1.0 all
+SOL_AWC r f 0.5 1.5 all
+SOL_K r f 0.5 15.0 all
+SOL_ALB r f 0.01 5.00 all
+CH_N2 v f -0.01 0.30 all
+CH_K2 v f  -0.01 500.0 all
+ALPHA_BNK v f 0.05 1.00 all
+TLAPS v f -10.0 10.0 all
+SLSUBSSN r f 0.05 25.0 all
+HRU_SLP r f 0.50 1.50 all
+OV_N r f 0.10 15.00 all
+CANMX v f 0.0 100.0 all
+ESCO v f 0.01 1.00 all
+EPCO v f 0.01 1.00 all
+SFTMP v f -5.0 5.0 all
+SMTMP v f -5.0 5.0 all
+SMFMX v f 0.0 20.0 all
+SMFMN v f 0.0 20.0 all
+TIMP v f 0.01 1.00 all
+```
+
+Then, the **evaluation file** should be created:
+
+File name: `obj_sa.evl`
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
+COL_2 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+
+1	2012 1 1	38.6
+2	2012 1 2	16.2
+3	2012 1 3	24.5
+4	2012 1 4	26.9
+5	2012 1 5	56.2
+6	2012 1 6	82.1
+7	2012 1 7	32.8
+8	2012 1 8	20.5
+9	2012 1 9	32.3
+10	2012 1 10	28.9
+11	2012 1 11	36.5
+...
+...
+...
+1821	2016 12 25	94.8
+1822	2016 12 26	106
+1823	2016 12 27	135
+1824	2016 12 28	87.4
+1825	2016 12 29	81.5
+1826	2016 12 30	94.9
+1827	2016 12 31	89.9
+```
+
+Based on this evaluation file, SWAT-UQ would extract the data of Reach 23 from `output.rch` during 2012.1.1 to 2016.12.31. In addition, the NSE function is used to evaluate the performance of model outputs.
+
+Finally, we can conduct the sensitivity analysis within python script-based environment:
+
+```python
+from swat_uq import SWAT_UQ
+
+projectPath = "E://swatProjectPath" # Use your SWAT project path
+workPath = "E://workPath" # Use your work path
+exeName = "swat2012.exe" # The exe name you want execute
+
+#Blew two files should be created in the workPath
+paraFileName = "paras_sa.par" # the parameter file you prepared
+evalFileName = "obj_sa.evl" # the evaluation file you prepared
+
+problem = SWAT_UQ(
+   projectPath = projectPath, # set projectPath
+   workPath = workPath, # set workPath
+   swatExeName = exeName # set swatExeName
+   paraFileName = paraFileName, # set paraFileName
+   evalFileName = evalFileName, # set evalFileName
+   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
+   numParallel = 10 # set the parallel numbers of SWAT
+)
+
+# The SWAT-related Problem is completed. 
+
+
+# Perform sensitivity analysis
+from UQPyL.sensibility import FAST
+
+fast = FAST()
+
+# Generate sample set
+X = fast.sample(problem = problem, N = 512)
+# Therefore, the shape of X would be (12288, 24). It would be time-consuming to evaluate.
+
+# Recommend: a. use Linux Serve Computer; b. use surrogate-based methods.
+
+
+Y = problem.objFunc(X)
+
+res = fast.analyze(X, Y)
+
+print(res)
+```
+
+The SA of SWAT model would be completed.
+
+
 
 
 

@@ -132,14 +132,14 @@ RCH_23 : ID of RCH, or SUB, or HRU
 COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
 FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
 
-1 2012_1 2.1
-2 2012_2 3.2
-3 2012_3 3.5
-4 2012_4 6.7
-5 2012_5 14.55
-6 2012_6 21.54
+1 2012 1 1 2.1
+2 2012 1 2 3.2
+3 2012 1 3 3.5
+4 2012 1 4 6.7
+5 2012 1 5 14.55
+6 2012 1 6 21.54
 ...
-12 2012_12 22.44
+12 2012 1 12 22.44
 ```
 
 The **evaluation file** can consists of multiple data series, which may correspond to different locations, output variable, or time periods.

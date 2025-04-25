@@ -660,7 +660,7 @@ class SWAT_UQ(Problem):
         with open(varInfosPath, 'r') as f:
             
             lines = f.readlines()
-            for i, line in enumerate(lines):
+            for i, line in enumerate(lines[1:]):
                 
                 tmpList = line.split()
                 name = tmpList[0]
