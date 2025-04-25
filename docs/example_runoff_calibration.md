@@ -50,6 +50,43 @@ Where $x$ denotes the undetermined parameters of the SWAT model; $NSE(\cdot)$ de
 
 Next, based on this abstracted problem, we can describe it using code within the framework of SWAT-UQ.
 
+## Sensitivity Analysis
+
+First, we would conduct sensitivity analysis (SA) for SWAT model. Refer to SWAT Manual and the [article](https://www.sciencedirect.com/science/article/pii/S0022169417305851)(Liu et al, 2017), following parameters are selected for SA.
+
+| ID | Abbreviation| Where | Assign Type | Range |
+|----|-------|-------|-------------|-------|
+| P1 |CN2|MGT| Relative | [-0.4, 0.2] |
+| P2 | GW_DELAY| GW | Value | [30, 450] |
+| P3 | ALPHA_BF | GW | Value | [0.0, 1.0] |
+| P4 | GWQMN | GW | Value | [0.0, 500.0] |
+| P5 | GW_REVAP | GW | Value | [0.02, 0.20] |
+| P6 | RCHRG_DP | GW | Value | [0.0, 1.0] |
+| P7 | SOL_AWC | SOL | Relative | [0.5, 1.5] |
+| P8 | SOL_K | SOL | Relative | [0.5, 15.0] |
+| P9 | SOL_ALB | SOL | Relative | [0.01, 5.00] |
+| P10 | CH_N2 | RTE | Value | [-0.01, 0.30] |
+| P11 | CH_K2 | RTE | Value | [-0.01, 500.0] |
+| P12 | ALPHA_BNK | RTE | Value | [0.05, 1.00] |
+| P13 | TLAPS | SUB | Value | [-10.0, 10.0] |
+| P14 | SLSUBSSN | HRU | Relative | [0.05, 25.0] |
+| P15 | HRU_SLP | HRU | Relative | [0.50, 1.50] |
+| P16 | OV_N | HRU | Relative | [0.10, 15.00] |
+| P17 | CANMX | HRU | Value | [0.0, 100.0] |
+| P18 | ESCO | HRU | Value | [0.01, 1.00] |
+| P19 | EPCO | HRU | Value | [0.01, 1.00] |
+| P20 | SFTMP | BSN | Value | [-5.0, 5.0] |
+| P21 | SMTMP | BSN | Value | [-5.0, 5.0] |
+| P22 | SMFMX | BSN | Value | [0.0, 20.0] |
+| P23 | SMFMN | BSN | Value | [0.0, 20.0] |
+| P24 | TIMP | BSN | Value | [0.01, 1.00] |
+
+As the [tutorial](./swat_uq_dev.md#quick-start) introduce, 
+
+
+
+
+
 
 
 
