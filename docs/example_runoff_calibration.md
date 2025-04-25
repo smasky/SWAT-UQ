@@ -195,15 +195,67 @@ res = fast.analyze(X, Y)
 print(res)
 ```
 
-The SA of SWAT model would be completed.
+The analysis results of FAST methods are shown below:
 
+<figure align="center">
+  <img src="./pic/fast.svg" width="1000"/>
+</figure>
 
+We select the top 10 parameters to be calibrated, i.e., CN2, ALPHA_BNK, SOL_K, SLSUBBSN, ESCO, HRU_SLP, OV_N, TLAPS, SOL_ALB, CH_K2.
 
+## Optimization
 
+Based on the above sensitivity analysis, we need to recreate parameter file:
 
+File name: `para_op.par`
 
+```
+Name Mode Type Min Max Scope
+CN2 r f -0.4 0.2 all
+SOL_K r f 0.5 15.0 all
+SOL_ALB r f 0.01 5.00 all
+CH_K2 v f  -0.01 500.0 all
+ALPHA_BNK v f 0.05 1.00 all
+TLAPS v f -10.0 10.0 all
+SLSUBSSN r f 0.05 25.0 all
+HRU_SLP r f 0.50 1.50 all
+OV_N r f 0.10 15.00 all
+ESCO v f 0.01 1.00 all
+```
 
+The **evaluation file** is the same as the SA. But it is a good habit to rename it to `obj_op.evl`
 
+Finally, we can run the optimization within python script-based environment:
 
+```python
+from swat_uq import SWAT_UQ
 
+projectPath = "E://swatProjectPath" # Use your SWAT project path
+workPath = "E://workPath" # Use your work path
+exeName = "swat2012.exe" # The exe name you want execute
+
+#Blew two files should be created in the workPath
+paraFileName = "paras_sa.par" # the parameter file you prepared
+evalFileName = "obj_sa.evl" # the evaluation file you prepared
+
+problem = SWAT_UQ(
+   projectPath = projectPath, # set projectPath
+   workPath = workPath, # set workPath
+   swatExeName = exeName # set swatExeName
+   paraFileName = paraFileName, # set paraFileName
+   evalFileName = evalFileName, # set evalFileName
+   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
+   numParallel = 10 # set the parallel numbers of SWAT
+)
+
+# The SWAT-related Problem is completed. 
+
+from UQPyL.optimization import PSO
+
+pso = PSO(nPop = 50, maxFEs = 30000, verboseFlag = True, saveFlag = True)
+
+pso.run(problem = problem)
+
+```
+## Postprocessing
 
