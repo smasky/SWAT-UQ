@@ -149,7 +149,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 1827	2016 12 31	89.9
 ```
 
-💡 **Noted:** [this link to download `para_sa.par` and `obj_sa.evl`]
+💡 **Noted:** [this link to download `para_sa.par` and `obj_sa.evl`](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/sa.zip)
 
 Based on this evaluation file, SWAT-UQ would extract the data of Reach 23 from `output.rch` during 2012.1.1 to 2016.12.31. In addition, the NSE function is used to evaluate the performance of model outputs.
 
@@ -227,6 +227,8 @@ ESCO v f 0.01 1.00 all
 ```
 
 The **evaluation file** is the same as the SA. But it is a good habit to rename it to `obj_op.evl`
+
+💡 **Noted:** [this link to download `para_op.par` and `obj_op.evl`](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/op.zip)
 
 Finally, we can run the optimization within python script-based environment:
 
