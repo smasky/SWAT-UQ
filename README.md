@@ -345,4 +345,4 @@ Email: [wmtsmasky@gmail.com](mailto:wmtsmasky@gmail.com)(Priority), [wmtsky@hhu.
 
 ---
 
-**本项目遵循 MIT 许可协议 - 具体内容详见 [LICENSE](https://github.com/smasky/SWAT-UQ/LICENSE)**
+*This project is licensed under the MIT License - see the [LICENSE](https://github.com/smasky/SWAT-UQ/LICENSE) file for details.*
