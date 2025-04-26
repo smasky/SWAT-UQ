@@ -262,6 +262,37 @@ pso = PSO(nPop = 50, maxFEs = 30000, verboseFlag = True, saveFlag = True)
 pso.run(problem = problem)
 
 ```
+
+The optimization results show:
+
+<figure align="center">
+  <img src="./pic/PSO.svg" width="1000"/>
+</figure>
+
+We list the optimal decision with NSE->0.88:
+
+| CN2 | SOL_K | SOL_ALB | CH_K2 | ALPHA_BNK | TLAPS | SLSUBSSN | HRU_SLP | OV_N | ESCO |
+|-----|-------|---------|-------|-----------|-------|----------|---------|------|------|
+|-0.236 | 14.278 | 0.325 | 46.604 | 1.000 | -5.532 | 1.611 | 0.515 | 3.162 | 0.010 |
+
 ## Postprocessing
 
-For 
+We have obtained the optimal parameter settings for the SWAT model.
+Now, we need to apply these values to the project folder:
+
+```python
+
+# Optimal parameter values
+X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162, 0.010])
+
+# Apply parameters
+problem.apply_parameters(X, replace=False)  
+# Setting 'replace=False' will apply the values to the working directory (workOriginPath) without modifying the original project files.
+
+# Alternatively
+problem.apply_parameters(X, replace=True)  
+# Setting 'replace=True' will overwrite the original project folder, which is not recommended.
+
+```
+
+So far, the calibration work is completed.
