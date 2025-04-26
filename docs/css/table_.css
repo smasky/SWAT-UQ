@@ -37,7 +37,7 @@
 }
 
 /* 针对小屏幕的响应式布局 */
-@media only screen and (max-width: 760px) {
+/* @media only screen and (max-width: 760px) {
     .md-typeset table {
         box-shadow: none;
     }
@@ -56,4 +56,4 @@
         border-radius: 4px;
         overflow: hidden;
     }
-} 
+}  */

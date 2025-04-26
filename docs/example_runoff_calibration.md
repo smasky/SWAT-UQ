@@ -341,7 +341,7 @@ problem.apply_parameters(X, replace=True)
 So far, the calibration work is completed.
 
 
-## Exercise for User
+## Exercise for users
 
 We provide an exercise based on the Xinfengjiang sub-basin, which is part of the Dongjiang watershed.
 
