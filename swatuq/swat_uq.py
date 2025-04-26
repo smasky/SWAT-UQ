@@ -226,7 +226,7 @@ class SWAT_UQ(Problem):
                     cons[id] = self.userConFunc(attrs)
                     
         return cons
-    
+        
     def apply_parameters(self, X, replace = False):
         
         X = X.ravel()

@@ -35,7 +35,7 @@ For calibration, the simulation periods are:
   <img src="./pic/example_runoff.svg" width="1000"/>
 </figure>
 
-💡 **Noted:** [this link to download project files.](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_FSB.zip)
+💡 **Noted:** [Click this link to download project files.](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_FSB.zip)
 
 ## Problem Define
 
@@ -149,7 +149,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 1827	2016 12 31	89.9
 ```
 
-💡 **Noted:** [this link to download `para_sa.par` and `obj_sa.evl`](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/sa.zip)
+💡 **Noted:** [Click this link to download related files](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/sa.zip)(`para_sa.par` and `obj_sa.evl`)
 
 Based on this evaluation file, SWAT-UQ would extract the data of Reach 23 from `output.rch` during 2012.1.1 to 2016.12.31. In addition, the NSE function is used to evaluate the performance of model outputs.
 
@@ -228,7 +228,7 @@ ESCO v f 0.01 1.00 all
 
 The **evaluation file** is the same as the SA. But it is a good habit to rename it to `obj_op.evl`
 
-💡 **Noted:** [this link to download `para_op.par` and `obj_op.evl`](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/op.zip)
+💡 **Noted:** [Click this link to download related files](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/op.zip)(`para_op.par`, `obj_op.evl` and `val_op.evl` for validation).
 
 Finally, we can run the optimization within python script-based environment:
 
@@ -275,9 +275,52 @@ We list the optimal decision with NSE->0.88:
 |-----|-------|---------|-------|-----------|-------|----------|---------|------|------|
 |-0.236 | 14.278 | 0.325 | 46.604 | 1.000 | -5.532 | 1.611 | 0.515 | 3.162 | 0.010 |
 
-## Postprocessing
+## Validation
 
 We have obtained the optimal parameter settings for the SWAT model.
+Now, we proceed to perform validation.
+
+The evaluation file must first be prepared.
+Here, we apply the observed data ranging from 2017.1.1 to 2017.12.31.
+
+File name: `val_op.evl`
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
+COL_2 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+
+1 2017 1 1 74.4
+2 2017 1 2 99.4
+3 2017 1 3 77.4
+...
+...
+365 2017 12 31 19.1
+```
+
+Using a Python script-based environment, we conduct the validation as follows:
+
+```python
+
+# optima
+X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162, 0.010])
+
+# Perform validation
+# `problem.validate_parameters` expects the optimized parameters and the validation file.
+# It returns a dictionary containing two keys: 'objs' (objective values) and 'cons' (constraint violations).
+res = problem.validate_parameters(X, valFile = "val_op.evl") 
+
+# Print the objective function values from the validation results
+print(res["objs"])
+```
+
+
+## Postprocessing
+
+
 Now, we need to apply these values to the project folder:
 
 ```python
@@ -296,3 +339,15 @@ problem.apply_parameters(X, replace=True)
 ```
 
 So far, the calibration work is completed.
+
+
+## Exercise for User
+
+We provide an exercise based on the Xinfengjiang sub-basin, which is part of the Dongjiang watershed.
+
+You can download the complete project files here:
+[Click here to download project files](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_XFJ.zip)
+
+Within the downloaded project files, the observed data is stored in the file named `observed.txt`.
+
+If you have any questions or need assistance, feel free to contact us.
