@@ -1770,13 +1770,13 @@
         "position": "default"
     },
     {
-        "name": "Ave",
+        "name": "SOL_AWC",
         "type": "float",
         "file_name": "sol",
         "position": "default"
     },
     {
-        "name": "Ksat",
+        "name": "SOL_K",
         "type": "float",
         "file_name": "sol",
         "position": "default"
@@ -1788,7 +1788,7 @@
         "position": "default"
     },
     {
-        "name": "Bulk",
+        "name": "SOL_BD",
         "type": "float",
         "file_name": "sol",
         "position": "default"

@@ -2,7 +2,6 @@ import os
 import re
 import json
 import queue
-import itertools
 import subprocess
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
@@ -58,6 +57,8 @@ SUB_VAR = {4 : "ET", 6 : "PERC"}
 
 HRU_EXT = ["chm", "gw", "hru", "mgt", "sdr", "sep", "sol", "ops"]
 SUB_EXT = ["pnd", "rte", "sub", "swq", "wgn", "wus"]
+
+SPECIAL_ALIAS = {"SOL_AWC" :  "Ave", "SOL_K" : "Ksat", "SOL_BD" : "Bulk"}
 
 class SWAT_UQ(Problem):
     '''
@@ -140,7 +141,8 @@ class SWAT_UQ(Problem):
             raise ValueError("The number of input variables is not equal to the number of parameters!")
         
         super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
-                            lb = self.lb, ub = self.ub, varType = self.varType, varSet = self.varSet, optType = optType)
+                            lb = self.lb, ub = self.ub, xLabels = self.xLabels,
+                            varType = self.varType, varSet = self.varSet, optType = optType)
 
     def evaluate(self, X):
         
@@ -656,6 +658,7 @@ class SWAT_UQ(Problem):
         
         varInfosPath = os.path.join(self.workPath, self.paraFileName)
         LB=[]; UB=[]; varType=[]; varSet={}; varName=[]; varMode=[]; varScope=[]
+        xLabels = []
         
         with open(varInfosPath, 'r') as f:
             
@@ -664,6 +667,19 @@ class SWAT_UQ(Problem):
                 
                 tmpList = line.split()
                 name = tmpList[0]
+                
+                xLabels.append(name)
+                   
+                match_pos = re.search(r'^(.*?)\((\d+)\)$', name)
+                
+                if match_pos:
+                    name = match_pos.group(1)
+                
+                ext = self.parasInfos.query('para_name==@name')['file_name'].values[0]
+                
+                if name in SPECIAL_ALIAS:
+                    name = SPECIAL_ALIAS[name]
+                
                 mode = tmpList[1]
                 T = tmpList[2]
                 LB_UB =  tmpList[3].split("_")
@@ -708,7 +724,7 @@ class SWAT_UQ(Problem):
         self.ub = np.array(UB).reshape(1,-1)
         self.varMode = varMode
         self.varName = varName
-        self.xLabels = self.varName
+        self.xLabels = xLabels
         self.varSet = varSet
         self.varType = varType
         self.nInput = len(self.varName)
@@ -1014,5 +1030,6 @@ class SWAT_UQ(Problem):
             with open(json_path, 'r', encoding='utf-8') as f:
                 params_dict = json.load(f)
             return [(p["name"], p["type"], p["file_name"], p["position"]) for p in params_dict]
+
         except Exception as e:
             raise e
