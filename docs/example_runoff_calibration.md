@@ -87,31 +87,31 @@ As the [tutorial](./swat_uq_dev.md#quick-start) introduce, we first prepare the 
 File name: `paras_sa.par`
 
 ```
-Name Mode Type Min Max Scope
-CN2 r f -0.4 0.2 all
-GW_DELAY v f 30 450 all
-ALPHA_BF v f 0.0 1.0 all
-GWQMN v f 0.0 500.0 all
-GW_REVAP v f 0.02 0.20 all
-RCHRG_DP v f 0.0 1.0 all
-SOL_AWC r f 0.5 1.5 all
-SOL_K r f 0.5 15.0 all
-SOL_ALB r f 0.01 5.00 all
-CH_N2 v f -0.01 0.30 all
-CH_K2 v f  -0.01 500.0 all
-ALPHA_BNK v f 0.05 1.00 all
-TLAPS v f -10.0 10.0 all
-SLSUBSSN r f 0.05 25.0 all
-HRU_SLP r f 0.50 1.50 all
-OV_N r f 0.10 15.00 all
-CANMX v f 0.0 100.0 all
-ESCO v f 0.01 1.00 all
-EPCO v f 0.01 1.00 all
-SFTMP v f -5.0 5.0 all
-SMTMP v f -5.0 5.0 all
-SMFMX v f 0.0 20.0 all
-SMFMN v f 0.0 20.0 all
-TIMP v f 0.01 1.00 all
+Name Mode Type Min_Max Scope
+CN2 r f -0.4_0.2 all
+GW_DELAY v f 30_450 all
+ALPHA_BF v f 0.0_1.0 all
+GWQMN v f 0.0_500.0 all
+GW_REVAP v f 0.02_0.20 all
+RCHRG_DP v f 0.0_1.0 all
+SOL_AWC r f 0.5_1.5 all
+SOL_K r f 0.5_15.0 all
+SOL_ALB r f 0.01_5.00 all
+CH_N2 v f -0.01_0.30 all
+CH_K2 v f  -0.01_500.0 all
+ALPHA_BNK v f 0.05_1.00 all
+TLAPS v f -10.0_10.0 all
+SLSUBSSN r f 0.05_25.0 all
+HRU_SLP r f 0.50_1.50 all
+OV_N r f 0.10_15.00 all
+CANMX v f 0.0_100.0 all
+ESCO v f 0.01_1.00 all
+EPCO v f 0.01_1.00 all
+SFTMP v f -5.0_5.0 all
+SMTMP v f -5.0_5.0 all
+SMFMX v f 0.0_20.0 all
+SMFMN v f 0.0_20.0 all
+TIMP v f 0.01_1.00 all
 ```
 
 Then, the **evaluation file** should be created:
@@ -178,7 +178,6 @@ problem = SWAT_UQ(
 
 # The SWAT-related Problem is completed. 
 
-
 # Perform sensitivity analysis
 from UQPyL.sensibility import FAST
 
@@ -189,7 +188,6 @@ X = fast.sample(problem = problem, N = 512)
 # Therefore, the shape of X would be (12288, 24). It would be time-consuming to evaluate.
 
 # Recommend: a. use Linux Serve Computer; b. use surrogate-based methods.
-
 
 Y = problem.objFunc(X)
 
@@ -213,17 +211,17 @@ Based on the above sensitivity analysis, we need to recreate parameter file:
 File name: `para_op.par`
 
 ```
-Name Mode Type Min Max Scope
-CN2 r f -0.4 0.2 all
-SOL_K r f 0.5 15.0 all
-SOL_ALB r f 0.01 5.00 all
-CH_K2 v f  -0.01 500.0 all
-ALPHA_BNK v f 0.05 1.00 all
-TLAPS v f -10.0 10.0 all
-SLSUBSSN r f 0.05 25.0 all
-HRU_SLP r f 0.50 1.50 all
-OV_N r f 0.10 15.00 all
-ESCO v f 0.01 1.00 all
+Name Mode Type Min_Max Scope
+CN2 r f -0.4_0.2 all
+SOL_K r f 0.5_15.0 all
+SOL_ALB r f 0.01_5.00 all
+CH_K2 v f  -0.01_500.0 all
+ALPHA_BNK v f 0.05_1.00 all
+TLAPS v f -10.0_10.0 all
+SLSUBSSN r f 0.05_25.0 all
+HRU_SLP r f 0.50_1.50 all
+OV_N r f 0.10_15.00 all
+ESCO v f 0.01_1.00 all
 ```
 
 The **evaluation file** is the same as the SA. But it is a good habit to rename it to `obj_op.evl`
@@ -317,8 +315,38 @@ res = problem.validate_parameters(X, valFile = "val_op.evl")
 print(res["objs"])
 ```
 
-
 ## Postprocessing
+
+Except for sensitivity analysis and optimization, SWAT-UQ support to extract data from output files.
+
+```
+The `series.evl` should be prepared:
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1 : Weight of series combination
+RCH_23  : ID of subbasin to be included in the objective function
+COL_2 : Column ID of variables in output.rch
+FUNC_10     : Type of objective function (e.g., 1: NSE, 2: RMSE. 3:PCC, 4:Pbias, 5:KGE)
+2012/1/1 to 2016/12/31 : Period for data extraction
+```
+
+We can extract the data:
+
+```python
+X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162, 0.010])
+
+# Extract the corresponding series data based on the parameter set X
+attr = problem.extract_series(X, seriesFile="series.evl")
+
+# The returned object 'attr' is a Python dictionary.
+# Simulation and observation data are stored separately by function type ('objSeries' or conSeries)objective function ID (objID) and series ID (serID). 
+
+simData = attr['objSeries'][1][1]['sim'] # Simulation data
+obData = attr['objSeries'][1][1]['obs']  # Observation data
+
+```
+
+## Apply optima to project
 
 
 Now, we need to apply these values to the project folder:

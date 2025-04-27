@@ -78,35 +78,41 @@ conda install swatuq --upgrade
 💡 **注意:** 参数文件的文件名没有严格限制，但建议使用 .par 扩展名，以保持与图形界面版本的一致性。文件中的所有元素应使用空格或制表符（Tab）进行分隔。
 
 ```
-Name Mode Min Max Scope
-CN2 r -0.4 0.2 all
-GW_DELAY v 30.0 450.0 all
-ALPHA_BF v 0.0 1.0 all
-GWQMN v 0.0 500.0 all
+Name Mode Type Min_Max Scope
+CN2 r f -0.4_0.2 all
+GW_DELAY v f 30.0_450.0 all
+ALPHA_BF v f 0.0_1.0 all
+GWQMN v f 0.0_500.0 all
 ... 
-SMFMN v 0.0 20.0 all
-TIMP v 0.01 1.0 all
-SURLAG v 0.05 24.0 all
+SMFMN v f 0.0_20.0 all
+TIMP v f 0.01_1.0 all
+SURLAG v f 0.05_24.0 all
 ```
 
 参数文件的**第一行**是固定保留的，用作提示说明。
 
-接下来的每一行参数信息需按照以下顺序填写: Name(参数名)、Mode(赋值方式)、Min(最小值)、Max(最大值)和 Scope(作用范围)，具体说明如下：
+接下来的每一行参数信息需按照以下顺序填写: Name(参数名)、Mode(赋值方式)、Type(变量类型)、Min_Max(最小值_最大值)和 Scope(作用范围)，具体说明如下：
 
-- **Name(参数名):** 可以填写出现在`.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq`等文件中的任意参数。唯一要求是，参数名必须与SWAT项目文件中的名称完全一致。目前已支持多达308个参数。
+- **Name(参数名):** 可以填写出现在`.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq`等文件中的任意参数。目前已支持多达308个参数。在 *.sol 文件中，支持针对不同层级单独调整参数。示例如下：
+
+```
+SOL_K(2) r f 0.5_15.0 all    # 仅应用于第二层
+SOL_K(3) r f 0.5_15.0 all    # 仅应用于第三层
+SOL_K r f 0.5_15.0 all       # 应用于所有层
+```
 
 - **Mode(赋值方式):** 表示参数的赋值模式，用一个字符表示(`r`, `v` 或 `a`)。
     - 假设`val`是参数文件中给出的值，`originVal`是SWAT项目文件中的原始值。
     - **`r`** 相对赋值方式，输入项目文件的实际值将通过公式`(1+val)*originVal`计算。
     - **`v`** 绝对赋值方式，直接使用`val`作为实际值。
     - **`a`** 增量赋值方式，实际值为`originVal+val`。
-- **Min(最小值):** 表示该参数的最小值(下界)。
-- **Max(最大值):** 表示该参数的最大值(上界)。
+- **Type(变量类型):** 表示参数的类型，用一个字符表示(`i` 整型, `f` 浮点型, `d` 离散型)
+- **Min_Max(最小值_Max):** 'Min'表示该参数的最小值(下界); 'Max'表示该参数的最大值(上界)。
 - **Scope(作用范围):** 表示该参数生效的目标范围。默认设置为`all`，即在全局范围内修改该参数。你也可以指定具体的`SUB ID`，或指定`SUB ID`与`HRU ID`的组合，从而只在特定区域上应用该参数。例如：
 
  ```
- CN2 r -0.4 0.2 all # Default Scope
- CN2 r -0.4 0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
+ CN2 r f -0.4_0.2 all # Default Scope
+ CN2 r f -0.4_0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
  ```
 
 作用范围的格式可以采用以下两种方式之一：
@@ -157,7 +163,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 
 - **RCH_ID**, **SUB_ID** 或 **HRU_ID:** 这些标签用于指定读取的输出文件类型，分别对应SWAT模型中的河道(RCH)、子流域(SUB)或水文响应单元(HRU)。ID应与SWAT项目中的对应编号一致，并可根据实际需求进行设定。
 
-- **VAR_NUM:** 此`NUM`表示要从`output.rch`, `output.sub`或`output.hru`文件中提取的变量列号(请参考后续表格以获取正确数值)。
+- **COL_NUM:** 此`NUM`表示要从`output.rch`, `output.sub`或`output.hru`文件中提取的变量列号(请参考后续表格以获取正确数值)。
 
 - **FUNC_NUM:** 此`NUM`用于定义基于观测值与模拟值的目标或约束函数类型。(`NUM`取值如下: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
 
@@ -167,6 +173,23 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 | output.rch| 1-FLOW_IN, 2-FLOW_OUT, 3-EVAP, 4-TLOSS, 5-SED_IN, 6-SED_OUT, 8-ORGN_IN, 9-OGRN_OUT, 10-ORGP_IN, 11-ORGP_OUT, 12-NO3_IN, 13-NO3_OUT, 14-NH4-IN, 15-NH4-OUT, 16-NO2_IN, 17-NO2_OUT, 18-MINP_IN, 19-MINP_OUT, 20-CHLA_IN, 21-CHLA_OUT, 22-CBOD_IN, 23-CBOD_OUT ... 38-BACTP_OUT, 39-BACTLP_OUT... 43-TOT_N, 44-TOT_P |
 | output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
 | output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
+
+可选：
+在某些情况下，目标函数（Objective Function）可以不依赖观测数据，仅通过从模型输出文件中提取数据来进行计算。
+SWAT-UQ 提供了一种更简便的方法来实现这一需求。
+
+例如：
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
+COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+2012/1/1 to 2018/12/31 : Period for data extraction
+```
+
+因此，2012/1/1至2018/12/31的数据会被提取出来。
 
 **步骤5:** 在Python环境，构建基于SWAT模型的问题
 

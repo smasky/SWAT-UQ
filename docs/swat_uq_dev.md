@@ -49,33 +49,41 @@ Some preparatory works are required:
 💡 **Noted:**  The file name is not restricted, but it is recommended to use the `.par` extension for consistency with the GUI version. In this file, all elements must be separated by spaces or tabs.
 
 ```
-Name Mode Min Max Scope
-CN2 r -0.4 0.2 all
-GW_DELAY v 30.0 450.0 all
-ALPHA_BF v 0.0 1.0 all
-GWQMN v 0.0 500.0 all
+Name Type Mode Min_Max Scope
+CN2 r f -0.4_0.2 all
+GW_DELAY v f 30.0_450.0 all
+ALPHA_BF v f 0.0_1.0 all
+GWQMN v f 0.0_500.0 all
 ... 
-SMFMN v 0.0 20.0 all
-TIMP v 0.01 1.0 all
-SURLAG v 0.05 24.0 all
+SMFMN v f 0.0_20.0 all
+TIMP v f 0.01_1.0 all
+SURLAG v f 0.05_24.0 all
 ```
 
 The first line should be kept as a hint for users.
 
-Following line of the parameter file should be structured by `Name`, `Mode`, `Min`, `Max` and `Scope`:
- - **Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters)
+Following line of the parameter file should be structured by `Name`, `Mode`, `Type`, `Min_Max` and `Scope`:
+
+ - **Name:** Any parameter occurred in `.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq` files can be wrote. The only requirement is that the parameter names used here must exactly match those in the SWAT project file. (Totally support 308 parameters). For parameters in `*.sol` files, it is possible to modify values for specific layers. For example:
+
+```
+SOL_K(2) r f 0.5_15.0 all    # Modify only the second layer
+SOL_K(3) r f 0.5_15.0 all    # Modify only the third layer
+SOL_K r f 0.5_15.0 all       # Modify all layers
+```
+
  - **Mode:** The title 'Mode' means assigning mode of parameters, which is represented by a single character, e.g., `r`, `v`, `a`. 
    - where `val` is the value in this parameter file, and `originVal` is the origin value of SWAT project files.
    - **`r`** denotes relative assignment. The true value would be calculated by $(1+val)*originVal$.
    - **`v`** denotes absolute assignment, directly use `val`.
    - **`a`** denotes for adding assignment, the true value is calculated by $originVal+val$.
- - **Min:** The title 'Min' is the lower bound of the parameter.
- - **Max:** The title 'Max' is the upper bound of the parameter.
+ - **Type:** The title 'Type' denotes the variable types of parameters, i.e., `i` - int, `f` - float, `d` - discrete.  
+ - **Min_Maz:** The title 'Min' is the lower bound of the parameter. The title 'Max' is the upper bound of the parameter.
  - **Scope:** The title 'Scope' means the target scope of the parameter. By default, it sets to `all` - the parameter would be modified globally. Alternatively, you can specify a particular BSN ID or a combination of SUB ID and HRU IDs to apply the parameter selectively. For example:
 
  ```
- CN2 r -0.4 0.2 all # Default Scope
- CN2 r -0.4 0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
+ CN2 r f -0.4_0.2 all # Default Scope
+ CN2 r f -0.4_0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
  ```
 
 The format follows either:
@@ -95,7 +103,7 @@ SER_1 : ID of series data
 OBJ_1 : ID of objective function
 WGT_1.0 : Weight of series combination
 RCH_23 : ID of RCH, or SUB, or HRU
-COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+COL_2 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
 FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
 
 1 2012_1 2.1
@@ -120,10 +128,10 @@ Each series consists of two parts: a. **Head Definition**; b. **Data Section**.
    💡 **Noted:** SWAT-UQ-DEV support the multiple series set the same `OBJ ID` or `CON ID`
 - **WGT_NUM:** The `NUM` denotes the linear weight for combing series obtaining the same `OBJ ID` or `CON ID`.
 - **RCH_ID**, **SUB_ID** or **HRU_ID:** The `RCH`, `SUB` or `HRU` determine the type of output file loaded. The `ID` should be consistent with the SWAT project (which RCH, SUB, HRU) and can be set according to your requirements.
-- **VAR_NUM:** The `NUM` specifies which data columns to extract from the `output.rch`, `output.hru` or `output.sub` file (Please see following table for checking valid values). 
+- **COL_NUM:** The `NUM` specifies which data columns to extract from the `output.rch`, `output.hru` or `output.sub` file (Please see following table for checking valid values). 
 - **FUNC_NUM:** The `NUM` defines the objective function type to compare observed and simulated data. (Valid values: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
 
-The valid values of `VAR_NUM` (extract variable) in `output.rch`, `output.hru`, `output.sub` can be:
+The valid values of `COL_NUM` (extract variable) in `output.rch`, `output.hru`, `output.sub` can be:
 
 | File Name | Valid Value |
 | ----------|-------------|
@@ -137,6 +145,18 @@ The valid values of `VAR_NUM` (extract variable) in `output.rch`, `output.hru`, 
 - **NUM:** Not used in SWAT-UQ-DEV, only for data integrity checking.
 - **YEAR_INDEX:** The value of `YEAR` means the year index for the data. The value of `INDEX` is the day number when SWAT outputs daily data, otherwise the month number, determined by `IPRINT` in `file.cio` of SWAT project. 
 - **DATA:** The type of data can be int or float.
+
+For example:
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
+COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+2012/1/1 to 2018/12/31 : Period for data extraction
+```
+Therefore, the period (2012/1/1 to 2018/12/31) would be extracted.
 
 **Step 5:** Build your problem in Python script environment.
 

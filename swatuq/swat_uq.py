@@ -48,8 +48,11 @@ def func_Max(trueValues, simValues):
 def func_Min(trueValues, simValues):
     return np.min(simValues, axis = 0)
 
-FUNC = {1: "func_NSE", 2: "func_RMSE", 3: "func_PCC", 4: "func_Pbias", 5: "func_KGE", 6: "func_Mean", 7:"func_Sum", 8:"func_Max", 9:"func_Min"}
-FUNC_TYPE = {1: "NSE", 2:"RMSE", 3:"PCC", 4:"Pbias", 5:"KGE", 6:"Mean", 7:"Sum", 8:"Max", 9:"Min"}
+def func_Extract(trueValues, simValues):
+    return -1
+
+FUNC = {1: "func_NSE", 2: "func_RMSE", 3: "func_PCC", 4: "func_Pbias", 5: "func_KGE", 6: "func_Mean", 7:"func_Sum", 8:"func_Max", 9:"func_Min", 10: "func_Extract"}
+FUNC_TYPE = {1: "NSE", 2:"RMSE", 3:"PCC", 4:"Pbias", 5:"KGE", 6:"Mean", 7:"Sum", 8:"Max", 9:"Min", 10: "None"}
 
 RCH_VAR = {1 : "FLOW_IN", 2 : "FLOW_OUT",  3: "EVAP", 4: "TLOSS", 5: "SED_IN", 6: "SED_OUT"}
 HRU_VAR = {6 : "ET", 9 : "PERC"}
@@ -58,7 +61,7 @@ SUB_VAR = {4 : "ET", 6 : "PERC"}
 HRU_EXT = ["chm", "gw", "hru", "mgt", "sdr", "sep", "sol", "ops"]
 SUB_EXT = ["pnd", "rte", "sub", "swq", "wgn", "wus"]
 
-SPECIAL_ALIAS = {"SOL_AWC" :  "Ave", "SOL_K" : "Ksat", "SOL_BD" : "Bulk"}
+SPECIAL_ALIAS = {"SOL_AWC" :  "Ave", "SOL_K" : "Ksat", "SOL_BD" : "Bulk", "SOL_ALB" : "Albedo", "SOL_E" : "Erosion"}
 
 class SWAT_UQ(Problem):
     '''
@@ -93,6 +96,7 @@ class SWAT_UQ(Problem):
         #copy the original project to the temp directory
         self.workOriginPath = os.path.join(tempPath, "origin")
         copy_origin_to_tmp(projectPath, self.workOriginPath)
+        self.workValidationPath = None
         
         #basic setting
         self.workPath = workPath
@@ -240,19 +244,20 @@ class SWAT_UQ(Problem):
             self._set_values(self.workOriginPath, X)
             print(f"The parameters have been applied to {self.workOriginPath}!")
     
-    def validate_parameters(self, X, validate_file = None, objFunc = None, conFunc = None):
+    
+    def extract_series(self, X, seriesFile = None):
         
-        if validate_file is None:
-            validate_file = self.evalFileName
+        X = X.ravel()
+        
+        if seriesFile is None:
+            seriesFile = self.evalFileName
         
         if self.workValidationPath is None:
             self.workValidationPath = os.path.join(self.workTempDir, "validation")
             copy_origin_to_tmp(self.projectPath, self.workValidationPath)
         
-        X = X.ravel()
         self.apply_parameters(X)
-        
-        valInfos = self._read_eval(self.workValidationPath, validate_file)
+        valInfos = self._read_eval(self.workValidationPath,  seriesFile)
         
         self._set_values(self.workValidationPath, X)
         
@@ -329,28 +334,32 @@ class SWAT_UQ(Problem):
                         
                 combVal[optID] = val
                        
-            attrs['id'] = id
             attrs['objs'] = objVal
             attrs['cons'] = conVal
             attrs['objSeries'] = objSeries
             attrs['consSeries'] = conSeries
-            attrs['x'] = X
             
-            if objFunc is None and self.userObjFunc is None:
-                objs = np.array(list(attrs['objs'].values()))
-            elif objFunc is not None:
-                objs = objFunc(attrs)
-            else:
-                objs = self.userObjFunc(attrs)
+        return attrs
+        
+    def validate_parameters(self, X, validate_file = None, objFunc = None, conFunc = None):
+        
+        attrs = self.extract_series(X, validate_file)
             
-            if conFunc is None:
-                cons = np.array(list(attrs['cons'].values()))
-            elif conFunc is not None:
-                cons = conFunc(attrs)
-            else:
-                cons = self.userConFunc(attrs)
-            
-            return {'objs': objs, 'cons': cons}
+        if objFunc is None and self.userObjFunc is None:
+            objs = np.array(list(attrs['objs'].values()))
+        elif objFunc is not None:
+            objs = objFunc(attrs)
+        else:
+            objs = self.userObjFunc(attrs)
+        
+        if conFunc is None:
+            cons = np.array(list(attrs['cons'].values()))
+        elif conFunc is not None:
+            cons = conFunc(attrs)
+        else:
+            cons = self.userConFunc(attrs)
+        
+        return {'objs': objs, 'cons': cons}
              
     def _subprocess(self, inputX, id):
         
@@ -450,7 +459,7 @@ class SWAT_UQ(Problem):
                 future = executor.submit(write_value_to_file, workPath, fileName, 
                                          infos["name"], infos["default"], 
                                          infos["index"], infos["mode"],  infos["position"], infos["type"],
-                                         paras_values.ravel())
+                                         paras_values.ravel(), infos["solLayer"])
                 futures.append(future)
             
             for future in futures:
@@ -479,6 +488,7 @@ class SWAT_UQ(Problem):
             patternCol = re.compile(r'COL_(\d+)')
             patternFunc = re.compile(r'FUNC_(\d+)')
             patternValue = re.compile(r'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.?\d*)')
+            patternDate = re.compile(r'(\d{4}[/-]\d{1,2}[/-]\d{1,2})\s+to\s+(\d{4}[/-]\d{1,2}[/-]\d{1,2})')
             
             try:
             
@@ -541,44 +551,70 @@ class SWAT_UQ(Problem):
                         serInfos[serID]['funcType'] = funcType
                                     
                         i = i + 6
+                        matchDate = patternDate.match(lines[i])
                         
-                        while patternValue.match(lines[i]) is None:
-                            i += 1
-                        
-                        YEAR = []
-                        INDEX = []
-                        VALUE = []
-                        
-                        while True:
-                            
-                            line = lines[i]
-                            matchData = patternValue.match(line)
-                            
-                            if not matchData:
-                                break
-                            
-                            _, year, month, day = map(int, matchData.groups()[:-1])
-                            
-                            value = float(matchData.groups()[-1])
-                            
-                            date = datetime(year, month, day)
+                        if matchDate:
+                            date1 = datetime.strptime(matchDate.group(1), "%Y/%m/%d")
+                            date2 = datetime.strptime(matchDate.group(2), "%Y/%m/%d")
                             
                             if printFlag == 0:
-                                years = year - self.modelInfos["beginRecord"].year
+                                year1 = date1.year - self.modelInfos["beginRecord"].year
                                 if years == 0:
-                                    index = date.month - self.modelInfos["beginRecord"].month
+                                    index = date1.month - self.modelInfos["beginRecord"].month
                                 else:
-                                    index = date.month  + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
+                                    index = date1.month  + 12 - self.modelInfos["beginRecord"].month + (year1-1)*12
                             else:
-                                index = (date - self.modelInfos["beginRecord"]).days
+                                index = (date1 - self.modelInfos["beginRecord"]).days
                             
-                            YEAR.append(int(year)); INDEX.append(int(index)); VALUE.append(value)
-                            
-                            i += 1
-                            
-                            if i >= len(lines):
-                                break
+                            YEAR = []
+                            INDEX = []
+                            VALUE = []
+                            current = date1
+                            while current <= date2:
+                                YEAR.append(current.year)
+                                INDEX.append(index)
+                                VALUE.append(0)
+                                index += 1
+                                current += timedelta(days=1)
+                        else:    
                         
+                            while patternValue.match(lines[i]) is None:
+                                i += 1
+                            
+                            YEAR = []
+                            INDEX = []
+                            VALUE = []
+                            
+                            while True:
+                                
+                                line = lines[i]
+                                matchData = patternValue.match(line)
+                                
+                                if not matchData:
+                                    break
+                                
+                                _, year, month, day = map(int, matchData.groups()[:-1])
+                                
+                                value = float(matchData.groups()[-1])
+                                
+                                date = datetime(year, month, day)
+                                
+                                if printFlag == 0:
+                                    years = year - self.modelInfos["beginRecord"].year
+                                    if years == 0:
+                                        index = date.month - self.modelInfos["beginRecord"].month
+                                    else:
+                                        index = date.month  + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
+                                else:
+                                    index = (date - self.modelInfos["beginRecord"]).days
+                                
+                                YEAR.append(int(year)); INDEX.append(int(index)); VALUE.append(value)
+                                
+                                i += 1
+                                
+                                if i >= len(lines):
+                                    break
+                                
                         YEAR = np.array(YEAR, dtype=int); INDEX = np.array(INDEX, dtype=int); VALUE = np.array(VALUE, dtype=float)
                         readLines = self._get_lines_for_output_(INDEX, loc)
                         serInfos[serID]['readLines'] = readLines
@@ -658,7 +694,7 @@ class SWAT_UQ(Problem):
         
         varInfosPath = os.path.join(self.workPath, self.paraFileName)
         LB=[]; UB=[]; varType=[]; varSet={}; varName=[]; varMode=[]; varScope=[]
-        xLabels = []
+        xLabels = []; solLayer = []
         
         with open(varInfosPath, 'r') as f:
             
@@ -669,17 +705,22 @@ class SWAT_UQ(Problem):
                 name = tmpList[0]
                 
                 xLabels.append(name)
-                   
-                match_pos = re.search(r'^(.*?)\((\d+)\)$', name)
                 
+                # handle the sol file
+                match_pos = re.search(r'^(.*?)\((\d+)\)$', name)
                 if match_pos:
                     name = match_pos.group(1)
-                
-                ext = self.parasInfos.query('para_name==@name')['file_name'].values[0]
-                
+                    layer = int(match_pos.group(2))
+                else:
+                    layer = 0
                 if name in SPECIAL_ALIAS:
-                    name = SPECIAL_ALIAS[name]
-                
+                        name = SPECIAL_ALIAS[name]
+                ext = self.parasInfos.query('para_name==@name')['file_name'].values[0]    
+                if ext == "sol":
+                    solLayer.append(layer)
+                else:
+                    solLayer.append(-1)
+                        
                 mode = tmpList[1]
                 T = tmpList[2]
                 LB_UB =  tmpList[3].split("_")
@@ -813,7 +854,9 @@ class SWAT_UQ(Problem):
                 self.varInfos[file]["position"].append(position)
                 self.varInfos[file].setdefault("type", [])
                 self.varInfos[file]["type"].append(varType)
-        
+                self.varInfos[file].setdefault("solLayer", [])
+                self.varInfos[file]["solLayer"].append(solLayer[i])
+                
         with ThreadPoolExecutor(max_workers = self.maxWorkers) as executor:
             futures = []
             for fileName, infos in self.varInfos.items():
