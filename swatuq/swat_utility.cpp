@@ -138,7 +138,8 @@ void readFormattedData(const std::string& line, std::vector<double>& data) {
 void _write_value(const std::string file_path, const std::string file_name, const std::vector<std::string> var_list, std::map<std::string, std::string> default_value, 
                       const std::vector<int> var_index, const std::vector<int> var_mode, 
                       const std::vector<std::string> position_list, const std::vector<int> type_list,
-                      const py::array_t<double> input_values, std::map<std::string, int> sol_pos){
+                      const py::array_t<double> input_values, std::vector<int> sol_layer){
+    
     std::regex pattern(R"((.*)\.(.*))");
     std::smatch match;
     std::regex_search(file_name, match, pattern);
@@ -194,7 +195,7 @@ void _write_value(const std::string file_path, const std::string file_name, cons
                     //line=replace_numbers(line, results.at(varname_list[i]));
                     // std::cout<<var_list[i]<<" "<<line<<" "<<var_index[i]<<" "<<input_values.at(var_index[i])<<std::endl;
                     // std::cout<<default_value[i]<<std::endl;
-                    std::string result=_generate_value(default_value[var_list[i]], var_mode[i], input_values.at(var_index[i]), sol_pos[var_list[i]]);
+                    std::string result=_generate_value(default_value[var_list[i]], var_mode[i], input_values.at(var_index[i]), sol_layer[i]);
                     // std::cout<<result<<std::endl;
                     line=std::regex_replace(line, patterns[i], match[1].str()+match[2].str()+result);
                     sign[i] = 0;
@@ -314,7 +315,7 @@ void _write_value(const std::string file_path, const std::string file_name, cons
             for (size_t i = 0; i < patterns.size(); ++i) {
                 std::smatch match;
                 if (sign[i] && std::regex_search(line, match, patterns[i])) {
-                    std::string result=_generate_value(default_value[var_list[i]], var_mode[i], input_values.at(var_index[i]), -1);
+                    std::string result=_generate_value(default_value[var_list[i]], var_mode[i], input_values.at(var_index[i]), sol_layer[i]);
                     // line=std::regex_replace(line, patterns[i], match[1].str()+std::format("{}", result)+match[3].str());
                     line = std::regex_replace(line, patterns[i], match[1].str() + result + match[3].str());
                     sign[i] = 0;
