@@ -23,7 +23,7 @@ For building SWAT model of Fengshuba sub-basin, the data set used includes:
 - **Soil Data** - The HWSD (Harmonized World Soil Database)
 - **Meteorological Data** - The CMADS (China Meteorological Assimilation Driving Dataset)
 
-- **Observation** - Runoff of Chinese hydrological yearbook. (2008.1.1 to 2017.12.31)
+- **Observation** - Runoff of Hydrographic Yearbook. (2008.1.1 to 2017.12.31)
 
 For calibration, the simulation periods are:
 

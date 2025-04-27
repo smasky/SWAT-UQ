@@ -15,6 +15,7 @@ nav:
     - SWAT-UQ-GUI: 'swat_uq_gui.md'
   - Example Collection:
     - Example 1: 'example_runoff_calibration.md'
+    - Example 2: 'best_management_practices.md'
 
 extra_css:
   - css/nav_.css
