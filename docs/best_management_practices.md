@@ -48,3 +48,97 @@ The parameters about the the grassed waterways measures are:
 - **GWATL:** Length of the vegetative channel (km).
 - **GWATS:** Average slope of the vegetative channel (m/m).
 
+To simplify the application of BMPs, we optimize only five parameters — namely, **FILTER_I**, **FILTER_RATIO**, **GWATI**, **GWATW**, and **GWATL** — across sub-basins 1, 13, 14, 20, and 31. Each sub-basin is assigned a distinct set of parameter values, resulting in a total of 25 variables. The optimization objectives are to minimize the total nitrogen (TN) and total phosphorus (TP) loads, as well as the implementation costs associated with these BMPs. Overall, this example represents a multi-objective optimization problem involving a mixture of parameters.
+
+The type, range of parameters can be concluded by:
+
+| Name | Type | Range|
+|------|------|------|
+| FILTER_I | int | 0-1 |
+| FILTER_RATIO | float | 0-300|
+| GWATI | int | 0-1 |
+| GWATW | discrete | 1, 5, 10, 15, 20, 25, 30 |
+| GWATL | float | 10-1000|
+
+First, we edit the parameter file:
+
+File name: `para.par`
+
+```
+Name Mode Type Min_Max Scope
+FILTER_I v i 0 1 1
+FILTER_RATIO v f 0 300 1
+GWATI v i 0 1 1
+GWATW v d 1_5_10_15_20_25_30 1
+GWATL v f 10 1000 1
+FILTER_I v i 0 1 13
+FILTER_RATIO v f 0 300 13
+GWATI v i 0 1 13
+GWATW v d 1_5_10_15_20_25_30 13
+GWATL v f 10 1000 13
+FILTER_I v i 0 1 14
+FILTER_RATIO v f 0 300 14
+GWATI v i 0 1 14
+GWATW v d 1_5_10_15_20_25_30 14
+GWATL v f 10 1000 14
+FILTER_I v i 0 1 20
+FILTER_RATIO v f 0 300 20
+GWATI v i 0 1 20
+GWATW v d 1_5_10_15_20_25_30 20
+GWATL v f 10 1000 20
+FILTER_I v i 0 1 31
+FILTER_RATIO v f 0 300 31
+GWATI v i 0 1 31
+GWATW v d 1_5_10_15_20_25_30 31
+GWATL v f 10 1000 31
+```
+
+💡 **Noted:** The parameter file supports parameters with the same name, as they are distinguished by their indices.
+
+
+Now, we introduce the objectives of this example. The first objective is the reduction of TN:
+
+ $\left ( TN_{base} - TN_{now}\right ) / TN_{base}$
+
+where $TN_{base}$ and $TN_{now}$ denote the total amount of TN flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
+
+The second objective is the reduction of TP:
+
+ $\left ( TP_{base} - TP_{now}\right ) / TP_{base}$
+
+where $TP_{base}$ and $TP_{now}$ denote the total amount of TP flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
+
+The third objective is the cost of BMPs. The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 6000 Yuan/ha. Therefore, for a sub-basin, the cost is:
+
+$Area_{AGRI}*FILTER_RATIO*FILTER_I*420 + GWATW*GWATL*GWATI*6000$
+
+where $Area_{AGRI}$ represents the area of agricultural land use.
+
+In this example, the objective computation cannot be completed solely through file control. Instead, the required data are obtained via file control, and the objective function (`objFunc`) is defined manually by the user.
+
+For the first two objectives, we require the total amount of TN and TP flowing out of the 51 sub-basin in 2021.
+
+Therefore, the file control can be:
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_51 : ID of RCH, or SUB, or HRU
+COL_42 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_7 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+2021.1.1 to 2021.12.31
+
+SER_2 : ID of series data
+OBJ_2 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_51 : ID of RCH, or SUB, or HRU
+COL_43 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_7 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+2021.1.1 to 2021.12.31
+```
+
+
+
+
+

@@ -8,9 +8,9 @@ from UQPyL.optimization.single_objective import GA
 nInput = 24
 nOutput = 1
 
-projectPath = "D:\\DJBasin\\TxtInOutFSB\\TxtInOutFSB"
+projectPath = "E:\\DJBasin\\TxtInOutFSB"
 exeName = "swat.exe"
-workPath = "D:\\DJ_FSB"
+workPath = "E:\\DJ_FSB"
 paraFileName = "para_op.par"
 evalFileName = "obj_op.evl"
 

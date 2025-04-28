@@ -440,6 +440,7 @@ class SWAT_UQ(Problem):
             self.workPathQueue.put(workPath)
             
             attrs['id'] = id
+            attrs['HRUInfosTable'] = self.modelInfos["HRUInfosTable"]
             attrs['objs'] = objVal
             attrs['cons'] = conVal
             attrs['objSeries'] = objSeries
@@ -913,11 +914,18 @@ class SWAT_UQ(Problem):
                     i += 1
         
         #read sub files
+        # HRU information table
+        HRUInfosTable = pd.DataFrame(columns=["HRU_ID", "SUB_ID", "HRU_Local_ID", "Slope_Low", "Slope_High", "Luse", "Area"])
+        
         for subID, fileName in SUB_IDToFileName.items():
             fileName = fileName + ".sub"
             tempHRU = []
             with open(os.path.join(self.projectPath, fileName), "r", encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
+                
+                matchArea = re.search(r'^\s*([\d.]+)', lines[1])
+                subArea = float(matchArea.group(1))
+                
                 for line in lines:
                     match = re.search(r'(\d+)\.hru', line)
                     if match:
@@ -930,14 +938,21 @@ class SWAT_UQ(Problem):
                     content = lines[0]
                     matchID = re.findall(r'HRU:\s*(\d+)', content)
                     matchSlope = re.search(r"Slope:\s*(\d+)-(\d+)", content)
+                    matchLUse = re.search(r"Luse:([a-zA-Z]+)", content)
+                    matchFr = re.search(r'^\s*([\d.]+)', lines[1])
                     
+                    area = subArea * float(matchFr.group(1))
                     slope = [int(matchSlope.group(1)), int(matchSlope.group(2))]
+                    luse = matchLUse.group(1)
+                    
                     HRU_IDToFileName[int(matchID[0])] = HRUFileName
                     SUBToHRU[subID][int(matchID[1])] = int(matchID[0])
-                    HRUInfos[int(matchID[0])] = (subID, int(matchID[1]), slope)
+                    HRUInfos[int(matchID[0])] = (subID, int(matchID[1]), slope, luse, area)
+                    HRUInfosTable.loc[int(matchID[0])] = [int(matchID[0]), subID, int(matchID[1]), slope[0], slope[1], luse, area]
         
         self.modelInfos["SUB_IDToFileName"] = SUB_IDToFileName
         self.modelInfos["HRU_IDToFileName"] = HRU_IDToFileName
+        self.modelInfos["HRUInfosTable"] = HRUInfosTable
         self.modelInfos["SUBList"] = list(SUB_IDToFileName.keys())
         self.modelInfos["HRUList"] = list(HRU_IDToFileName.keys())
         self.modelInfos["HRUInfos"] = HRUInfos
