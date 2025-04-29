@@ -1,4 +1,4 @@
-# Example 2: Best Management Practices
+# Example 2: Best Management Practices for the Four Lake watershed
 
 ---
 
@@ -113,11 +113,11 @@ The second objective is the reduction of TP:
 
 where $TP_{base}$ and $TP_{now}$ denote the total amount of TP flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
 
-The third objective is the cost of BMPs. **The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 6000 Yuan/ha.** Therefore, for a sub-basin, the cost is:
+The third objective is the cost of BMPs. **The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 600 Yuan/m^2.** Therefore, for a sub-basin, the cost is:
 
 $cost_{filter}^i = Area_{AGRI}^i*FILTER_RATIO*FILTER_I*420$
 
-$cost_{gwat}^i = GWATW*GWATL*GWATI*6000$
+$cost_{gwat}^i = GWATW*GWATL*GWATI*600$
 
 $Obj_3 = \sum{cost_{filter}^i + cost_{gwat}^i}, i\in \left \{ 1,13,14,20,31 \right \}$
 
@@ -166,52 +166,103 @@ keywords:
 Therefore, we can define the `userObjFunc`:
 
 ```python
+# Define base total nitrogen (TN) and total phosphorus (TP) loads for normalization
+TN_Base = 1.558e7  # Baseline total nitrogen load (unit depends on context)
+TP_Base = 1.154e6  # Baseline total phosphorus load
 
-TN_Base = 1.558e7 # base
-TP_Base = 1.154e6 # base
-
-Basins = [1, 13, 14, 20, 31] #BasinID for BMPs
+# Define the list of Basin IDs where BMPs (Best Management Practices) are applied
+Basins = [1, 13, 14, 20, 31]
 
 def userObjFunc(attr):
-  
-  objs = np.zeros(3) # Three objectives
+    """
+    User-defined objective function.
 
-  x = attr("x")
+    Parameters:
+    - attr: dict
+        Contains input decision variables, objective values, constraint values,
+        time series for objectives and constraints, and HRU (Hydrological Response Unit) information.
 
-  objs[0] = (TN_Base - attr[1])/TN_Base # Compute obj_1
+    Returns:
+    - objs: np.ndarray
+        Array containing computed objective values [obj_1, obj_2, obj_3].
+    """
 
-  objs[1] = (TP_Base - attr[2])/TN_Base # Compute obj_2
+    objs = np.zeros(3)  # Initialize three objective values
 
-  # Compute obj_3
+    # Extract decision variables (not used directly here, kept for potential future needs)
+    x = attr["x"]
 
-  HRUInfos = attr["HRUInfos"]
+    # Compute the first objective:
+    # Relative reduction in TN load compared to baseline
+    objs[0] = (TN_Base - attr['objs'][1]) / TN_Base
 
-  cost = 0
+    # Compute the second objective:
+    # Relative reduction in TP load compared to baseline
+    objs[1] = (TP_Base - attr['objs'][2]) / TP_Base
 
-  for i, ID in enumerate(Basins):
+    # Compute the third objective: Total cost of BMP implementations
+    HRUInfosTable = attr["HRUInfos"]  # Extract HRU information table
 
-    # Compute the area of AGRL of SUB
-    areas = np.sum(HRUInfosTable.loc[
-    (HRUInfosTable.SUB_ID == ID) & (HRUInfosTable.Luse == "AGRL"),
-    "Area"].tolist())
+    cost = 0  # Initialize total cost
 
-    filter_I = x[5*i]
-    filter_ratio = x[5*i+1]
+    for i, ID in enumerate(Basins):
+        # Calculate the total area of agricultural land (AGRL) in the subbasin
+        areas = np.sum(
+            HRUInfosTable.loc[
+                (HRUInfosTable.SUB_ID == ID) & (HRUInfosTable.Luse == "AGRL"),
+                "Area"
+            ].tolist()
+        )
 
-    graw_I = x[5*i+2]
-    graw_W = x[5*i+3]
-    graw_L = x[5*i+4]
+        # Extract BMP design parameters from decision variables
+        filter_I = x[5 * i]       # Filter switch
+        filter_ratio = x[5 * i + 1]  # Fraction of area treated by filter
+        graw_I = x[5 * i + 2]     # Graw BMP switch
+        graw_W = x[5 * i + 3]     # Graw BMP width
+        graw_L = x[5 * i + 4]     # Graw BMP length
 
-    cost_filter = areas * filter_ratio * filer_I * 420
-    cost_graw = graw_W * graw_L * graw_I * 6000
-    cost + = cost_filter + cost_graw
+        # Calculate the cost of filter BMPs
+        cost_filter = areas * filter_ratio * filter_I * 420  # unit cost= 420
 
-  objs[3] = cost
+        # Calculate the cost of Graw BMPs
+        cost_graw = graw_W * graw_L * graw_I * 600  # unit cost = 600
 
-  return objs
+        # Accumulate total cost
+        cost += cost_filter + cost_graw
 
+    objs[2] = cost  # Assign total cost to the third objective
+
+    return objs
 ```
 
+All preparatory work has been completed, and the optimization process can now be conducted.
 
+```python
+import numpy as np
+from swatuq import SWAT_UQ
+from UQPyL.optimization.multi_objective import NSGAII
+
+nInput = 25
+nOutput = 3
+
+projectPath = "E:\\BMPs\\TxtInOut"
+exeName = "swat.exe"
+workPath = "E:\\DJ_FSB"
+paraFileName = "para_bmp.par"
+evalFileName = "obj_bmp.evl"
+specialFileName = "special_paras1.txt"
+
+problem = SWAT_UQ(projectPath = projectPath, swatExeName = exeName, 
+                  specialFileName = specialFileName, workPath = workPath, 
+                  paraFileName = paraFileName, evalFileName = evalFileName, 
+                  verboseFlag = True, numParallel = 10,
+                  userObjFunc = userObjFunc, nOutput = 3, 
+                  optType = ["max", "max", "min"])
+
+nsgaii = NSGAII(nPop = 50, maxFEs = 20000, saveFlag = True, verboseFlag = True, verboseFreq = 5)
+
+nsgaii.run(problem = problem)
+
+```
 
 
