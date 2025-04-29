@@ -113,7 +113,7 @@ The second objective is the reduction of TP:
 
 where $TP_{base}$ and $TP_{now}$ denote the total amount of TP flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
 
-The third objective is the cost of BMPs. The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 6000 Yuan/ha. Therefore, for a sub-basin, the cost is:
+The third objective is the cost of BMPs. **The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 6000 Yuan/ha.** Therefore, for a sub-basin, the cost is:
 
 $cost_{filter}^i = Area_{AGRI}^i*FILTER_RATIO*FILTER_I*420$
 
@@ -167,17 +167,48 @@ Therefore, we can define the `userObjFunc`:
 
 ```python
 
-TN_Base = 1.23e6
-TP_Base = 3.57e5
+TN_Base = 1.558e7 # base
+TP_Base = 1.154e6 # base
+
+Basins = [1, 13, 14, 20, 31] #BasinID for BMPs
 
 def userObjFunc(attr):
   
   objs = np.zeros(3) # Three objectives
 
+  x = attr("x")
+
   objs[0] = (TN_Base - attr[1])/TN_Base # Compute obj_1
 
   objs[1] = (TP_Base - attr[2])/TN_Base # Compute obj_2
 
+  # Compute obj_3
+
+  HRUInfos = attr["HRUInfos"]
+
+  cost = 0
+
+  for i, ID in enumerate(Basins):
+
+    # Compute the area of AGRL of SUB
+    areas = np.sum(HRUInfosTable.loc[
+    (HRUInfosTable.SUB_ID == ID) & (HRUInfosTable.Luse == "AGRL"),
+    "Area"].tolist())
+
+    filter_I = x[5*i]
+    filter_ratio = x[5*i+1]
+
+    graw_I = x[5*i+2]
+    graw_W = x[5*i+3]
+    graw_L = x[5*i+4]
+
+    cost_filter = areas * filter_ratio * filer_I * 420
+    cost_graw = graw_W * graw_L * graw_I * 6000
+    cost + = cost_filter + cost_graw
+
+  objs[3] = cost
+
+  return objs
 
 ```
 

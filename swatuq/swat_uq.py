@@ -72,7 +72,7 @@ class SWAT_UQ(Problem):
     '''
     
     def __init__(self, projectPath: str, swatExeName: str,
-                 workPath: str, paraFileName: str, evalFileName: str, specialParaList: list = None,
+                 workPath: str, paraFileName: str, evalFileName: str, specialFileName: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
                  maxThreads: int = 12, numParallel: int = 5, 
                  verboseFlag = False, name: str = None, optType = 'min'):
@@ -102,7 +102,7 @@ class SWAT_UQ(Problem):
         self.workPath = workPath
         self.paraFileName = paraFileName
         self.evalFileName = evalFileName
-        self.specialParaList = specialParaList
+        self.specialFileName = specialFileName
         
         self.projectPath = projectPath
         self.swatExe = swatExeName
@@ -559,11 +559,11 @@ class SWAT_UQ(Problem):
                             date2 = datetime.strptime(matchDate.group(2), "%Y/%m/%d")
                             
                             if printFlag == 0:
-                                year1 = date1.year - self.modelInfos["beginRecord"].year
+                                years = date1.year - self.modelInfos["beginRecord"].year
                                 if years == 0:
                                     index = date1.month - self.modelInfos["beginRecord"].month
                                 else:
-                                    index = date1.month  + 12 - self.modelInfos["beginRecord"].month + (year1-1)*12
+                                    index = date1.month  + 12 - self.modelInfos["beginRecord"].month + (years-1)*12
                             else:
                                 index = (date1 - self.modelInfos["beginRecord"]).days
                             
@@ -571,12 +571,17 @@ class SWAT_UQ(Problem):
                             INDEX = []
                             VALUE = []
                             current = date1
-                            while current <= date2:
+                            if printFlag == 0:
+                                year_diff = date2.year - date1.year
+                                month_diff = date2.month - date1.month
+                                num = year_diff * 12 + month_diff + 1
+                            else:
+                                num = (date2 - date1).days + 1
+                            for _ in range(num):
                                 YEAR.append(current.year)
                                 INDEX.append(index)
                                 VALUE.append(0)
                                 index += 1
-                                current += timedelta(days=1)
                         else:    
                         
                             while patternValue.match(lines[i]) is None:
@@ -818,7 +823,7 @@ class SWAT_UQ(Problem):
                     for comb in varScope[i]:
                         if "(" not in comb:
                             SUB_ID = int(comb)
-                            for _, HRU_ID in SUBToHRU[SUB_ID]:
+                            for _, HRU_ID in SUBToHRU[SUB_ID].items():
                                 files.append(f"{HRU_IDToFileName[HRU_ID]}.{ext}")
                         else:
                             SUB_ID = comb.split("(")[0]
@@ -916,7 +921,7 @@ class SWAT_UQ(Problem):
         #read sub files
         # HRU information table
         HRUInfosTable = pd.DataFrame(columns=["HRU_ID", "SUB_ID", "HRU_Local_ID", "Slope_Low", "Slope_High", "Luse", "Area"])
-        
+        SUBInfosTable = pd.DataFrame(columns=["SUB_ID", "Area"])
         for subID, fileName in SUB_IDToFileName.items():
             fileName = fileName + ".sub"
             tempHRU = []
@@ -925,6 +930,8 @@ class SWAT_UQ(Problem):
                 
                 matchArea = re.search(r'^\s*([\d.]+)', lines[1])
                 subArea = float(matchArea.group(1))
+                
+                SUBInfosTable.loc[subID] = [subID, subArea]
                 
                 for line in lines:
                     match = re.search(r'(\d+)\.hru', line)
@@ -953,6 +960,7 @@ class SWAT_UQ(Problem):
         self.modelInfos["SUB_IDToFileName"] = SUB_IDToFileName
         self.modelInfos["HRU_IDToFileName"] = HRU_IDToFileName
         self.modelInfos["HRUInfosTable"] = HRUInfosTable
+        self.modelInfos["SUBInfosTable"] = SUBInfosTable
         self.modelInfos["SUBList"] = list(SUB_IDToFileName.keys())
         self.modelInfos["HRUList"] = list(HRU_IDToFileName.keys())
         self.modelInfos["HRUInfos"] = HRUInfos
@@ -966,9 +974,12 @@ class SWAT_UQ(Problem):
         self.parasInfos = pd.DataFrame(self._load_parameters(), columns=HEAD)
         
         #for special paras file
-        if self.specialParaList is not None:
-            for para in self.specialParaList:
-                self.parasInfos.loc[para[0]] = para
+        if self.specialFileName is not None:
+            with open(os.path.join(self.workPath, self.specialFileName), 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    content = line.strip().split()
+                    self.parasInfos.loc[len(self.parasInfos)] = content
         
         if self.verboseFlag:
             print("="*25 + "Model Information" + "="*25)
