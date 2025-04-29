@@ -440,11 +440,11 @@ class SWAT_UQ(Problem):
             self.workPathQueue.put(workPath)
             
             attrs['id'] = id
-            attrs['HRUInfosTable'] = self.modelInfos["HRUInfosTable"]
+            attrs['HRUInfos'] = self.modelInfos["HRUInfosTable"]
             attrs['objs'] = objVal
             attrs['cons'] = conVal
             attrs['objSeries'] = objSeries
-            attrs['consSeries'] = conSeries
+            attrs['conSeries'] = conSeries
             attrs['x'] = inputX
             
         except Exception as e:

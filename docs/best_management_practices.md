@@ -29,9 +29,11 @@ In the SWAT model used here, the lake is located within the sub-basin 51. Theref
 
 ## Optimization
 
-In SWAT, there are many built-in BMPs, e.g., terracing operation (BMP1), tile drainage (BMP2) ... filter strip (BMP4) ... grassed waterways (BMP7). For reduce TN and TP, the BMP4 and BMP7 are selected and applied to sub-basins 1, 13, 14, 20, and 31.
+In SWAT, there are many built-in BMPs, e.g., the terracing operation (BMP1), the tile drainage (BMP2) ... the filter strip (BMP4) ... the grassed waterways (BMP7). 
 
-The **.ops** files in SWAT project control all BMPs. The parameters involving the filter strip are:
+For reduce TN and TP, the BMP4 and BMP7 are commonly selected. Considering the cost, this example only focuses on the critical sub-basins like 1, 13, 14, 20, and 31.
+
+The **.ops** files in SWAT project control and set BMPs to simulated the watershed. The parameters involving the filter strip are:
 
 - **FILTER_I:** Indicator for filter strip simulation (1 for active, 0 for inactive).
 - **FILTER_RATIO:** The ratio of field area to filter strip area (ha/ha). Range: 0–300.
@@ -48,9 +50,9 @@ The parameters about grassed waterways are:
 - **GWATL:** Length of the vegetative channel (km).
 - **GWATS:** Average slope of the vegetative channel (m/m).
 
-To simplify the application of BMPs, we optimize only five parameters — namely, **FILTER_I**, **FILTER_RATIO**, **GWATI**, **GWATW**, and **GWATL** — across sub-basins 1, 13, 14, 20, and 31. Each sub-basin is assigned a distinct set of parameter values, resulting in a total of 25 variables. The optimization objectives are to minimize the total nitrogen (TN) and total phosphorus (TP) loads, as well as the implementation costs associated with these BMPs. Overall, this example represents a multi-objective optimization problem involving a mixture of parameters.
+To simplify the application of BMPs, this example only optimize five parameters, i.e., **FILTER_I**, **FILTER_RATIO**, **GWATI**, **GWATW**, and **GWATL** — across sub-basins 1, 13, 14, 20, and 31. In addition, each sub-basin would be assigned a distinct set of parameter values, resulting in a total of 25 variables. The optimization objectives are to maximize the reduction of TN and TP loads, as well as the costs associated with these BMPs. Overall, this example is a **multi-objective** optimization problem involving **a mixture of parameters**.
 
-The type, range of parameters can be concluded by:
+The information (variable types and ranges) of optimized parameters can be concluded as follows:
 
 | Name | Type | Range|
 |------|------|------|
@@ -60,65 +62,72 @@ The type, range of parameters can be concluded by:
 | GWATW | discrete | 1, 5, 10, 15, 20, 25, 30 |
 | GWATL | float | 10-1000|
 
-First, we edit the parameter file:
+Initially, it is necessary to edit the parameter files. In contrast to Example 1, the BMP parameters differ among sub-basins. Consequently, each sub-basin requires an independent definition of all relevant parameters. In SWAT-UQ, the discrete parameter GWATW represents all possible values in the 'Min_Max' field by linking them with an underscore ('_'):
 
-File name: `para.par`
+```
+GWATW v d 1_5_10_15_20_25_30 1
+```
+
+The complete content of the parameter file can be:
 
 ```
 Name Mode Type Min_Max Scope
-FILTER_I v i 0 1 1
-FILTER_RATIO v f 0 300 1
-GWATI v i 0 1 1
+FILTER_I v i 0_1 1
+FILTER_RATIO v f 0_300 1
+GWATI v i 0_1 1
 GWATW v d 1_5_10_15_20_25_30 1
-GWATL v f 10 1000 1
-FILTER_I v i 0 1 13
-FILTER_RATIO v f 0 300 13
-GWATI v i 0 1 13
+GWATL v f 10_1000 1
+FILTER_I v i 0_1 13
+FILTER_RATIO v f 0_300 13
+GWATI v i 0_1 13
 GWATW v d 1_5_10_15_20_25_30 13
-GWATL v f 10 1000 13
-FILTER_I v i 0 1 14
-FILTER_RATIO v f 0 300 14
-GWATI v i 0 1 14
+GWATL v f 10_1000 13
+FILTER_I v i 0_1 14
+FILTER_RATIO v f 0_300 14
+GWATI v i 0_1 14
 GWATW v d 1_5_10_15_20_25_30 14
-GWATL v f 10 1000 14
-FILTER_I v i 0 1 20
-FILTER_RATIO v f 0 300 20
-GWATI v i 0 1 20
+GWATL v f 10_1000 14
+FILTER_I v i 0_1 20
+FILTER_RATIO v f 0_300 20
+GWATI v i 0_1 20
 GWATW v d 1_5_10_15_20_25_30 20
-GWATL v f 10 1000 20
-FILTER_I v i 0 1 31
-FILTER_RATIO v f 0 300 31
-GWATI v i 0 1 31
+GWATL v f 10_1000 20
+FILTER_I v i 0_1 31
+FILTER_RATIO v f 0_300 31
+GWATI v i 0_1 31
 GWATW v d 1_5_10_15_20_25_30 31
-GWATL v f 10 1000 31
+GWATL v f 10_1000 31
 ```
 
-💡 **Noted:** The parameter file supports parameters with the same name, as they are distinguished by their indices.
+💡 **Noted:** This file supports parameters with the same name, as they are distinguished by their indices.
 
+Then, the objectives of this example are introduced. The first objective is the reduction of TN:
 
-Now, we introduce the objectives of this example. The first objective is the reduction of TN:
+ $Obj_1 = \left ( TN_{base} - TN_{now}\right ) / TN_{base}$
 
- $\left ( TN_{base} - TN_{now}\right ) / TN_{base}$
-
-where $TN_{base}$ and $TN_{now}$ denote the total amount of TN flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
+where $TN_{base}$ and $TN_{now}$ denote the total amount of TN flowing out of the 51 sub-basin before and after the application of BMPs, respectively.
 
 The second objective is the reduction of TP:
 
- $\left ( TP_{base} - TP_{now}\right ) / TP_{base}$
+ $Obj_2 = \left ( TP_{base} - TP_{now}\right ) / TP_{base}$
 
 where $TP_{base}$ and $TP_{now}$ denote the total amount of TP flowing out of the 51 sub-basin before and after the implementation of BMPs, respectively.
 
 The third objective is the cost of BMPs. The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 6000 Yuan/ha. Therefore, for a sub-basin, the cost is:
 
-$Area_{AGRI}*FILTER_RATIO*FILTER_I*420 + GWATW*GWATL*GWATI*6000$
+$cost_{filter}^i = Area_{AGRI}^i*FILTER_RATIO*FILTER_I*420$
+
+$cost_{gwat}^i = GWATW*GWATL*GWATI*6000$
+
+$Obj_3 = \sum{cost_{filter}^i + cost_{gwat}^i}, i\in \left \{ 1,13,14,20,31 \right \}$
 
 where $Area_{AGRI}$ represents the area of agricultural land use.
 
-In this example, the objective computation cannot be completed solely through file control. Instead, the required data are obtained via file control, and the objective function (`objFunc`) is defined manually by the user.
+In this example, the computation of these objectives cannot be completed solely through the `*.eval` file control. Instead, the required data are obtained via file control, and the objective function (`objFunc`) should be defined manually by the user.
 
 For the first two objectives, we require the total amount of TN and TP flowing out of the 51 sub-basin in 2021.
 
-Therefore, the file control can be:
+Therefore, the `*.eval` file can be edited as follows:
 
 ```
 SER_1 : ID of series data
@@ -138,6 +147,39 @@ FUNC_7 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 2021.1.1 to 2021.12.31
 ```
 
+Then, we define the `userObjFunc`. The `userObjFunc` would accept a python dict named `attr` that contain several keywords, e.g., `x`, `objs`, `cons`, `objSeries`, `conSeries`, `HRUInfos`. 
+
+API:
+```
+attr - a python dict
+
+keywords:
+
+- x : The input decision, np.1darray
+- objs : The objective values of this input decision, a python dict, use `objs[objID]` defined by the *.evl file
+- cons : Similar to objs
+- objSeries : A python dict records the series defined by the *.evl file, use `objSeries[objID][serID]`
+- conSeries : Similar to objSeries
+- HRUInfos : A pandas table that records the information about HRU, columns are ["HRU_ID", "SUB_ID", "HRU_Local_ID", "Slope_Low", "Slope_High", "Luse", "Area"]
+```
+
+Therefore, we can define the `userObjFunc`:
+
+```python
+
+TN_Base = 1.23e6
+TP_Base = 3.57e5
+
+def userObjFunc(attr):
+  
+  objs = np.zeros(3) # Three objectives
+
+  objs[0] = (TN_Base - attr[1])/TN_Base # Compute obj_1
+
+  objs[1] = (TP_Base - attr[2])/TN_Base # Compute obj_2
+
+
+```
 
 
 
