@@ -74,7 +74,7 @@ class SWAT_UQ(Problem):
     def __init__(self, projectPath: str, swatExeName: str,
                  workPath: str, paraFileName: str, evalFileName: str, specialFileName: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
-                 maxThreads: int = 12, numParallel: int = 5, 
+                 maxThreads: int = 12, numParallel: int = 5, nInput = None, nOutput = None,
                  verboseFlag = False, name: str = None, optType = 'min'):
         
         self.modelInfos = {}
@@ -143,6 +143,9 @@ class SWAT_UQ(Problem):
         
         if self.nInput != len(self.varName):
             raise ValueError("The number of input variables is not equal to the number of parameters!")
+        
+        if nOutput is not None:
+            self.nOutput = nOutput
         
         super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
                             lb = self.lb, ub = self.ub, xLabels = self.xLabels,
@@ -256,7 +259,6 @@ class SWAT_UQ(Problem):
             self.workValidationPath = os.path.join(self.workTempDir, "validation")
             copy_origin_to_tmp(self.projectPath, self.workValidationPath)
         
-        self.apply_parameters(X)
         valInfos = self._read_eval(self.workValidationPath,  seriesFile)
         
         self._set_values(self.workValidationPath, X)
