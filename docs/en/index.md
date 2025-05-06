@@ -1,6 +1,6 @@
 # Welcome to SWAT-UQ documentation
 
-<p align="center"><img src="/assets/images/SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="../assets/images/SWAT-UQ.svg" width="400"/></p>
 
 [![PyPI version](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - Downloads](https://img.shields.io/pypi/dm/swatuq) ![PyPI - License](https://img.shields.io/pypi/l/swatuq) ![GitHub last commit](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![Static Badge](https://img.shields.io/badge/Author-wmtSky-orange) ![Static Badge](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
@@ -39,14 +39,14 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 - [UQPyL](https://github.com/smasky/UQPyL), a Python package for **Uncertainty Quantification** and **Parameter Optimization**.
 
 <figure align="center">
-  <img src="../assets/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
+  <img src="../assets/images/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
   <figcaption>Overview of UQPyL</figcaption>
 </figure>
 
 - [SWAT-UQ](https://github.com/smasky/SWAT-UQ), providing script-based (Develop) and GUI versions to integrate UQPyL and the Soil and Water Assessment Tool (**SWAT**) model. 
 
 <figure align="center">
-  <img src="/assets/MainUI.jpg" alt="SWAT-UQ GUI Version" width="500"/>
+  <img src="../assets/images/MainUI.jpg" alt="SWAT-UQ GUI Version" width="500"/>
   <figcaption>SWAT-UQ GUI Version</figcaption>
 </figure>
 

@@ -7,7 +7,7 @@
 When watersheds are impacted by nonpoint source pollution, the integration of the SWAT model with best management practices (BMPs) has proven to be a reliable and effective tool. This example refers to the [article](https://www.sciencedirect.com/science/article/pii/S0043135424016877)(Long et al, 2025). 
 
 <figure align="center">
-  <img src="/assets/pic/sihu.svg"  width="600"/>
+  <img src="../assets/images/sihu.svg"  width="600"/>
 </figure>
 
 <p align="center"><strong>Information about Four Lake watershed</strong></p>
