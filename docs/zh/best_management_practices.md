@@ -7,7 +7,7 @@
 当流域受到非点源污染影响时，将 SWAT 模型与最佳管理实践（Best Management Practices，BMPs）相结合，已被证明是一种可靠且有效的工具。本示例参考了 [Long 等（2025）](https://www.sciencedirect.com/science/article/pii/S0043135424016877) 的研究成果。
 
 <figure align="center">
-  <img src="/pic/sihu.svg" width="600"/>
+  <img src="/assets/pic/sihu.svg" width="600"/>
 </figure>
 
 <p align="center"><strong>四湖流域概况</strong></p>
@@ -23,7 +23,7 @@
 
 本示例省略了径流和水质的校准部分，重点介绍 **最佳管理实践（BMP）** 的优化过程。在中国，**总氮（TN）**和**总磷（TP）**是评估湖泊水质的重要指标。以下是 2021 年 12 月 31 日 TN 和 TP 的分布图：
 
-<p align="center"><img src="/pic/TN.svg"  width="300"/> <img src="/pic/TP.svg" width="300"/></p>
+<p align="center"><img src="/assets/pic/TN.svg"  width="300"/> <img src="/assets/pic/TP.svg" width="300"/></p>
 <p align="center"><strong>四湖流域 TN 和 TP 的分布情况</strong></p>
 
 在本研究的 SWAT 模型中，主湖区位于 **子流域 32**；主要入湖流量来自 **子流域 51**。此外，重点管理区域包括识别出的关键污染源子流域：**1、13、14、20、31**。
@@ -237,7 +237,7 @@ nsgaii.run(problem=problem)
 最终 BMP 优化结果可视化如下所示：
 
 <figure align="center">
-  <img src="/pic/BMP.svg" width="400"/>
+  <img src="/assets/pic/BMP.svg" width="400"/>
 </figure>
 
 ---
