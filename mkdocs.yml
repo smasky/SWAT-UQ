@@ -8,6 +8,7 @@ theme:
   features:
     - navigation.indexes
     - navigation.language
+  logo: assets/SWAT-UQ.svg
 
 plugins:
   - i18n:
