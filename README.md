@@ -1,6 +1,6 @@
 # SWAT-UQ: Uncertainty Quantification for SWAT
 
-<p align="center"><img src="./docs/pic/SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="./docs/assets/SWAT-UQ.svg" width="400"/></p>
 
 [![PyPI version](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - Downloads](https://img.shields.io/pypi/dm/swatuq) ![PyPI - License](https://img.shields.io/pypi/l/swatuq) ![GitHub last commit](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![Static Badge](https://img.shields.io/badge/Author-wmtSky-orange) ![Static Badge](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 

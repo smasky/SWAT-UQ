@@ -1,6 +1,6 @@
 # SWAT-UQ: Uncertainty Quantification for SWAT
 
-<p align="center"><img src="./docs/pic/SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="./docs/assets/SWAT-UQ.svg" width="400"/></p>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![Static Badge](https://img.shields.io/badge/Author-wmtSky-orange) ![Static Badge](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
