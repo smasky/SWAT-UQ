@@ -1,6 +1,6 @@
 # 欢迎使用 SWAT-UQ 中文文档
 
-<p align="center"><img src="../assets/images//SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="../assets/SWAT-UQ.svg" width="400"/></p>
 
 [![PyPI 版本](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - 下载量](https://img.shields.io/pypi/dm/swatuq) ![PyPI - 许可证](https://img.shields.io/pypi/l/swatuq) ![GitHub 最后提交](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![作者](https://img.shields.io/badge/Author-wmtSky-orange) ![联系方式](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 

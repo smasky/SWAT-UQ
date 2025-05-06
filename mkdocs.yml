@@ -3,6 +3,7 @@ theme:
   name: material
   palette:
     scheme: light
+    primary: cyan
   code:
     highlight_theme: monokai
   features:
