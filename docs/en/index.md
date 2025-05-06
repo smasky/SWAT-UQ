@@ -39,7 +39,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 - [UQPyL](https://github.com/smasky/UQPyL), a Python package for **Uncertainty Quantification** and **Parameter Optimization**.
 
 <figure align="center">
-  <img src="/assets/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
+  <img src="../assets/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
   <figcaption>Overview of UQPyL</figcaption>
 </figure>
 
