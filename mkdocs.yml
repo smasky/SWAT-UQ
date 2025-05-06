@@ -64,5 +64,5 @@ site_dir: 'site'
 
 # 配置静态文件路径
 extra_static:
-  - path: 'docs/assets/images'  # 假设图片存放在 docs/images 目录下
+  - path: 'assets/images'  # 假设图片存放在 docs/images 目录下
     dest: 'assets/images'
