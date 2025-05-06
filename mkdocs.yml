@@ -57,5 +57,3 @@ repo_url: https://github.com/smasky/SWAT-UQ
 
 use_directory_urls: false
 
-extra:
-  static_path: docs
