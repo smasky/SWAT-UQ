@@ -43,7 +43,6 @@ extra_css:
   - css/head_.css
   - css/content_.css
   - css/table_.css
-  - assets
 
 markdown_extensions:
   - pymdownx.emoji
