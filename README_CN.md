@@ -4,6 +4,9 @@
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![Static Badge](https://img.shields.io/badge/Author-wmtSky-orange) ![Static Badge](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
+👉[Readme](https://github.com/smasky/SWAT-UQ/blob/main/README.md)
+
+👉[中文文档](https://swat-uq.readthedocs.io/en/latest/zh/index.html)
 
 SWAT-UQ 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的扩展子项目。UQPyL 是一个面向参数不确定性分析与优化的综合性平台。SWAT-UQ 旨在实现 UQPyL 与 SWAT 水文模型的深度耦合，帮助用户以极简的方式开展参数敏感性分析、单目标优化、多目标优化等任务，亦可灵活支持其他不确定性相关工作。
 
