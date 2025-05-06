@@ -30,6 +30,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
       - [SWAT-UQ-GUI](swat_uq_gui.md)
    - Example Collection
       - [Example 1: Runoff Calibration](example_runoff_calibration.md)
+      - [Example 2: Best Management Practices](best_management_practices.md)
 
 ---
 

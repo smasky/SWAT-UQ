@@ -7,15 +7,36 @@ theme:
     highlight_theme: monokai
   features:
     - navigation.indexes
+    - navigation.language
 
-nav:
-  - Introduction: 'index.md'
-  - Tutorial:
-    - SWAT-UQ-DEV: 'swat_uq_dev.md'
-    - SWAT-UQ-GUI: 'swat_uq_gui.md'
-  - Example Collection:
-    - Example 1: 'example_runoff_calibration.md'
-    - Example 2: 'best_management_practices.md'
+plugins:
+  - i18n:
+      docs_structure: folder
+      default_language: en
+      languages:
+        - locale: en
+          name: English
+          build: true
+          default: true
+          nav:
+            - Introduction: index.md
+            - Tutorial:
+              - SWAT-UQ-DEV: swat_uq_dev.md
+              - SWAT-UQ-GUI: swat_uq_gui.md
+            - Example Collection:
+              - Example 1: example_runoff_calibration.md
+              - Example 2: best_management_practices.md
+        - locale: zh
+          name: 中文
+          build: true
+          nav:
+            - 介绍: index.md
+            - 教程:
+              - DEV版使用教程: swat_uq_dev.md
+              - GUI版使用教程: swat_uq_gui.md
+            - 示例集合:
+              - 示例一：径流校准: example_runoff_calibration.md
+              - 示例二：最佳工程管理: best_management_practices.md
 
 extra_css:
   - css/nav_.css

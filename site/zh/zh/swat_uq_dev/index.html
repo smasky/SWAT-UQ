@@ -1,0 +1,969 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://SWAT-UQ.readthedocs.io/zh/zh/swat_uq_dev/">
+      
+      
+        <link rel="prev" href="../example_runoff_calibration/">
+      
+      
+        <link rel="next" href="../swat_uq_gui/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>SWAT-UQ-DEV 模块 - SWAT-UQ</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/nav_.css">
+    
+      <link rel="stylesheet" href="../../../css/head_.css">
+    
+      <link rel="stylesheet" href="../../../css/content_.css">
+    
+      <link rel="stylesheet" href="../../../css/table_.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#swat-uq-dev" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../../.." title="SWAT-UQ" class="md-header__button md-logo" aria-label="SWAT-UQ" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SWAT-UQ
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SWAT-UQ-DEV 模块
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../swat_uq_dev/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/smasky/SWAT-UQ" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SWAT-UQ" class="md-nav__button md-logo" aria-label="SWAT-UQ" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SWAT-UQ
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/smasky/SWAT-UQ" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../en/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    En
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            En
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../en/best_management_practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Example 2: Best Management Practices for the Four Lake watershed
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../en/example_runoff_calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Example 1: Runoff Calibration for the Dongjiang watershed
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../en/swat_uq_dev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SWAT-UQ-DEV
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../en/swat_uq_gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SWAT-UQ-GUI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Zh
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Zh
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best_management_practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Example 2: Best Management Practices for the Four Lake watershed
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_runoff_calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Example 1: Runoff Calibration for the Dongjiang watershed
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    SWAT-UQ-DEV 模块
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    SWAT-UQ-DEV 模块
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dev" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEV 版本概述
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      主要特性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      安装方式
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      快速入门
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="快速入门">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      第一步：准备文件与目录结构
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      编程示例
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      应用最优参数
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../swat_uq_gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SWAT-UQ-GUI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dev" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEV 版本概述
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      主要特性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      安装方式
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      快速入门
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="快速入门">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      第一步：准备文件与目录结构
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      编程示例
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      应用最优参数
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="swat-uq-dev">SWAT-UQ-DEV 模块</h1>
+<hr />
+<h2 id="dev">DEV 版本概述</h2>
+<p><strong>SWAT-UQ-DEV</strong> 是一个专为 <strong>脚本化环境</strong> 设计的 Python 软件包。该模块定义了一个名为 <code>SWAT_UQ</code> 的 Python 类，继承自 UQPyL 的 <code>Problem</code> 类。通过实例化 <code>SWAT_UQ</code> 类，用户即可直接调用 UQPyL 提供的全部方法和算法。</p>
+<p>此外，<code>SWAT_UQ</code> 还封装了一系列内置函数，旨在简化构建与求解实际问题（如模型校准、最佳管理实践等）的流程，提升效率。</p>
+<p>SWAT-UQ-DEV 特别适合希望自定义工作流程、集成 UQPyL 或其他 Python 工具的用户。</p>
+<hr />
+<h2 id="_1">主要特性</h2>
+<ol>
+<li>
+<p><strong>并行执行：</strong> 无论是项目文件夹中的数据读写，还是 <strong>SWAT 模型仿真</strong>，均支持并行处理。<br />
+   🎉 在一台 40 核服务器上的基准测试表明，该代码版本可稳定同时运行 80 个 SWAT 实例。</p>
+</li>
+<li>
+<p><strong>文件控制简化：</strong> 在进行如流量或水质等模型校准任务时，用户只需准备若干 <code>.txt</code> 文件，即可完成全部设置。</p>
+</li>
+<li>
+<p><strong>流程集成性强：</strong> 借助 <a href="https://github.com/smasky/UQPyL">UQPyL</a> 的支持，用户可轻松执行完整的建模流程，包括：</p>
+</li>
+<li>敏感性分析（Sensitivity Analysis）</li>
+<li>参数优化（Optimization）</li>
+<li>最优参数反代（Back-substitution）</li>
+</ol>
+<hr />
+<h2 id="_2">安装方式</h2>
+<p>支持的 Python 版本：3.6 至 3.12<br />
+支持系统：Windows、Linux</p>
+<p><strong>推荐安装方式（使用 PyPi 或 Conda）：</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>swatuq
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>install<span class="w"> </span>swatuq<span class="w"> </span>--upgrade
+</code></pre></div>
+<hr />
+<h2 id="_3">快速入门</h2>
+<p>本节将提供逐步指南，帮助你通过 SWAT-UQ-DEV 解决基于 SWAT 的建模问题。</p>
+<h3 id="_4">第一步：准备文件与目录结构</h3>
+<ol>
+<li>获取一个 <strong>SWAT 项目文件夹</strong>（以下简称 SWAT Project Folder）。</li>
+<li>创建一个独立的 <strong>工作文件夹（Work Folder）</strong>，用于存放控制文件和并行运行时生成的临时文件。</li>
+<li>在 Work Folder 中，创建一个名为 <code>paras.par</code> 的参数文件，内容需为 UTF-8 编码。</li>
+</ol>
+<p>文件格式如下：</p>
+<div class="highlight"><pre><span></span><code>Name Type Mode Min_Max Scope
+CN2 r f -0.4_0.2 all
+GW_DELAY v f 30.0_450.0 all
+...
+</code></pre></div>
+<ul>
+<li>参数名称需与 SWAT 项目中的名称严格一致。</li>
+<li>支持的赋值方式包括：<ul>
+<li><code>r</code>：相对赋值（新值 = 原值 × (1+val)）</li>
+<li><code>v</code>：绝对赋值</li>
+<li><code>a</code>：加法赋值（新值 = 原值 + val）</li>
+</ul>
+</li>
+<li>参数类型可为整数 (<code>i</code>)、浮点数 (<code>f</code>)、离散 (<code>d</code>)。</li>
+<li>
+<p>作用范围（Scope）支持全局（<code>all</code>），也支持精确指定子流域和 HRU ID。</p>
+</li>
+<li>
+<p>创建一个名为 <code>eval.obj</code> 的 UTF-8 编码文件，用于定义目标函数或约束函数。<br />
+   文件包括：</p>
+</li>
+<li><strong>头部定义区（Head Definition）：</strong> 用于声明数据系列 ID、目标函数 ID、权重、输出变量列号、评价指标类型等；</li>
+<li><strong>数据区（Data Section）：</strong> 为对应观测数据，支持月、日时间尺度；</li>
+</ul>
+<p>支持的评价指标包括：NSE、RMSE、PCC、Pbias、KGE、均值、总和、最大值、最小值。</p>
+<hr />
+<h2 id="_5">编程示例</h2>
+<p>以下 Python 脚本展示了如何定义并运行一个 SWAT-UQ 问题：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># First import SWAT_UQ class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">swatuq</span><span class="w"> </span><span class="kn">import</span> <span class="n">SWAT_UQ</span>
+
+<span class="c1"># Second define requirement variables:</span>
+
+<span class="n">projectPath</span> <span class="o">=</span> <span class="s2">&quot;E://swatProjectPath&quot;</span>  <span class="c1"># your SWAT Project Path</span>
+<span class="n">workPath</span> <span class="o">=</span> <span class="s2">&quot;E://workPath&quot;</span> <span class="c1"># your Work Path</span>
+<span class="n">exeName</span> <span class="o">=</span> <span class="s2">&quot;swat2012.exe&quot;</span> <span class="c1"># the name of swat.exe you want to run</span>
+<span class="n">paraFileName</span> <span class="o">=</span> <span class="s2">&quot;paras.par&quot;</span> <span class="c1"># the parameter file you prepared</span>
+<span class="n">evalFileName</span> <span class="o">=</span> <span class="s2">&quot;eval.obj&quot;</span> <span class="c1"># the evaluation file you prepared</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">SWAT_UQ</span><span class="p">(</span>
+   <span class="n">projectPath</span> <span class="o">=</span> <span class="n">projectPath</span><span class="p">,</span> <span class="c1"># set projectPath</span>
+   <span class="n">workPath</span> <span class="o">=</span> <span class="n">workPath</span><span class="p">,</span> <span class="c1"># set workPath</span>
+   <span class="n">swatExeName</span> <span class="o">=</span> <span class="n">exeName</span> <span class="c1"># set swatExeName</span>
+   <span class="n">paraFileName</span> <span class="o">=</span> <span class="n">paraFileName</span><span class="p">,</span> <span class="c1"># set paraFileName</span>
+   <span class="n">evalFileName</span> <span class="o">=</span> <span class="n">evalFileName</span><span class="p">,</span> <span class="c1"># set evalFileName</span>
+   <span class="n">verboseFlag</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1"># enable verboseFlag to check if setup is configured properly.</span>
+   <span class="n">numParallel</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># set the number of parallels</span>
+<span class="p">)</span>
+
+<span class="c1"># The SWAT-related Problem is completed. You can enjoy all methods and algorithms of UQPyL.</span>
+
+<span class="c1">#For example:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">UQPyL.optimization.single_objective</span><span class="w"> </span><span class="kn">import</span> <span class="n">GA</span>
+
+<span class="n">ga</span> <span class="o">=</span> <span class="n">GA</span><span class="p">()</span>
+<span class="n">ga</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">problem</span> <span class="o">=</span> <span class="n">problem</span><span class="p">)</span>
+</code></pre></div>
+<p>💡 <strong>提示：</strong> 更多关于 UQPyL 的用法详见 <a href="https://uqpyl.readthedocs.io/en/latest/">UQPyL 使用文档</a></p>
+<hr />
+<h2 id="_6">应用最优参数</h2>
+<p>你可以通过以下代码将最优参数应用到原始项目文件夹中，或只作用于工作目录：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># X should be a list or a NumPy 1D or 2D array</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">apply_parameter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># 应用于工作路径，不修改原始项目</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">apply_parameter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># 直接写入原始 SWAT 项目</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.indexes", "navigation.language"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MM"></script>
+      
+    
+  </body>
+</html>
