@@ -39,14 +39,14 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 - [UQPyL](https://github.com/smasky/UQPyL), a Python package for **Uncertainty Quantification** and **Parameter Optimization**.
 
 <figure align="center">
-  <img src="images/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
+  <img src="../images/UQPyL_overview.svg" alt="UQPyL Overview" width="800"/>
   <figcaption>Overview of UQPyL</figcaption>
 </figure>
 
 - [SWAT-UQ](https://github.com/smasky/SWAT-UQ), providing script-based (Develop) and GUI versions to integrate UQPyL and the Soil and Water Assessment Tool (**SWAT**) model. 
 
 <figure align="center">
-  <img src="./images/MainUI.jpg" alt="SWAT-UQ GUI Version" width="500"/>
+  <img src="../images/MainUI.jpg" alt="SWAT-UQ GUI Version" width="500"/>
   <figcaption>SWAT-UQ GUI Version</figcaption>
 </figure>
 
