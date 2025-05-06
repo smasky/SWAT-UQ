@@ -7,7 +7,7 @@
 When watersheds are impacted by nonpoint source pollution, the integration of the SWAT model with best management practices (BMPs) has proven to be a reliable and effective tool. This example refers to the [article](https://www.sciencedirect.com/science/article/pii/S0043135424016877)(Long et al, 2025). 
 
 <figure align="center">
-  <img src="../assets/images/sihu.svg"  width="600"/>
+  <img src="./assets/images/sihu.svg"  width="600"/>
 </figure>
 
 <p align="center"><strong>Information about Four Lake watershed</strong></p>
@@ -23,7 +23,7 @@ The Four Lake watershed locates in the middle reaches of the Yangtze River and t
 
 The calibration of runoff and water quality is omitted here, with a primary focus on the process of Best Management Practices (BMPs). In China, Total Nitrogen (TN) and Total Phosphorus (TP) concentrations are critical indicators for assessing lake water quality. The distributions of TN and TP in 2021.12.31 are show blew:
 
-<p align="center"><img src="/assets/pic/TN.svg"  width="300"/> <img src="/assets/pic/TP.svg" width="300"/></p>
+<p align="center"><img src="./assets/images/TN.svg"  width="300"/> <img src="./assets/images/TP.svg" width="300"/></p>
 <p align="center"><strong>The distributions of TN and TP in the Four Lake basin</strong></p>
 
 In the SWAT model applied in this study, the main lake is situated within **sub-basin 32**. Accordingly, particular attention should be directed toward **sub-basin 51**, which serves as the primary inflow region. Furthermore, management practices should be prioritized in the identified critical source areas, namely sub-basins **1, 13, 14, 20, and 31**.
@@ -275,5 +275,5 @@ nsgaii.run(problem = problem)
 The visualization of BMP optimization shows below:
 
 <figure align="center">
-  <img src="/assets/pic/BMP.svg"  width="400"/>
+  <img src="./assets/images/BMP.svg"  width="400"/>
 </figure>

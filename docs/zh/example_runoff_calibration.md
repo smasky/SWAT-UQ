@@ -11,7 +11,7 @@
 我们主要展示丰水坝子流域的校准过程，其汇水面积为 5,150 平方公里，年均降雨量为 1,581 毫米。为了帮助用户熟悉 SWAT-UQ，提供了新丰江子流域的校准作为额外练习。
 
 <figure align="center">
-  <img src="/assets/pic/background_dongjiang.jpg" alt="UQPyL Overview" width="600"/>
+  <img src="../assets/images/background_dongjiang.jpg" alt="UQPyL Overview" width="600"/>
 </figure>
 
 ---
@@ -33,7 +33,7 @@
 - **验证期**：2017 年 1 月 1 日至 2017 年 12 月 31 日  
 
 <figure align="center">
-  <img src="/assets/pic/example_runoff.svg" width="1000"/>
+  <img src="../assets/images/example_runoff.svg" width="1000"/>
 </figure>
 
 💡 **提示：** [点击此链接下载项目文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_FSB.zip)
@@ -49,7 +49,7 @@
 因此，实际问题可以抽象为如下形式：
 
 <figure align="center">
-  <img src="/assets/pic/example_problem.svg" width="350"/>
+  <img src="../assets/images/example_problem.svg" width="350"/>
 </figure>
 
 其中：
@@ -158,7 +158,7 @@ print(res)
 最终结果（FAST 分析）如下图所示：
 
 <figure align="center">
-  <img src="/assets/pic/fast.svg" width="1000"/>
+  <img src="../assets/images/fast.svg" width="1000"/>
 </figure>
 
 选取前 10 个灵敏参数用于后续优化：CN2、ALPHA_BNK、SOL_K、SLSUBSSN、ESCO、HRU_SLP、OV_N、TLAPS、SOL_ALB、CH_K2。
@@ -189,7 +189,7 @@ pso.run(problem)
 优化结果如下：
 
 <figure align="center">
-  <img src="/assets/pic/PSO.svg" width="1000"/>
+  <img src="../assets/images/PSO.svg" width="1000"/>
 </figure>
 
 最优参数（NSE≈0.88）如下表：
