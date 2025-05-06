@@ -1,6 +1,6 @@
 # 欢迎使用 SWAT-UQ 中文文档
 
-<p align="center"><img src="/assets/pic/SWAT-UQ.svg" width="400"/></p>
+<p align="center"><img src="../images/SWAT-UQ.svg" width="400"/></p>
 
 [![PyPI 版本](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - 下载量](https://img.shields.io/pypi/dm/swatuq) ![PyPI - 许可证](https://img.shields.io/pypi/l/swatuq) ![GitHub 最后提交](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![作者](https://img.shields.io/badge/Author-wmtSky-orange) ![联系方式](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
@@ -38,13 +38,13 @@
 - [UQPyL](https://github.com/smasky/UQPyL)：用于**不确定性量化**与**参数优化**的 Python 工具包。
 
 <figure align="center">
-  <img src="/assets/pic/UQPyL_overview.svg" alt="UQPyL 总览图" width="800"/>
+  <img src="../images/UQPyL_overview.svg" alt="UQPyL 总览图" width="800"/>
   <figcaption>UQPyL功能总览</figcaption>
 </figure>
 
 - [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过脚本开发版与图形界面版，将UQPyL与SWAT模型有机融合。
 
 <figure align="center">
-  <img src="/assets/pic/MainUI.jpg" alt="SWAT-UQ 图形界面版本" width="500"/>
+  <img src="../images/MainUI.jpg" alt="SWAT-UQ 图形界面版本" width="500"/>
   <figcaption>SWAT-UQ图形界面版本</figcaption>
 </figure>
