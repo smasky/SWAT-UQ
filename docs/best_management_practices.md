@@ -271,3 +271,9 @@ nsgaii.run(problem = problem)
 
 # The result would be save to `Result\Data\NSGAII_SWAT-UQ_D25_M3.hdf`
 ```
+
+The visualization of BMP optimization shows below:
+
+<figure align="center">
+  <img src="./pic/BMP.svg"  width="400"/>
+</figure>
