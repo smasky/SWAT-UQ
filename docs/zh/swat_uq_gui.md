@@ -4,7 +4,7 @@
 
 ## GUI 版本概述
 
-💡 **注意：** SWAT-UQ-GUI 仍处于演示阶段（目前推荐使用 SWAT-UQ-DEV）。欢迎体验，我们正在开发完整版！
+💡 **注意：** SWAT-UQ-GUI目前处于Demo阶段（推荐使用 SWAT-UQ-DEV）。我们正在开发完整版！
 
 **SWAT-UQ-GUI** 是专为 **SWAT** 模型的参数不确定性量化（UQ）而设计的图形用户界面工具。它的核心功能构建在我们已公开发布的 Python UQ 工具包 [UQPyL](https://github.com/smasky/UQPyL) 之上。这个平台的显著优势在于用户**无需编程**，即可实现从**敏感性分析**到**参数优化**、**结果检查**再到**数据可视化**的完整流程自动化。
 
@@ -29,11 +29,9 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 
 请下载 SWAT-UQ 的最新版本。
 
-**演示版已发布：** [SWAT-UQ](https://github.com/smasky/SWAT-UQ/releases/tag/v0.0)
+**Demo版已发布：** [SWAT-UQ](https://github.com/smasky/SWAT-UQ/releases/tag/v0.0)
 
----
-
-### 第一步：创建或打开项目
+### 创建或打开项目
 
 在 **Get Started** 界面中，点击 **New Project** 卡片创建新项目，或点击 **Open Project** 打开已有项目。你也可以选择 **Example** 卡片查看案例，或点击 **Help** 获取帮助。
 
@@ -45,9 +43,7 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 
 **Open Project：** 用户选择包含 *.prj 文件的文件夹，程序将检查其有效性。
 
----
-
-### 第二步：参数设置与目标定义
+### 参数设置与目标定义
 
 在参数设置与目标定义界面，用户需创建 `.par` 参数文件和 `.obj` 目标文件，这些文件用于指定将修改的参数及评估的目标函数。
 
@@ -70,9 +66,7 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 
 用户需填写目标 ID、序列 ID、目标类型、变量类型、权重等信息。目标 ID 与序列 ID 可重复，用于定义加权组合目标函数。完成后可保存为 `.obj` 文件，一个文件中也可定义多个目标函数。
 
----
-
-### 第三步：执行敏感性分析或参数优化
+### 执行敏感性分析或参数优化
 
 以敏感性分析为例，如图 6 所示，用户先选择参数文件和目标文件，然后选择分析方法与采样方式，并设置超参数。
 
@@ -88,9 +82,7 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 
 <p align="center"><strong>图 8. 参数优化界面</strong></p>
 
----
-
-### 可用方法列表
+### 方法列表
 
 **敏感性分析方法：**
 - Sobol'
@@ -107,9 +99,7 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 - **单目标优化**：SCE-UA、ML-SCE-UA、GA、CSA、PSO、DE、ABC、ASMO* (#TODO)、EGO* (#TODO)  
 - **多目标优化**：MOEA/D、NSGA-II、RVEA、MOASMO* (#TODO)
 
----
-
-### 第四步：结果验证与应用
+### 结果验证与应用
 
 在结果验证界面，SWAT-UQ 允许用户模拟指定参数组合，并提取所需时间序列，或将最优参数直接应用到 SWAT 项目中。参数组合可以是用户定义的，也可以来自已有优化结果文件。
 
@@ -117,9 +107,7 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 
 <p align="center"><strong>图 9. 结果验证界面</strong></p>
 
----
-
-### 第五步：结果可视化
+### 结果可视化
 
 当前 SWAT-UQ 支持两类图形：柱状图（敏感性分析）与收敛图（优化分析），未来将持续添加更多类型。
 
@@ -136,7 +124,3 @@ SWAT-UQ-GUI 包含三个主要模块，分别对应前处理、执行过程和�
 <p align="center"><img src="../assets/images/Visualization_A.png" alt="Visualization_A" width="350"/> <img src="../assets/images/Visualization_B.png" alt="Visualization_B" width="350"/></p>
 
 <p align="center"><strong>图 12. 可视化界面</strong></p>
-
----
-
-**以上为 SWAT-UQ 快速开始部分。如需更多高级功能，请参阅完整文档。**

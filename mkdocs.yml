@@ -35,9 +35,9 @@ plugins:
             - 教程:
               - DEV版使用教程: swat_uq_dev.md
               - GUI版使用教程: swat_uq_gui.md
-            - 示例集合:
+            - 示例:
               - 示例一：径流校准: example_runoff_calibration.md
-              - 示例二：最佳工程管理: best_management_practices.md
+              - 示例二：工程管理: best_management_practices.md
 
 extra_css:
   - css/nav_.css
@@ -52,7 +52,8 @@ markdown_extensions:
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
-
+  - assets/js/collapse_toc.js
+  
 site_url: https://SWAT-UQ.readthedocs.io/
 repo_url: https://github.com/smasky/SWAT-UQ
 

@@ -21,7 +21,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
 - **Website**: [Official Site](http://www.uq-pyl.com) (**TODO**: Needs update)
 - **Source Code**: [GitHub Repository](https://github.com/smasky/SWAT-UQ/)
 - **Documentation**: [ReadTheDocs](https://swat-uq.readthedocs.io/en/latest/)
-- **Citation Infos**: SWAT-UQ (Future Plan)
+- **Citation Infos**: SWAT-UQ (Submit to Environment Modelling & SoftWare)
 
 ## 🚀 Getting Started
 

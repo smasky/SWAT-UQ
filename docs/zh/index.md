@@ -11,7 +11,7 @@
  - **SWAT-UQ-DEV（开发者版本）**：适用于需要高度灵活性和自定义建模流程的高级用户。
  - **SWAT-UQ-GUI（图形界面版本）**：提供直观的图形化界面，简化操作流程，适合希望尽量减少编程的用户。
 
-借助SWAT-UQ，用户可以将强大的不确定性分析与优化功能无缝融入基于SWAT的水文建模项目中。
+借助SWAT-UQ，用户可以将UQPyL强大的不确定性分析与优化功能无缝融入基于SWAT模型的水文建模项目。
 
 ---
 
@@ -20,7 +20,7 @@
 - **官网**：[官方网站](http://www.uq-pyl.com)（**待更新**）
 - **源代码**：[GitHub 仓库](https://github.com/smasky/SWAT-UQ/)
 - **文档资料**：[查看文档](https://swat-uq.readthedocs.io/en/latest/)
-- **引用信息**：SWAT-UQ（未来计划中）
+- **引用信息**：SWAT-UQ（**投稿至Environment Modelling & SoftWare**）
 
 ## 🚀 快速入门
 
@@ -35,14 +35,14 @@
 
 ## ⭐ UQ 项目系列
 
-- [UQPyL](https://github.com/smasky/UQPyL)：用于**不确定性量化**与**参数优化**的 Python 工具包。
+- [UQPyL](https://github.com/smasky/UQPyL)：**不确定性量化**与**参数优化**的 Python 工具包。
 
 <figure align="center">
   <img src="../assets/images//UQPyL_overview.svg" alt="UQPyL 总览图" width="800"/>
-  <figcaption>UQPyL功能总览</figcaption>
+  <figcaption>UQPyL内容总览</figcaption>
 </figure>
 
-- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过脚本开发版与图形界面版，将UQPyL与SWAT模型有机融合。
+- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过脚本开发版与图形界面版，融合UQPyL与SWAT模型。
 
 <figure align="center">
   <img src="../assets/images//MainUI.jpg" alt="SWAT-UQ 图形界面版本" width="500"/>
