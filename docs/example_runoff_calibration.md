@@ -339,7 +339,7 @@ X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162,
 attr = problem.extract_series(X, seriesFile="series.evl")
 
 # The returned object 'attr' is a Python dictionary.
-# Simulation and observation data are stored separately by function type ('objSeries' or conSeries)objective function ID (objID) and series ID (serID). 
+# Simulation and observation data are stored separately by function type ('objSeries' or conSeries) objective function ID (objID) and series ID (serID). 
 
 simData = attr['objSeries'][1][1]['sim'] # Simulation data
 obData = attr['objSeries'][1][1]['obs']  # Observation data

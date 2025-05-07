@@ -25,24 +25,24 @@
 ## 🚀 快速入门
 
    - 教程
-      - [SWAT-UQ-DEV 使用教程](swat_uq_dev.md)
-      - [SWAT-UQ-GUI 使用教程](swat_uq_gui.md)
-   - 示例集合
+      - [SWAT-UQ-DEV教程](swat_uq_dev.md)
+      - [SWAT-UQ-GUI教程](swat_uq_gui.md)
+   - 示例
       - [示例一：径流校准](example_runoff_calibration.md)
-      - [示例二：最佳工程管理](best_management_practices.md)
+      - [示例二：工程管理](best_management_practices.md)
 
 ---
 
-## ⭐ UQ 项目系列
+## ⭐ UQ系列
 
-- [UQPyL](https://github.com/smasky/UQPyL)：**不确定性量化**与**参数优化**的 Python 工具包。
+- [UQPyL](https://github.com/smasky/UQPyL)：**不确定性量化**与**参数优化**的Python工具包。
 
 <figure align="center">
   <img src="../assets/images//UQPyL_overview.svg" alt="UQPyL 总览图" width="800"/>
   <figcaption>UQPyL内容总览</figcaption>
 </figure>
 
-- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过脚本开发版与图形界面版，融合UQPyL与SWAT模型。
+- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过DEV版与GUI版，融合UQPyL与SWAT模型。
 
 <figure align="center">
   <img src="../assets/images//MainUI.jpg" alt="SWAT-UQ 图形界面版本" width="500"/>

@@ -95,7 +95,8 @@
 | P23 | SMFMN | BSN | Value | [0.0, 20.0] |
 | P24 | TIMP | BSN | Value | [0.01, 1.00] |
 
-基于[快速教程](./swat_uq_dev.md##快速入门)介绍，第一步准备参数文件（par文件）。
+基于[快速教程](./swat_uq_dev.md)介绍。
+第一步，准备参数文件（par文件）。
 
 文件名：`paras_sa.par`
 
