@@ -43,3 +43,39 @@
         padding: 0;
     }
 }
+
+/* 调整目录间距和层级显示 */
+.md-sidebar--secondary nav.md-nav .md-nav__list {
+    padding-left: 0.5em;
+    margin: 0;
+}
+
+.md-sidebar--secondary nav.md-nav .md-nav__item {
+    padding: 2px 0;
+    margin: 0;
+}
+
+.md-sidebar--secondary nav.md-nav ul ul {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0; /* 防止空白区域突变 */
+    padding-left: 10px; /* 缩小子列表缩进 */
+}
+  
+.md-sidebar--secondary nav.md-nav ul ul.expanded {
+    max-height: 500px; /* 足够撑开 */
+    opacity: 1;
+    margin-top: 2px; /* 减少上边距 */
+}
+
+/* 调整三级标题样式 */
+.md-sidebar--secondary nav.md-nav > ul > li > ul > li > a {
+    font-size: 0.95em; /* 稍微小一点的字体 */
+    padding: 1px 0;
+    border-left: 1px solid rgba(0,0,0,0.1); /* 左侧边框 */
+    padding-left: 5px; /* 左侧内边距 */
+    margin-left: -8px; /* 向左偏移以对齐 */
+}
+  

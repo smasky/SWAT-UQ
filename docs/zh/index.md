@@ -4,7 +4,7 @@
 
 [![PyPI 版本](https://badge.fury.io/py/swatuq.svg)](https://badge.fury.io/py/swatuq) ![PyPI - 下载量](https://img.shields.io/pypi/dm/swatuq) ![PyPI - 许可证](https://img.shields.io/pypi/l/swatuq) ![GitHub 最后提交](https://img.shields.io/github/last-commit/smasky/SWAT-UQ) ![作者](https://img.shields.io/badge/Author-wmtSky-orange) ![联系方式](https://img.shields.io/badge/Contact-wmtsmasky%40gmail.com-blue)
 
-**SWAT-UQ** 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的延续项目。UQPyL是一个功能全面的不确定性分析与参数优化平台；而开发SWAT-UQ项目的目标是将UQPyL与SWAT模型无缝集成，使用户能够轻松开展敏感性分析、单目标优化、多目标优化等工作，实现SWAT模型快速建立，水资源高效管理等任务。
+**SWAT-UQ** 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的延伸项目。UQPyL是一个功能全面的不确定性分析与参数优化平台；而开发SWAT-UQ项目的目标是将UQPyL与SWAT模型无缝集成，使用户能够轻松开展敏感性分析、单目标优化、多目标优化等工作，实现SWAT模型快速建立，水资源高效管理等任务。
 
 目前SWAT-UQ项目提供两个版本，满足不同类型用户的需求：
 

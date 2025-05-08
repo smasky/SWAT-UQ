@@ -6,9 +6,11 @@ theme:
     primary: cyan
   code:
     highlight_theme: monokai
+    
   features:
     - navigation.indexes
     - navigation.language
+
   logo: assets/SWAT-UQ.svg
 
 plugins:

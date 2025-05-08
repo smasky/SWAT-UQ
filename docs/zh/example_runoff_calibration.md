@@ -4,11 +4,11 @@
 
 ## 背景介绍
 
-东江流域是广东省内重要的淡水水源地，面积超过 35,000 平方公里，为广州、深圳、香港等多个城市提供供水。
+东江流域是中国广东省内重要的淡水水源地，面积超过 35,000 平方公里，为广州、深圳、香港等多个城市提供生活用水。
 
-本研究选取东江流域的两个子流域——丰水坝（Fengshuba）与新丰江（XinFengJiang）作为径流校准的案例。
+本研究选取东江流域的两个子流域——枫树坝（Fengshuba）与新丰江（XinFengJiang）的径流校准作为教程案例。
 
-本例主要展示丰水坝子流域的校准过程，其汇水面积为 5,150 平方公里，年均降雨量为 1,581 毫米。为了帮助用户熟悉 SWAT-UQ，我们提供了新丰江子流域的校准作为额外练习。
+本例主要展示枫树坝子流域的校准过程，其汇水面积为5,150平方公里，年均降雨量为1,581毫米。为帮助用户熟悉SWAT-UQ，本文档还另外提供了新丰江子流域径流校准作为额外练习。
 
 <figure align="center">
   <img src="../assets/images/background_dongjiang.jpg" alt="UQPyL Overview" width="600"/>
@@ -16,37 +16,35 @@
 
 ---
 
-## SWAT 模型构建
+## 模型构建
 
-在构建丰水坝子流域的 SWAT 模型时，所用数据包括：
+在构建丰水坝SWAT模型时，使用的数据包括：
 
-- **DEM（数字高程模型）** - 使用 ASTER GDEM，空间分辨率为 30 米  
-- **土地利用数据** - 来自中国资源与环境科学数据中心（RESDC）  
-- **土壤数据** - 来自世界统一土壤数据库（HWSD）  
-- **气象数据** - 使用CMADS（中国气象驱动数据集）  
-- **观测数据** - 来自《水文年鉴》的径流数据（2008年1月1日至2017年12月31日）
+- **DEM（数字高程模型）** - ASTER GDEM，空间分辨率为30米  
+- **土地利用数据** - 中国资源与环境科学数据中心（RESDC）  
+- **土壤数据** - 世界统一土壤数据库（HWSD）  
+- **气象数据** - CMADS（中国气象驱动数据集）  
+- **观测数据** - 《中国水文年鉴》的径流数据（2008/01/01 - 2017/12/31）
 
 模型运行时间段如下：
 
-- **预热期**：2008年01月01日至2011年12月31日  
-- **校准期**：2012年01月01日至2016年12月31日  
-- **验证期**：2017年01月01日至2017年12月31日  
+- **预热期**：2008/01/01 - 2011/12/31  
+- **校准期**：2012/01/01 - 2016/12/31
+- **验证期**：2017/01/01 - 2017/12/31  
 
 <figure align="center">
   <img src="../assets/images/example_runoff.svg" width="1000"/>
 </figure>
 
-💡 **提示：** [点击此链接下载项目文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_FSB.zip)
-
----
+💡 **提示：** [点击此链接下载SWAT项目文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_FSB.zip)
 
 ## 问题定义
 
-问题定义指的是将实际问题抽象成数学和代码可处理的问题。
+问题定义指的是将实际问题转换成能用数学公式和代码表示的抽象问题。
 
-本例目标是校准 SWAT 模型，使其输出结果尽可能接近观测数据。首先需选定用于评估模型表现的指标。在水文学中，常见的指标包括 NSE、R²、KGE、RMSE、PCC 等。这里我们采用 **NSE** 作为评估指标。
+本例目标是校准SWAT模型，使其输出径流尽可能接近观测数据。首先需选定用于评估模型表现的指标。在水文学中，常见的指标包括 NSE、R²、KGE、RMSE、PCC 等。本例采用 **NSE** 作为评估指标。
 
-因此，实际问题可以抽象为如下形式：
+因此，实际问题可表示为：
 
 <figure align="center">
   <img src="../assets/images/example_problem.svg" width="350"/>
@@ -54,19 +52,17 @@
 
 其中：
 
-- $x$：SWAT 模型中待确定的参数  
-- $NSE(\cdot)$：NSE 指标函数  
-- $sim$：模型仿真结果  
-- $ob$：观测数据  
-- $lb$ 与 $ub$：参数的上下限
+- $x$：SWAT模型的待定参数  
+- $NSE(\cdot)$：NSE指标 
+- $sim$：模型模拟结果  
+- $ob$：观测数据 
+- $lb$ 与 $ub$：待定参数的上下限
 
-基于该问题，将使用SWAT-UQ实例化该问题与对其求解。
-
----
+依据上述抽象问题，使用SWAT-UQ对其进行编码。
 
 ## 敏感性分析
 
-首先，对东江流域的SWAT模型进行敏感性分析。参考SWAT手册和[Liu 等人 (2017)](https://www.sciencedirect.com/science/article/pii/S0022169417305851)的研究，选取了以下参数：
+首先，对东江流域枫树坝SWAT模型进行敏感性分析。参考SWAT手册和[Liu 等人 (2017)](https://www.sciencedirect.com/science/article/pii/S0022169417305851)的研究，选取以下参数：
 
 | ID | Abbreviation| Where | Assign Type | Range |
 |----|-------|-------|-------------|-------|
@@ -95,8 +91,9 @@
 | P23 | SMFMN | BSN | Value | [0.0, 20.0] |
 | P24 | TIMP | BSN | Value | [0.01, 1.00] |
 
-基于[快速教程](./swat_uq_dev.md)介绍。
-第一步，准备参数文件（par文件）。
+基于[SWAT-UQ-DEV教程](./swat_uq_dev.md)介绍。
+
+第一步，准备参数文件:
 
 文件名：`paras_sa.par`
 
@@ -128,7 +125,7 @@ SMFMN v f 0.0_20.0 all
 TIMP v f 0.01_1.00 all
 ```
 
-第二步，准备函数评估文件（evl文件）：
+第二步，准备评估文件：
 
 文件名：`obj_sa.evl`
 
@@ -165,9 +162,9 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 
 💡 **提示：** [点击此链接下载相关文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/sa.zip)
 
-基于evl文件，SWAT-UQ将从`output.rch`中提取2012至2016年Reach23的数据，并使用NSE指标评估模型性能。
+根据评估文件，SWAT-UQ将从`output.rch`中提取2012-2016年Reach23对应的径流数据，并使用NSE指标整合模拟值和实测值，以此评估模型性能。
 
-第三步，基于Python环境进行敏感性分析：
+第三步，基于Python环境编程实现敏感性分析：
 
 ```python
 from swat_uq import SWAT_UQ
@@ -188,7 +185,7 @@ print(res)
   <img src="../assets/images/fast.svg" width="1000"/>
 </figure>
 
-选取灵敏度前10个参数用于后续优化：CN2、ALPHA_BNK、SOL_K、SLSUBSSN、ESCO、HRU_SLP、OV_N、TLAPS、SOL_ALB、CH_K2。
+依据上图，选取灵敏度前10个参数用于后续优化：CN2、ALPHA_BNK、SOL_K、SLSUBSSN、ESCO、HRU_SLP、OV_N、TLAPS、SOL_ALB、CH_K2。
 
 ---
 
@@ -212,7 +209,7 @@ OV_N r f 0.10_15.00 all
 ESCO v f 0.01_1.00 all
 ```
 
-函数评估文件可与敏感性分析共用，但推荐另存为 `obj_op.evl`。
+函数评估文件可与敏感性分析共用，但推荐另存为`obj_op.evl`，方便工况设置。
 
 💡 **提示：** [点击此链接下载相关文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/op.zip)
 
@@ -264,9 +261,11 @@ pso.run(problem = problem)
 
 ## 参数验证
 
-接下来，基于最优参数进行模型验证。
+基于最优参数进行模型验证。
 
-准备验证期的函数评估文件 `val_op.evl`（使用2017年的实测数据）
+准备验证期的评估文件（即2017年全年数据）：
+
+文件名：`val_op.evl`
 
 ```
 SER_1 : ID of series data
@@ -290,59 +289,10 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 
 X = np.array([...])  # 最优参数值
 res = problem.validate_parameters(X, valFile="val_op.evl")
-print(res["objs"])
-
+print(res['objs'])
 ```
 
----
-
-## 数据后处理
-
-除了敏感性分析与优化，SWAT-UQ还支持从模型输出中提取时间序列数据：
-
-构建新的evl文件：
-
-文件名：`series.evl`
-```
-SER_1 : ID of series data
-OBJ_1 : ID of objective function
-WGT_1 : Weight of series combination
-RCH_23  : ID of subbasin to be included in the objective function
-COL_2 : Column ID of variables in output.rch
-FUNC_10     : Type of objective function (e.g., 1: NSE, 2: RMSE. 3:PCC, 4:Pbias, 5:KGE)
-2012/1/1 to 2016/12/31 : Period for data extraction
-```
-
-```python
-
-X = np.array([...])
-attr = problem.extract_series(X, seriesFile="series.evl")
-
-```
-
-此处，`attr`是一个python字典，其API如下：
-
-```
-attr -> Python Dict
-
-关键字说明：
-
-- x : 输入决策变量，类型为 np.1darray（一维数组）
-- objs : 当前输入决策对应的目标函数值，是一个 Python 字典，可通过 `attr['objs'][objID]` 访问，对应在 *.evl 文件中定义的 objID
-- cons : 与 objs 类似，用于表示约束函数值
-- objSeries : 一个 Python 字典，记录 *.evl 文件中关于目标函数的数据序列，可通过 `attr['objSeries'][objID][serID]` 访问
-- conSeries : 与 objSeries 类似，用于记录关于约束函数的数据序列
-```
-
-关于此例：
-
-```
-simData = attr['objSeries'][1][1]['sim']
-obData = attr['objSeries'][1][1]['obs']
-
-```
-
-## 导入最优解
+## 载入最优解
 
 ```python
 X = np.array([...])

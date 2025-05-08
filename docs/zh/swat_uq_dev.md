@@ -13,7 +13,7 @@
 
 ## 功能特点
 
-1. **并行执行：** 无论是项目文件读写，还是**SWAT模型的模拟仿真**，均支持并行处理。（在一台40核服务器上的基准测试表明，Dev版本能稳定地并行运行80个SWAT实例，实现一个小时内完成两万次模型模拟）。
+1. **并行执行：** 无论是项目文件读写，还是**SWAT模型的模拟仿真**，均支持并行处理。（经过一台40核服务器上的案例测试，Dev版本能稳定并行运行80个SWAT实例以上，并实现了一个小时内完成两万次模型模拟）。
 
 2. **文件控制：** 用户只在前期准备若干UTF-8格式的txt文件，即可完成如流量或水质等模型校准任务时。
 
@@ -42,9 +42,9 @@ conda install swatuq --upgrade
 
 首先，需要实例化`SWAT-UQ`类。该类实质上继承自UQPyL中的`Problem`类。该类将使用户可随意世通UQPyL的所有方法和算法（参考[UQPyL Project](https://github.com/smasky/UQPyL)）。
 
-### 前期准备
+### 概述
 
-前期准备步骤如下：
+总体步骤如下：
 
 1. 准备**SWAT项目文件夹**（简称SWAT Project Folder）。
 
@@ -54,7 +54,9 @@ conda install swatuq --upgrade
 
 4. 在Work Folder中，创建评估文件（UTF-8编码），该文件存储构造目标函数或约束函数的关键信息。
 
-**具体创建参数文件的步骤如下：**
+5. 基于Python环境编程解决问题。
+
+### 参数文件
 
 示例：
 
@@ -105,6 +107,8 @@ CN2 r f -0.4_0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # 指定范围
 - `SUB ID`：作用于指定子流域内的所有 HRU
 - `SUB ID(HRU ID1, HRU ID2, ...)`：作用于指定子流域中的特定 HRU
 - 多个子流域用空格或制表符分隔  
+
+### 评估文件
 
 对于创建评估文件，具体要求如下：
 
@@ -239,14 +243,126 @@ ga.run(problem = problem)
 
 💡 **提示：** 更多关于 UQPyL 的用法详见 [UQPyL 使用文档](https://uqpyl.readthedocs.io/en/latest/)
 
----
 
-### 载入参数
+## 高级操作
 
-你可以通过以下代码将最优参数应用到原始项目文件夹中，或只作用于工作目录：
+### 载入最优参数
+
+通过以下代码将最优参数应用到原始项目文件夹中，或只作用于工作目录：
 
 ```python
-# X should be a list or a NumPy 1D or 2D array
+
+X = np.array([...]) # 输入变量，X should be a list or a NumPy 1D or 2D array
 problem.apply_parameter(X, replace=False) # 应用于工作路径下的Origin文件夹，不修改原始项目
 problem.apply_parameter(X, replace=True) # 直接写入原始SWAT项目
 ```
+
+### 提取模拟结果
+
+SWAT-UQ支持从output文件提取任意时间内的模拟数据
+
+类似于评估文件的格式，准备UTF8格式的序列文件：
+
+文件名：`series.evl`
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1 : Weight of series combination
+RCH_23  : ID of subbasin to be included in the objective function
+COL_2 : Column ID of variables in output.rch
+FUNC_10 : Type of objective function
+2012/1/1 to 2016/12/31 : Period for data extraction
+```
+
+格式和编写规则同评估文件,Python环境编程示例如下：
+
+```Python
+
+X = np.array([...]) # 输入变量，np.1darray
+
+attr = problem.extract_series(X, seriesFile="series.evl")
+
+```
+
+`extract_series`函数返回的变量`attr`是一个python字典，其API如下：
+
+
+```
+attr -> Python Dict
+
+关键字说明：
+
+- x : 输入决策变量，类型为 np.1darray（一维数组）
+- objs : 当前输入决策对应的目标函数值，是一个 Python 字典，可通过 `attr['objs'][objID]` 访问，对应在 *.evl 文件中定义的 objID
+- cons : 与 objs 类似，用于表示约束函数值
+- objSeries : 一个 Python 字典，记录 *.evl 文件中关于目标函数的数据序列，可通过 `dataS = attr['objSeries'][objID][serID]` 访问，其中dataS['sim']表示模拟数据，dataS['obs']表示观测数据
+- conSeries : 与 objSeries 类似，用于记录关于约束函数的数据序列
+```
+
+因此，使用如下方法获得（2012/01/01-2016/12/31）模拟数据：
+
+```Python
+
+simData = attr['objSeries'][1][1]['sim'] # 关键词 'objSeries' 表示目标序列，非约束序列，
+# 关键词 第一个1表示objID, 第二个1表示serID
+# 关键词 'sim' 表示模拟数据，非'obs'观测数据
+
+```
+
+### 验证最优参数
+
+基于验证期观测数据对模型验证所得优化结果，是构建高精度 SWAT 模型的关键步骤。对此，SWAT-UQ-DEV内置了`validate_parameters`函数。
+
+首先，准备UTF8格式的验证文件，导入验证期数据，格式和规则同评估文件：
+
+文件名：`val_op.evl`
+
+```
+SER_1 : ID of series data
+OBJ_1 : ID of objective function
+WGT_1.0 : Weight of series combination
+RCH_23 : ID of RCH, or SUB, or HRU
+COL_2 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+
+1 2017 1 1 74.4
+2 2017 1 2 99.4
+3 2017 1 3 77.4
+...
+...
+365 2017 12 31 19.1
+```
+
+编程示例：
+
+```python
+
+X = np.array([...])  # 最优参数值
+res = problem.validate_parameters(X, valFile="val_op.evl")
+
+```
+
+`validate_parameters`函数返回的`res`是Python字典形式的变量，包含两个固定关键词：`objs` 和 `cons`，代表目标值和约束值。
+对于本例，想获取的是目标值：
+
+```Python
+
+objs = res['objs']
+
+```
+
+### 自定义评估函数
+
+在某些应用场景中（例如 BMPs 优化），**目标函数或约束函数的构建**并不能仅依赖评估文件直接完成。不过，SWAT-UQ可以首先通过评估文件提取模拟结果中的关键数据，进而为用户自定义的目标函数`userObjFunc`或约束函数`userConFunc`提供支持。
+
+这两个函数有一个共同的接口特征：**都接收一个名为`attr`的参数**。
+
+该参数`attr`的本质结构与`extract_series`函数的返回结果一致，都是一个 **Python 字典对象**，其关键词（key）完全相同，并额外包含以下字段：
+
+```
+- HRUInfos：一个 Pandas 数据表（DataFrame），用于记录 HRU（汇流单元）的相关信息，包含以下列：
+  ["HRU_ID", "SUB_ID", "HRU_Local_ID", "Slope_Low", "Slope_High", "Luse", "Area"]
+```
+
+因此`attr`字典汇集了模拟数据、观测数据以及流域空间信息，为用户在`userObjFunc`和`userConFunc`中灵活构造目标函数或约束函数提供了完整的数据基础。具体自定义目标函数与约束函数的案例请参考[工程管理优化](./best_management_practices.md)
