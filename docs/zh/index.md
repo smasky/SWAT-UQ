@@ -42,7 +42,7 @@
   <figcaption>UQPyL内容总览</figcaption>
 </figure>
 
-- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：通过DEV版、GUI版，融合UQPyL与SWAT模型。
+- [SWAT-UQ](https://github.com/smasky/SWAT-UQ)：将UQPyL与SWAT模型深度融合，为模型建立与参数优化提供高效的平台。
 
 <figure align="center">
   <img src="../assets/images//MainUI.jpg" alt="SWAT-UQ 图形界面版本" width="500"/>
