@@ -6,9 +6,9 @@
 
 东江流域是中国广东省内重要的淡水水源地，面积超过 35,000 平方公里，为广州、深圳、香港等多个城市提供生活用水。
 
-本研究选取东江流域的两个子流域——枫树坝（Fengshuba）与新丰江（XinFengJiang）的径流校准作为教程案例。
+本研究选取东江流域的两个子流域——枫树坝与新丰江的径流校准作为教程。
 
-本例主要展示枫树坝子流域的校准过程，其汇水面积为5,150平方公里，年均降雨量为1,581毫米。为帮助用户熟悉SWAT-UQ，本文档还另外提供了新丰江子流域径流校准作为额外练习。
+本例以枫树坝子流域的校准过程为主，该子流域其汇水面积为5,150平方公里，年均降雨量为1,581毫米。为帮助用户熟悉SWAT-UQ，文档还提供新丰江子流域的径流校准作为额外练习。
 
 <figure align="center">
   <img src="../assets/images/background_dongjiang.jpg" alt="UQPyL Overview" width="600"/>
@@ -18,7 +18,7 @@
 
 ## 模型构建
 
-在构建丰水坝SWAT模型时，使用的数据包括：
+构建丰水坝SWAT模型，使用的数据包括：
 
 - **DEM（数字高程模型）** - ASTER GDEM，空间分辨率为30米  
 - **土地利用数据** - 中国资源与环境科学数据中心（RESDC）  
@@ -26,7 +26,7 @@
 - **气象数据** - CMADS（中国气象驱动数据集）  
 - **观测数据** - 《中国水文年鉴》的径流数据（2008/01/01 - 2017/12/31）
 
-模型运行时间段如下：
+模型运行的时间段设置如下：
 
 - **预热期**：2008/01/01 - 2011/12/31  
 - **校准期**：2012/01/01 - 2016/12/31
@@ -40,11 +40,11 @@
 
 ## 问题定义
 
-问题定义指的是将实际问题转换成能用数学公式和代码表示的抽象问题。
+问题定义是指将实际问题转换成能用数学公式和代码表示的抽象问题。
 
-本例目标是校准SWAT模型，使其输出径流尽可能接近观测数据。首先需选定用于评估模型表现的指标。在水文学中，常见的指标包括 NSE、R²、KGE、RMSE、PCC 等。本例采用 **NSE** 作为评估指标。
+本例最终目标是校准SWAT模型，使其模拟径流尽可能接近观测数据。在水文学中，常见评价指标包括 NSE、R²、KGE、RMSE、PCC 等。本例采用**NSE**作为评估指标。
 
-因此，实际问题可表示为：
+该实际问题可表示为：
 
 <figure align="center">
   <img src="../assets/images/example_problem.svg" width="350"/>
@@ -52,17 +52,15 @@
 
 其中：
 
-- $x$：SWAT模型的待定参数  
-- $NSE(\cdot)$：NSE指标 
-- $sim$：模型模拟结果  
+- $x$：待定参数  
+- $NSE(\cdot)$：纳什效率系数
+- $sim$：径流模拟数据  
 - $ob$：观测数据 
-- $lb$ 与 $ub$：待定参数的上下限
-
-依据上述抽象问题，使用SWAT-UQ对其进行编码。
+- $lb$ 与 $ub$：待定参数取值范围
 
 ## 敏感性分析
 
-首先，对东江流域枫树坝SWAT模型进行敏感性分析。参考SWAT手册和[Liu 等人 (2017)](https://www.sciencedirect.com/science/article/pii/S0022169417305851)的研究，选取以下参数：
+首先，对东江流域枫树坝SWAT模型进行敏感性分析。参考SWAT手册和[Liu 等人 (2017)](https://www.sciencedirect.com/science/article/pii/S0022169417305851)的研究，选取下述参数：
 
 | ID | Abbreviation| Where | Assign Type | Range |
 |----|-------|-------|-------------|-------|
@@ -91,9 +89,9 @@
 | P23 | SMFMN | BSN | Value | [0.0, 20.0] |
 | P24 | TIMP | BSN | Value | [0.01, 1.00] |
 
-基于[SWAT-UQ-DEV教程](./swat_uq_dev.md)介绍。
+基于[SWAT-UQ-DEV教程](./swat_uq_dev.md)。
 
-第一步，准备参数文件:
+首先，准备参数文件:
 
 文件名：`paras_sa.par`
 
@@ -125,7 +123,7 @@ SMFMN v f 0.0_20.0 all
 TIMP v f 0.01_1.00 all
 ```
 
-第二步，准备评估文件：
+其次，准备评估文件：
 
 文件名：`obj_sa.evl`
 
@@ -162,12 +160,15 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 
 💡 **提示：** [点击此链接下载相关文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/sa.zip)
 
-根据评估文件，SWAT-UQ将从`output.rch`中提取2012-2016年Reach23对应的径流数据，并使用NSE指标整合模拟值和实测值，以此评估模型性能。
+根据上述文件的信息，SWAT-UQ将从`output.rch`中提取2012-2016年河道ID23对应的径流数据，并使用NSE指标评价模拟值和实测值的拟合程度，进而评估模型性能。
 
-第三步，基于Python环境编程实现敏感性分析：
+最后，在Pyhon环境下编程实现SWAT模型的敏感性分析。
+
+示例如下：
 
 ```python
 from swat_uq import SWAT_UQ
+
 # 初始化 SWAT-UQ 问题
 problem = SWAT_UQ(...)
 
@@ -179,13 +180,13 @@ res = fast.analyze(X, Y)
 print(res)
 ```
 
-最终的FAST敏感性分析如下图所示：
+应用FAST敏感性分析法的结果如下：
 
 <figure align="center">
   <img src="../assets/images/fast.svg" width="1000"/>
 </figure>
 
-依据上图，选取灵敏度前10个参数用于后续优化：CN2、ALPHA_BNK、SOL_K、SLSUBSSN、ESCO、HRU_SLP、OV_N、TLAPS、SOL_ALB、CH_K2。
+依据上图，选取灵敏度前10的参数用于后续参数优化：CN2、ALPHA_BNK、SOL_K、SLSUBSSN、ESCO、HRU_SLP、OV_N、TLAPS、SOL_ALB、CH_K2。
 
 ---
 
@@ -209,7 +210,7 @@ OV_N r f 0.10_15.00 all
 ESCO v f 0.01_1.00 all
 ```
 
-函数评估文件可与敏感性分析共用，但推荐另存为`obj_op.evl`，方便工况设置。
+评估文件理论上可与敏感性分析共用，但推荐另存为`obj_op.evl`，方便工况设置和修改。
 
 💡 **提示：** [点击此链接下载相关文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/op.zip)
 
@@ -218,25 +219,8 @@ ESCO v f 0.01_1.00 all
 ```python
 from swat_uq import SWAT_UQ
 
-projectPath = "E://swatProjectPath" # Use your SWAT project path
-workPath = "E://workPath" # Use your work path
-exeName = "swat2012.exe" # The exe name you want execute
-
-#Blew two files should be created in the workPath
-paraFileName = "paras_sa.par" # the parameter file you prepared
-evalFileName = "obj_sa.evl" # the evaluation file you prepared
-
-problem = SWAT_UQ(
-   projectPath = projectPath, # set projectPath
-   workPath = workPath, # set workPath
-   swatExeName = exeName # set swatExeName
-   paraFileName = paraFileName, # set paraFileName
-   evalFileName = evalFileName, # set evalFileName
-   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
-   numParallel = 10 # set the parallel numbers of SWAT
-)
-
-# The SWAT-related Problem is completed. 
+# 初始化 SWAT-UQ 问题
+problem = SWAT_UQ(...)
 
 from UQPyL.optimization import PSO
 
@@ -245,13 +229,13 @@ pso = PSO(nPop = 50, maxFEs = 30000, verboseFlag = True, saveFlag = True)
 pso.run(problem = problem)
 ```
 
-优化结果如下：
+优化过程及结果如下所示：
 
 <figure align="center">
   <img src="../assets/images/PSO.svg" width="1000"/>
 </figure>
 
-最优参数（NSE≈0.88）如下表：
+最优参数（NSE≈0.88）见下表：
 
 | CN2 | SOL_K | SOL_ALB | CH_K2 | ALPHA_BNK | TLAPS | SLSUBSSN | HRU_SLP | OV_N | ESCO |
 |-----|--------|----------|--------|------------|--------|------------|-----------|--------|-------|
@@ -261,9 +245,9 @@ pso.run(problem = problem)
 
 ## 参数验证
 
-基于最优参数进行模型验证。
+对最优参数进行模型验证。
 
-准备验证期的评估文件（即2017年全年数据）：
+首先，准备验证期对应的评估文件（即使用2017年全年的观测数据）：
 
 文件名：`val_op.evl`
 
@@ -286,8 +270,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 编程示例：
 
 ```python
-
-X = np.array([...])  # 最优参数值
+X = np.array([...]) 
 res = problem.validate_parameters(X, valFile="val_op.evl")
 print(res['objs'])
 ```
@@ -298,14 +281,14 @@ print(res['objs'])
 X = np.array([...])
 problem.apply_parameters(X, replace=False)  # 不改动原始项目，只改动工作目录的Origin文件夹
 # 或：
-problem.apply_parameters(X, replace=True)  # 覆盖原始项目（不推荐）
+problem.apply_parameters(X, replace=True)  # 覆盖原始项目
 ```
 
-至此，模型校准工作完成。
+至此，SWAT模型的校准工作全部完成。
 
 ## 额外练习
 
-另外，本项目提供了新丰江子流域的完整练习项目：
+本项目提供了新丰江子流域的SWAT模型进行练习：
 
 👉 [点击此处下载项目文件](https://github.com/smasky/SWAT-UQ/raw/main/example/example1/project_XFJ.zip)
 
