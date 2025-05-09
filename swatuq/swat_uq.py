@@ -74,7 +74,7 @@ class SWAT_UQ(Problem):
     def __init__(self, projectPath: str, swatExeName: str,
                  workPath: str, paraFileName: str, evalFileName: str, specialFileName: list = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
-                 maxThreads: int = 12, numParallel: int = 5, nInput = None, nOutput = None,
+                 maxThreads: int = 12, numParallel: int = 5, nInput = None, nOutput = None, nConstraints = None,
                  verboseFlag = False, name: str = None, optType = 'min'):
         
         self.modelInfos = {}
@@ -146,6 +146,11 @@ class SWAT_UQ(Problem):
         
         if nOutput is not None:
             self.nOutput = nOutput
+            
+        if nConstraints is not None:
+            self.nConstraints = nConstraints
+
+            
         
         super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
                             lb = self.lb, ub = self.ub, xLabels = self.xLabels,

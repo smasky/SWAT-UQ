@@ -4,7 +4,7 @@
 
 ## 概述
 
-**SWAT-UQ-DEV**是一个基于**Python语言环境**并依托PyPi平台的扩展包（Package）。该扩展包定义了名为`SWAT_UQ`的 Python类，继承自UQPyL的`Problem`类。因此，用户实例化`SWAT_UQ`类后，即可直接调用UQPyL的所有方法和算法，完成各项任务。
+**SWAT-UQ-DEV**是一个基于**Python语言环境**并于PyPi平台托管的扩展包（Package）。该扩展包定义了名为`SWAT_UQ`的 Python类，继承自UQPyL的`Problem`类。因此，用户实例化`SWAT_UQ`类后，即可直接调用UQPyL的所有方法和算法，完成各项任务。
 
 此外`SWAT_UQ`类还封装了一系列功能函数，包括写入自定义参数、读取模拟模拟结果等，简化了问题构建->分析->求解的流程，提升效率。
 
@@ -40,11 +40,11 @@ conda install swatuq --upgrade
 
 本节将提供SWAT-UQ-DEV的详细指南，帮助用户解决基于SWAT模型的水文问题。
 
-首先，需要实例化`SWAT-UQ`类。该类实质上继承自UQPyL中的`Problem`类。该类将使用户可随意世通UQPyL的所有方法和算法（参考[UQPyL Project](https://github.com/smasky/UQPyL)）。
+首先，需要实例化`SWAT-UQ`类。该类实质上继承自UQPyL中的`Problem`类。该类将使用户可随意调用UQPyL的所有方法和算法（参考[UQPyL Project](https://github.com/smasky/UQPyL)）。
 
 ### 概述
 
-总体步骤如下：
+具体步骤如下：
 
 1. 准备**SWAT项目文件夹**（简称SWAT Project Folder）。
 
@@ -123,8 +123,8 @@ SER_1 : ID of series data
 OBJ_1 : ID of objective function
 WGT_1.0 : Weight of series combination
 RCH_23 : ID of RCH, or SUB, or HRU
-COL_2 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
-FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
+COL_2 : Variable of Column, within *.rch, *.sub, *.hru.
+FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min, 10 - None)
 
 1 2012_1 2.1
 2 2012_2 3.2
@@ -152,7 +152,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 - **WGT_NUM：** `NUM`为该序列在同一`OBJ ID` 或 `CON ID`组合时的线性权重。
 - **RCH_ID / SUB_ID / HRU_ID：** 指定要从`output.rch`、`output.sub`或`output.hru`文件中提取数据。ID为RCH、SUB、HRU的对应位置标识。
 - **COL_NUM：** 指定从对应输出文件的第几列提取数据（可参考下表）。
-- **FUNC_NUM：** 定义目标函数类型：1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min
+- **FUNC_NUM：** 定义目标函数类型：1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min, 10 - None (only for extract)
 
 **有效的COL_NUM 值（不同输出文件对应列号）：**
 
@@ -162,7 +162,7 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 | output.sub  | 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP |
 | output.hru  | 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP, ... 49-NUP, 50-PUP, ... 67-BACTP, 68-BACTLP |
 
-💡 **注意：** 这些编号取自 SWAT 手册。也可以直接打开输出文件手动数列号以确定对应变量。
+💡 **注意：** 这些编号取自SWAT手册；也可以直接打开output文件手动数列号以确定对应变量。
 
  **Data Section**
 
