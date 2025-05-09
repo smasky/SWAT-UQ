@@ -12,7 +12,7 @@ There are two available versions of SWAT-UQ, tailored to meet different user nee
 
  - **SWAT-UQ-GUI (GUI Version)** - Offers an intuitive graphical interface for streamlined operation, ideal for users seeking minimal coding involvement.
 
-With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantification and optimization capabilities into their SWAT-based hydrological modeling projects.
+With the framework of SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantification and optimization capabilities into their SWAT-based hydrological modeling projects.
 
 ---
 
@@ -43,7 +43,7 @@ With SWAT-UQ, users can seamlessly incorporate powerful uncertainty quantificati
   <figcaption>Overview of UQPyL</figcaption>
 </figure>
 
-- [SWAT-UQ](https://github.com/smasky/SWAT-UQ), providing script-based (Develop) and GUI versions to integrate UQPyL and the Soil and Water Assessment Tool (**SWAT**) model. 
+- [SWAT-UQ](https://github.com/smasky/SWAT-UQ) integrate UQPyL and the Soil and Water Assessment Tool (**SWAT**) model and provide script-based (Develop) and GUI versions. 
 
 <figure align="center">
   <img src="./assets/images/MainUI.jpg" alt="SWAT-UQ GUI Version" width="500"/>

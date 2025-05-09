@@ -12,15 +12,15 @@ The SWAT-UQ-DEV is particularly suited for users who wish to customize their wor
 
 1. **Parallel Execution:** Both data I/O operations within project folder and **SWAT model simulations** support parallelization. ( 🎉 Benchmark tests on a 40-core server demonstrate that the current code version can stably run up to 80 SWAT instances concurrently.)
 
-2. **File Control:** For model calibration tasks — such as streamflow and water quality,  users only need to prepare a set of `.txt` files to complete the entire setup process. 
+2. **File Control:** For model calibration tasks — such as runoff and water quality,  users only need to prepare a set of text files to complete the entire work process. 
 
-3. **Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> back-substitution.
+3. **Workflow Integration:** With the support of  [UQPyL](https://github.com/smasky/UQPyL), users can efficiently carry out the complete modelling-based workflows: sensitivity analysis -> optimization -> optimal parameters loading.
 
 ## Installation
 
  ![Static Badge](https://img.shields.io/badge/Python-3.6%2C%203.7%2C%203.8%2C%203.9%2C%203.10%2C%203.11%2C%203.12-blue) ![Static Badge](https://img.shields.io/badge/OS-Windows%2C%20Linux-orange)
 
- **Recommended (PyPi or Conda):**
+ **Recommended (pip or conda):**
 
 ```bash
 pip install -U swatuq
