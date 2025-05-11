@@ -8,20 +8,21 @@
 
 👉[中文文档](https://swat-uq.readthedocs.io/en/latest/zh/index.html)
 
-SWAT-UQ 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的扩展子项目。UQPyL 是一个面向参数不确定性分析与优化的综合性平台。SWAT-UQ 旨在实现 UQPyL 与 SWAT 水文模型的深度耦合，帮助用户以极简的方式开展参数敏感性分析、单目标优化、多目标优化等任务，亦可灵活支持其他不确定性相关工作。
+**SWAT-UQ** 是 [UQPyL](https://github.com/smasky/UQPyL) 项目的延伸项目。UQPyL是一个功能全面的不确定性分析与参数优化平台；而开发SWAT-UQ项目的目标是将UQPyL与SWAT模型无缝集成，使用户能够轻松开展敏感性分析、单目标优化、多目标优化等工作，实现SWAT模型快速建立，水资源高效管理等任务。
 
-面向不同的用户群体，SWAT-UQ提供两个版本：
-- **SWAT-UQ-DEV:** 开发版，提供灵活的代码接口，适用于具备一定编程能力、追求高度定制化建模流程的高级用户。
-- **SWAT-UQ-GUI:** 图形界面版，配备直观易用的可视化操作界面，简化工作流程，适合希望减少编码参与的用户群体。
+目前SWAT-UQ项目提供两个版本，满足不同类型用户的需求：
 
-SWAT-UQ使用户能够将先进的不确定性分析方法与优化算法，便捷地融入基于SWAT模型的水文建模流程之中。
+ - **SWAT-UQ-DEV（开发者版本）**：适用于需要高度灵活性和自定义建模、分析、优化流程的用户。
+ - **SWAT-UQ-GUI（图形界面版本）**：提供直观的图形化界面，简化操作流程，适合希望尽量减少编程的用户。
+
+总体而言，借助SWAT-UQ项目，用户可以将UQPyL强大的不确定性分析与优化功能无缝融入基于SWAT模型的研究项目。
 
 ## 实用链接
 
-- **官网网站**: [参数敏感性分析及优化实验室](http://www.uq-pyl.com) (**TODO**: 需要更新)
-- **开源代码**: [GitHub 仓库](https://github.com/smasky/SWAT-UQ/)
-- **官方文档**: [查看文档](https://swat-uq.readthedocs.io/en/latest/)
-- **文章引用**: SWAT-UQ(未来将发表)
+- **官网**：[参数敏感性分析及优化实验室](http://www.uq-pyl.com)（**待更新**）
+- **源代码**：[GitHub 仓库](https://github.com/smasky/SWAT-UQ/)
+- **文档资料**：[查看文档](https://swat-uq.readthedocs.io/en/latest/)
+- **引用信息**：SWAT-UQ（**投稿至Environment Modelling & SoftWare**）
 
 ---
 
@@ -36,23 +37,25 @@ SWAT-UQ使用户能够将先进的不确定性分析方法与优化算法，便�
 
 ## SWAT-UQ 开发版
 
-**SWAT-UQ-DEV**是面向Python环境的扩展包。该版本实现了一个名为`SWAT_UQ`的Python类，继承自 UQPyL框架中的`Problem`基类。用户通过实例化SWAT_UQ类，不仅能够直接调用UQPyL提供的各类方法与算法，还可借助其内置的多种辅助函数，高效开展模型参数率定、最佳管理措施优化等不确定性分析与优化任务。
+**SWAT-UQ-DEV**是一个基于**Python语言环境**并于PyPi平台托管的扩展包（Package）。该扩展包定义了名为`SWAT_UQ`的 Python类，继承自UQPyL的`Problem`类。因此，用户实例化`SWAT_UQ`类后，即可直接调用UQPyL的所有方法和算法，帮助完成各种任务。
 
-该版本尤其适合有自定义建模流程需求，或希望将其与 UQPyL 及其他 Python 工具进行集成的用户。
+此外`SWAT_UQ`类还封装了一系列功能函数，包括写入自定义参数、读取模型模拟结果等，简化“问题构建->分析->求解”的流程，提升解决问题效率。
+
+因此，SWAT-UQ-DEV特别适合希望自定义工作流（集成UQPyL或其他Python扩展包）的用户。
 
 ### ✨ 功能特点
 
-1. **并行执行:** 项目文件夹内的数据输入输出操作以及 SWAT 模型仿真 都支持并行化处理。(🎉在一台 40核Linux服务器上的基准测试表明，当前版本的代码可以稳定地同时运行最多80个SWAT实例。)
+1. **并行执行：** 无论是项目文件读写，还是**SWAT模型的模拟仿真**，均支持并行处理。（经过一台40核服务器上的压力测试，SWAT-UQ-Dev并行运行80个SWAT模拟实例以上，实现一小时内完成两万次模拟）。
 
-2. **文件控制:** 在模型参数率定任务中（如径流、泥沙、水质），用户只需准备一组 .txt 文件即可完成整个设置过程。
+2. **文件控制：** 用户只在前期准备若干UTF-8格式的文本文件，即可轻易完成如径流或水质等关于SWAT模型的校准任务。
 
-3. **工作流集成:** 在 UQPyL 的支持下，用户能够高效地执行完整的基于建模的工作流：敏感性分析 -> 优化 -> 参数回代分析。
+3. **流程简化：** 基于[UQPyL](https://github.com/smasky/UQPyL)的支持，用户可轻松完成全部建模流程：敏感性分析->参数优化->最优参数载入
 
 ### ⚙️ 安装指南
 
  ![Static Badge](https://img.shields.io/badge/Python-3.6%2C%203.7%2C%203.8%2C%203.9%2C%203.10%2C%203.11%2C%203.12-blue) ![Static Badge](https://img.shields.io/badge/OS-Windows%2C%20Linux-orange)
 
- **推荐 (PyPi or Conda):**
+ **推荐 (pip or conda):**
 
 ```bash
 pip install -U swatuq
@@ -64,81 +67,99 @@ conda install swatuq --upgrade
 
 ### 🍭 快速开始
 
-在本节，我们提供了使用SWAT-UQ-DEV解决基于SWAT模型的分析及优化问题的指南。
+本节将提供SWAT-UQ-DEV的详细指南，帮助用户解决各类基于SWAT模型的水文问题。SWAT-UQ-DEV的设计核心是通过实例化`SWAT-UQ`类，来串联SWAT模型与UQPyL。因此，`SWAT-UQ`类实质上继承自UQPyL中的`Problem`类。该类的实例化将使用户可简单快速调用UQPyL的所有方法（参考[UQPyL Project](https://github.com/smasky/UQPyL)）。
 
-首先，实例化`SWAT-UQ`类，该类继承自UQPyL中的`Problem`类。通过这样操作，您将能够访问UQPyL中所有可用的方法和算法(有关详细信息，请参考[UQPyL文档](https://github.com/smasky/UQPyL))。
+具体步骤如下：
 
-在开始之前，需要进行一些准备工作：
+第1步：准备**SWAT项目文件夹**，即TxtInOut文件夹（简称项目文件夹）。
 
-**步骤1:** 获得SWAT项目文件夹(为方便起见，称为**SWAT Project Folder**)。
+第2步：创建另外的**工作文件夹（Work Folder）**，存放控制文件和临时文件。
 
-**步骤2:** 创建一个单独的文件夹，作为工作文件夹(**Work Folder**)，用于存放问题设定所需的控制文件，以及在并行运行 SWAT 模型过程中生成的临时文件。
+第3步：在工作文件夹，创建并编辑参数文件（使用UTF-8编码）。该文件用于存储待分析或优化参数的信息。
 
-**步骤3:** 在工作文件夹中创建一个使用UTF-8编码的参数文件，用于定义您希望分析或优化的参数信息。格式示例如下:
+第4步：在工作文件夹，创建并编辑评估文件（使用UTF-8编码），该文件用于存储构造目标函数或约束函数的信息。
 
-**文件名:** `paras.par`
+第5步：基于Python环境编程并解决问题。
 
-💡 **注意:** 参数文件的文件名没有严格限制，但建议使用 .par 扩展名，以保持与图形界面版本的一致性。文件中的所有元素应使用空格或制表符（Tab）进行分隔。
+工作文件夹的文件结构应为：
 
 ```
-Name Mode Type Min_Max Scope
+Work Folder/
+├── tempForParallel/  # 并行临时目录，计算结束请自行删除以免占满硬盘
+│   ├── 0505_081713/ # 每一次运行，SWAT-UQ-DEV按照日期自动生成单独文件夹，方便后期Debug
+│   │   ├── origin/ # 原始SWAT项目文件夹，apply_parameters函数可载入最优参数至该目录
+│   │   ├── validation/ # 用于模型验证
+│   │   ├── parallel0/ # 用于并行的SWAT项目文件夹
+│   │   ├── parallel1/ # 用于并行的SWAT项目文件夹
+│   │   └── parallel2/ # 用于并行的SWAT项目文件夹
+│   └── 0504_215113/
+├── paras.par # 参数文件
+└── eval.evl # 评估文件
+```
+
+参数文件示例如下：
+
+```
+Name Type Mode Min_Max Scope
 CN2 r f -0.4_0.2 all
 GW_DELAY v f 30.0_450.0 all
-ALPHA_BF v f 0.0_1.0 all
-GWQMN v f 0.0_500.0 all
-... 
-SMFMN v f 0.0_20.0 all
-TIMP v f 0.01_1.0 all
-SURLAG v f 0.05_24.0 all
+...
 ```
 
-参数文件的**第一行**是固定保留的，用作提示说明。
+第一行始终用于显示提示信息，请勿移除。
 
-接下来的每一行参数信息需按照以下顺序填写: Name(参数名)、Mode(赋值方式)、Type(变量类型)、Min_Max(最小值_最大值)和 Scope(作用范围)，具体说明如下：
+除首行外，每一行均应包含下述完整的字段信息：`Name`、`Mode`、`Type`、`Min_Max` 和 `Scope`。
 
-- **Name(参数名):** 可以填写出现在`.gw`, `.hru`, `.mgt`, `.sol`, `.rte`, `.sub`, `.sep`, `.swq`等文件中的任意参数。目前已支持多达308个参数。在 *.sol 文件中，支持针对不同层级单独调整参数。示例如下：
+**Name（参数名）：** 可为`.gw`、`.hru`、`.mgt`、`.sol`、`.rte`、`.sub`、`.sep`、`.swq`等项目文件中的任意参数名。参数名原则上应与SWAT项目文件中的参数名一致。同时，针对`*.sol`文件的参数，可针对特定土层修改，例如：
 
 ```
-SOL_K(2) r f 0.5_15.0 all    # 仅应用于第二层
-SOL_K(3) r f 0.5_15.0 all    # 仅应用于第三层
-SOL_K r f 0.5_15.0 all       # 应用于所有层
+SOL_K(2) r f 0.5_15.0 all    # 仅修改第二层
+SOL_K(3) r f 0.5_15.0 all    # 仅修改第三层
+SOL_K r f 0.5_15.0 all       # 修改所有层
 ```
 
-- **Mode(赋值方式):** 表示参数的赋值模式，用一个字符表示(`r`, `v` 或 `a`)。
-    - 假设`val`是参数文件中给出的值，`originVal`是SWAT项目文件中的原始值。
-    - **`r`** 相对赋值方式，输入项目文件的实际值将通过公式`(1+val)*originVal`计算。
-    - **`v`** 绝对赋值方式，直接使用`val`作为实际值。
-    - **`a`** 增量赋值方式，实际值为`originVal+val`。
-- **Type(变量类型):** 表示参数的类型，用一个字符表示(`i` 整型, `f` 浮点型, `d` 离散型)
-- **Min_Max(最小值_Max):** 'Min'表示该参数的最小值(下界); 'Max'表示该参数的最大值(上界)。
-- **Scope(作用范围):** 表示该参数生效的目标范围。默认设置为`all`，即在全局范围内修改该参数。你也可以指定具体的`SUB ID`，或指定`SUB ID`与`HRU ID`的组合，从而只在特定区域上应用该参数。例如：
+如果，有些HRU的土壤层数不足3层或者2层，则默认不对该HRU修改。
 
- ```
- CN2 r f -0.4_0.2 all # Default Scope
- CN2 r f -0.4_0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # Appoint Scope
- ```
+**Mode（赋值模式）：** 通过`r`、`v`、`a`等单字符定义项目文件对应参数的赋值模式。（参考SWAT-CUP软件的用法）
 
-作用范围的格式可以采用以下两种方式之一：
+   - val 表示分析或优化的数值
+   - `r`：相对赋值 -> 新值 = 原值 × (1 + val)
+   - `v`：绝对赋值 -> 新值 = val
+   - `a`：加法赋值 -> 新值 = 原值 + val  
 
-- `SUB ID`：将该参数应用于指定子流域（Sub-basin）中的所有 HRU 单元。
-- `SUB ID(HRU ID_1, HRU ID_2, ..., HRU ID_N)`：将该参数仅应用于指定子流域中部分HRU单元。
+**Type（变量类型）：** `i` 表示整数，`f` 表示浮点数，`d` 表示离散型。
 
-多个子流域之间应使用空格或制表符（Tab）分隔。
-(后续即将推出以HRU的slope来划分作用范围)
+**Min_Max（取值范围）：** 定义最小值与最大值，用 `_` 分隔。对于离散变量则使用`_`串联所有可能的值。
 
-**步骤4:** 在工作目录(Work Folder)中创建一个评估文件(evaluation file)，文件编码为UTF-8。该文件用于基于观测数据构建目标函数或约束函数。
+**Scope（作用范围）：**
 
-文件名: `eval.obj`
+  - 默认设置为`all`表示参数将在全流域进行赋值。
 
-💡 **注意:** 评估文件的文件名没有严格限制，但建议使用`.obj`扩展名，以保持与图形界面版本的一致性。
+  - 或者指定子流域**SUB ID**或**SUB ID(HRU ID)**，例如：
+
+```
+CN2 r f -0.4_0.2 all # 默认范围
+CN2 r f -0.4_0.2 3(1,2,3,4,5,6,7,8,9) 4(1,2,3,4) 5 # 指定范围
+```
+说明如下：
+
+- 多个子流域用空格或制表符分隔 
+- 单个`SUB ID`：作用于指定子流域内的的所有HRU
+- `SUB ID(HRU ID1, HRU ID2, ...)`：作用于指定子流域的特定HRU。
+
+对于创建评估文件，也推荐使用 `.evl` 扩展名以与 GUI 版本保持一致
+
+**示例：**
+
+文件名： `eval.evl`
 
 ```
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
 WGT_1.0 : Weight of series combination
 RCH_23 : ID of RCH, or SUB, or HRU
-COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
-FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
+COL_2 : Variable of Column, within *.rch, *.sub, *.hru.
+FUNC_1 : Func Type( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min, 10 - None)
 
 1 2012_1 2.1
 2 2012_2 3.2
@@ -150,38 +171,61 @@ FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7
 12 2012_12 22.44
 ```
 
-评估文件(evaluation file)可以包含多个数据序列(data series)，每个序列可对应流域内不同的位置、输出变量、时间段。
-本示例中仅展示一个数据序列的格式。
-每个数据序列由两部分组成：a.头部定义(Head Definition); b.数据部分(Data Section)
+评估文件可由多个序列（series）组成，上面示例为一个序列，每个序列可对应流域内不同位置、变量或时间。
 
-**头部定义(Head Definition)说明**: (以下带有 ID 或 NUM 的标签需用具体数字替代)
+每个序列应包含两部分：a.Head Section；b. Data Section
 
-- **SER_ID:** 该ID是该数据序列的唯一标识符，需用不同的int型数字区分不同数据序列。
+**Head Section：**
 
-- **OBJ_ID** 或 **CON_ID:** `OBJ`表示该序列用于构建目标函数(Objective Function);`CON`表示该序列用于构建约束函数(Constraint Function)；其后的 ID 是对应函数的唯一标识符。
+在下述说明中，标签`ID`或`NUM`需根据实际问题用数字替换。
 
-💡**提示:** SWAT-UQ-DEV支持多个数据序列(Data series)共用同一个OBJ_ID或CON_ID。共同ID的数据序列将使用后续定义的权重来线性组合。
+- **SER_ID：** 每个序列的唯一标识。（用户自行决定具体数值，但应保证不同序列拥有不同ID）
+- **OBJ_ID / CON_ID：** `OBJ`或`CON`定义该序列属于目标函数还是约束函数。`ID`表示`OBJ`或`CON`的标识，用户自行定义。
+💡 **注意：** SWAT-UQ-DEV 支持多个序列共享同一`OBJ ID` 或 `CON ID`，但`SER_ID`应是唯一的。
+- **WGT_NUM：** 线性权重参数，用于在组合相同 OBJ ID 或 CON ID 的多个序列时，指定当前序列的权重值。
+- **RCH_ID / SUB_ID / HRU_ID：** 前缀表示数据来源，即RCH表示从`output.rch`抽取数据，SUB表示`output.sub`，HRU表示`output.hru`。ID则表示河道、子流域和HRU的标识码。
+- **COL_NUM：** 指定从输出文件中提取数据的列号。各输出文件的列结构有所不同，具体列号对应的变量请参考下表。
+- **FUNC_NUM：** 指定评价函数或数据处理方法的编号，例如：1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min, 10 - None (仅用于数据提取)
 
-- **WGT_NUM:** 此`NUM`表示该序列在组合为同一OBJ_ID或CON_ID时的线性权重。`NUM`应为int或float型数字
+**不同输出文件对应的数据列号**
 
-- **RCH_ID**, **SUB_ID** 或 **HRU_ID:** 这些标签用于指定读取的输出文件类型，分别对应SWAT模型中的河道(RCH)、子流域(SUB)或水文响应单元(HRU)。ID应与SWAT项目中的对应编号一致，并可根据实际需求进行设定。
+| 文件名      | 有效值 |
+|-------------|--------|
+| output.rch  | 1-FLOW_IN, 2-FLOW_OUT, 3-EVAP, 4-TLOSS, 5-SED_IN, 6-SED_OUT, 8-ORGN_IN, 9-ORGN_OUT, ... 38-BACTP_OUT, 39-BACTLP_OUT, 43-TOT_N, 44-TOT_P |
+| output.sub  | 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP |
+| output.hru  | 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP, ... 49-NUP, 50-PUP, ... 67-BACTP, 68-BACTLP |
 
-- **COL_NUM:** 此`NUM`表示要从`output.rch`, `output.sub`或`output.hru`文件中提取的变量列号(请参考后续表格以获取正确数值)。
+💡 **注意：** 上述编号均取自SWAT手册；用户也可以直接打开响应的output文件自行确定变量的列号。
 
-- **FUNC_NUM:** 此`NUM`用于定义基于观测值与模拟值的目标或约束函数类型。(`NUM`取值如下: 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min)
+ **Data Section**
 
-各输出文件（output.rch、output.sub、output.hru）中可提取变量的列号一览表
-| File Name | Valid Value |
-| ----------|-------------|
-| output.rch| 1-FLOW_IN, 2-FLOW_OUT, 3-EVAP, 4-TLOSS, 5-SED_IN, 6-SED_OUT, 8-ORGN_IN, 9-OGRN_OUT, 10-ORGP_IN, 11-ORGP_OUT, 12-NO3_IN, 13-NO3_OUT, 14-NH4-IN, 15-NH4-OUT, 16-NO2_IN, 17-NO2_OUT, 18-MINP_IN, 19-MINP_OUT, 20-CHLA_IN, 21-CHLA_OUT, 22-CBOD_IN, 23-CBOD_OUT ... 38-BACTP_OUT, 39-BACTLP_OUT... 43-TOT_N, 44-TOT_P |
-| output.sub| 1-PRECIP, 2-SNOMELT, 3-PET, 4-ET, 5-SW, 6-PERC, 7-SURQ, 8-GW_Q, 9-WYLD, 10-SYLD, 11-ORGN, 12-ORGP, 13-NSURQ, 14-SOLP, 15-SEDP|
-| output.hru| 1-PRECIP, 2-SNOFALL, 3-SNOMELT, 4-IRR, 5-PET, 6-ET, 7-SW_INIT, 8-SW_END, 9-PERA, 10-GW_RCHG, 11-DA_RCHC, 12-REVAP ... 49-NUP, 50-PUP ...67-BACTP, 68-BACTLP|
+该部分的数据结构应为 `NUM`、`YEAR`、`MONTH`、`DAY`、`DATA`。其中：
 
-可选：
-在某些情况下，目标函数（Objective Function）可以不依赖观测数据，仅通过从模型输出文件中提取数据来进行计算。
-SWAT-UQ 提供了一种更简便的方法来实现这一需求。
+- **NUM:** 序号，仅用于用户检查数据完整性，是否缺漏
+- **YEAR:** 年份，
+- **MONTH:** 月份，
+- **DAY:** 日,
+- **DATA:** 数据值（整数或浮点数）。
 
-例如：
+💡 **注意：** 当SWAT项目的`file.cio`文件的`IPRINT`为1，输出文件按日生成，SWAT-UQ将读取YEAR、MONTH、DAY；若为0，输出文件按月生成，SWAT-UQ将则仅读取YEAR，MONTH（DAY字段在此模式下无效，但必须提供）。
+
+示例:
+
+```
+1 2012 1 1 2.1
+2 2012 1 2 3.2
+3 2012 1 3 3.5
+4 2012 1 4 6.7
+5 2012 1 5 14.55
+6 2012 1 6 21.54
+...
+12 2012 1 12 22.44
+```
+
+在某些工况下，目标函数或者约束函数不依赖于观测数据，只需要模型输出文件的模拟数据。对此，SWAT-UQ还提供更简便方法：
+
+示例：
+
 ```
 SER_1 : ID of series data
 OBJ_1 : ID of objective function
@@ -189,56 +233,50 @@ WGT_1.0 : Weight of series combination
 RCH_23 : ID of RCH, or SUB, or HRU
 COL_6 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
 FUNC_1 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
-2012/1/1 to 2018/12/31 : Period for data extraction
+2012/01/01 to 2018/12/31 : Period for data extraction
 ```
 
-因此，2012/1/1至2018/12/31的数据会被提取出来。
+通过`YYYY/MM/DD to YYYY/MM/DD`设定数据提取区间。在本例中，SWAT-UQ将提取2012年1月1日-2018年12月31日期间的模拟数据。
 
-**步骤5:** 在Python环境，构建基于SWAT模型的问题
+以下代码展示了如何在 Python 环境中如何定义`SWAT-UQ`类：
 
-```Python
-# First import SWAT_UQ class
+```python
+
+# 导入SWAT-UQ类
 from swatuq import SWAT_UQ
 
-# Second define requirement variables:
-
-projectPath = "E://swatProjectPath"  # your SWAT Project Path
-workPath = "E://workPath" # your Work Path
-exeName = "swat2012.exe" # the name of swat.exe you want to run
-paraFileName = "paras.par" # the parameter file you prepared
-evalFileName = "eval.obj" # the evaluation file you prepared
+# 定义环境变量
+projectPath = "E://swatProjectPath"  #项目文件夹 地址
+workPath = "E://workPath" #工作文件夹 地址
+exeName = "swat2012.exe" #SWAT可执行程序的名称
+paraFileName = "paras.par" #参数文件名称，该文件应位于工作文件夹
+evalFileName = "eval.evl" #评估文件名称，该文件应位于工作文件夹
 
 problem = SWAT_UQ(
-   projectPath = projectPath, # set projectPath
-   workPath = workPath, # set workPath
-   swatExeName = exeName # set swatExeName
-   paraFileName = paraFileName, # set paraFileName
-   evalFileName = evalFileName, # set evalFileName
-   verboseFlag = True, # enable verboseFlag to check if setup is configured properly.
-   numParallel = 2 # set the number of parallels
+   projectPath = projectPath,
+   workPath = workPath,
+   swatExeName = exeName,
+   paraFileName = paraFileName,
+   evalFileName = evalFileName,
+   nInput = 10, # 待定参数个数
+   nOuput = 1, # 目标个数，若不指定则依据eval.obj文件设定的目标个数
+   nConstraint = 0, #约束个数，若不指定则依据eval.obj文件设定的目标个数
+   verboseFlag = True, # 是否输出调试信息
+   numParallel = 2 #并行SWAT模型的数量
 )
 
-# The SWAT-related Problem is completed. You can enjoy all methods and algorithms of UQPyL.
+# 以上为实例化SWAT-UQ的过程，下面就可以随意调用UQPyL的方法
 
-#For example:
+#例如，单目标优化:
 from UQPyL.optimization.single_objective import GA
 
 ga = GA()
 ga.run(problem = problem)
 ```
 
-**步骤6:** 将最优参数应用到工程文件夹
+💡 **提示：** 更多关于UQPyL的用法请详见[UQPyL 使用文档](https://uqpyl.readthedocs.io/en/latest/)。SWAT-UQ-DEV更多高级用法请详见[SWAT-UQ 使用文档](https://swat-uq.readthedocs.io/en/latest/)
 
-```Python
-
-#X应为list或者numpy.1d/2darray
-problem.apply_parameter(X, replace = False) # 将参数X应用到workOriginPath, 不修改原始工程。
-problem.apply_parameter(X, replace = True) # 将参数X应用到原始工程文件夹
-
-```
-
-
-## SWAT-UQ 界面操作版
+## SWAT-UQ界面操作版
 
 💡 **提示:** 目前推荐使用SWAT-UQ-DEV，DEV版本更领先，GUI版本有待后续更新！
 

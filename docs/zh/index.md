@@ -17,10 +17,10 @@
 
 ## 🔗 项目概览
 
-- **官网**：[官方网站](http://www.uq-pyl.com)（**待更新**）
+- **官网**：[参数敏感性分析及优化实验室](http://www.uq-pyl.com)（**待更新**）
 - **源代码**：[GitHub 仓库](https://github.com/smasky/SWAT-UQ/)
 - **文档资料**：[查看文档](https://swat-uq.readthedocs.io/en/latest/)
-- **引用信息**：SWAT-UQ（**计划投稿至Environment Modelling & SoftWare**）
+- **引用信息**：SWAT-UQ（**投稿至Environment Modelling & SoftWare**）
 
 ## 🚀 快速入门
 

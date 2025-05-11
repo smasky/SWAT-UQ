@@ -169,7 +169,7 @@ FUNC_1 : Func Type( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 
 - **DAY:** 日,
 - **DATA:** 数据值（整数或浮点数）。
 
-💡 **注意：** 当SWAT项目的`file.cio`文件的`IPRINT`为0，输出文件按日生成，SWAT-UQ将读取YEAR、MONTH、DAY；若为1，输出文件按月生成，SWAT-UQ将则仅读取YEAR，MONTH（DAY字段在此模式下无效，但必须提供）。
+💡 **注意：** 当SWAT项目的`file.cio`文件的`IPRINT`为1，输出文件按日生成，SWAT-UQ将读取YEAR、MONTH、DAY；若为0，输出文件按月生成，SWAT-UQ将则仅读取YEAR，MONTH（DAY字段在此模式下无效，但必须提供）。
 
 示例:
 

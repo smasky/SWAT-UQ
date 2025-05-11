@@ -80,7 +80,7 @@ Specific steps list below:
 
 ---
 
-The file structure of Work Folder of SWAT-UQ-DEV would be:
+The file structure of Work Folder would be:
 
 ```
 Work Folder/
@@ -214,7 +214,7 @@ The valid values of `COL_NUM` in `output.rch`, `output.hru`, `output.sub` can be
 - **DAY:** Day index
 - **DATA:** The type of data can be int or float.
 
-💡 **Note:** When the `IPRINT` setting in the SWAT project's `file.cio` file is set to `0`, the output files are generated on a daily basis, and SWAT-UQ will read the `YEAR`, `MONTH`, and `DAY` fields. When `IPRINT` is set to `1`, the output files are generated monthly, and SWAT-UQ will only read the `YEAR` and `MONTH` fields. In this mode, the `DAY` field is ignored but still required to be present.
+💡 **Note:** When the `IPRINT` setting in the SWAT project's `file.cio` file is set to `1`, the output files are generated on a daily basis, and SWAT-UQ will read the `YEAR`, `MONTH`, and `DAY` fields. When `IPRINT` is set to `0`, the output files are generated monthly, and SWAT-UQ will only read the `YEAR` and `MONTH` fields. In this mode, the `DAY` field is ignored but still required to be present.
 
 For example:
 
