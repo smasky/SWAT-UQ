@@ -85,7 +85,7 @@ The file structure of Work Folder of SWAT-UQ-DEV would be:
 ```
 Work Folder/
 ├── tempForParallel/  # Temporary directory for parallel processing, please delete after computation to avoid filling up disk space
-│   ├── 0505_081713/  # SWAT-UQ-DEV creates a separate folder for each run based on date, facilitating debugging
+│   ├── 0505_081713/  # SWAT-UQ-DEV automatically creates a separate folder for each run based on datetime, facilitating debugging
 │   │   ├── origin/   # Original SWAT project folder, apply_parameters function can load optimal parameters into this directory
 │   │   ├── validation/  # Used for model validation
 │   │   ├── parallel0/   # SWAT project folder used for parallel processing
