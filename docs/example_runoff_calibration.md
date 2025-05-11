@@ -4,7 +4,7 @@
 
 ## Background
 
-The Dongjiang watershed in Guangdong is a critical freshwater source, covering an area of over 35,000 square kilometers. It supplies water to several major cities, including Guangzhou, Shenzhen, and Hong Kong.
+The Dongjiang watershed in Guangdong is a critical freshwater source, covering an area of over 35,000 square kilometers. It supplies water to several cities, including Guangzhou, Shenzhen, and Hong Kong.
 
 In this study, we use the Fengshuba and XinFengJiang sub-basins of the Dongjiang watershed as examples for runoff calibration.
 
@@ -315,37 +315,6 @@ res = problem.validate_parameters(X, valFile = "val_op.evl")
 print(res["objs"])
 ```
 
-## Postprocessing
-
-Except for sensitivity analysis and optimization, SWAT-UQ support to extract data from output files.
-
-```
-The `series.evl` should be prepared:
-SER_1 : ID of series data
-OBJ_1 : ID of objective function
-WGT_1 : Weight of series combination
-RCH_23  : ID of subbasin to be included in the objective function
-COL_2 : Column ID of variables in output.rch
-FUNC_10     : Type of objective function (e.g., 1: NSE, 2: RMSE. 3:PCC, 4:Pbias, 5:KGE)
-2012/1/1 to 2016/12/31 : Period for data extraction
-```
-
-We can extract the data:
-
-```python
-X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162, 0.010])
-
-# Extract the corresponding series data based on the parameter set X
-attr = problem.extract_series(X, seriesFile="series.evl")
-
-# The returned object 'attr' is a Python dictionary.
-# Simulation and observation data are stored separately by function type ('objSeries' or conSeries) objective function ID (objID) and series ID (serID). 
-
-simData = attr['objSeries'][1][1]['sim'] # Simulation data
-obData = attr['objSeries'][1][1]['obs']  # Observation data
-
-```
-
 ## Apply optima to project
 
 
@@ -358,7 +327,7 @@ X = np.array([-0.236, 14.278, 0.325, 46.604, 1.000, -5.532, 1.611, 0.515, 3.162,
 
 # Apply parameters
 problem.apply_parameters(X, replace=False)  
-# Setting 'replace=False' will apply the values to the working directory (workOriginPath) without modifying the original project files.
+# Setting 'replace=False' will apply the values to the working directory without modifying the original project files.
 
 # Alternatively
 problem.apply_parameters(X, replace=True)  

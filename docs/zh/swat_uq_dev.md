@@ -94,7 +94,7 @@ SOL_K r f 0.5_15.0 all       # 修改所有层
 
   - 默认设置为`all`表示参数将在全流域进行赋值。
 
-  - 或者指定子流域**SUB ID**或HRU**SUB ID(HRU ID)**，例如：
+  - 或者指定子流域**SUB ID**或**SUB ID(HRU ID)**，例如：
 
 ```
 CN2 r f -0.4_0.2 all # 默认范围
@@ -215,7 +215,7 @@ projectPath = "E://swatProjectPath"  #项目文件夹 地址
 workPath = "E://workPath" #工作文件夹 地址
 exeName = "swat2012.exe" #SWAT可执行程序的名称
 paraFileName = "paras.par" #参数文件名称，该文件应位于工作文件夹
-evalFileName = "eval.obj" #评估文件名称，该文件应位于工作文件夹
+evalFileName = "eval.evl" #评估文件名称，该文件应位于工作文件夹
 
 problem = SWAT_UQ(
    projectPath = projectPath,
@@ -242,6 +242,24 @@ ga.run(problem = problem)
 💡 **提示：** 更多关于UQPyL的用法请详见[UQPyL 使用文档](https://uqpyl.readthedocs.io/en/latest/)
 
 
+### 文件结构
+
+SWAT-UQ-DEV的工作文件夹的文件结构应为：
+
+```
+Work Folder/
+├── tempForParallel/  # 并行临时目录，计算结束请自行删除以免占满硬盘
+│   ├── 0505_081713/ # 每一次运行，SWAT-UQ-DEV按照日期生成单独文件夹，方便后期Debug
+│   │   ├── origin/ # 原始SWAT项目文件夹，apply_parameters函数可载入最优参数至该目录
+│   │   ├── validation/ # 用于模型验证
+│   │   ├── parallel0/ # 用于并行的SWAT项目文件夹
+│   │   ├── parallel1/ # 用于并行的SWAT项目文件夹
+│   │   └── parallel2/ # 用于并行的SWAT项目文件夹
+│   └── 0504_215113/
+├── paras.par # 参数文件
+└── eval.evl # 评估文件
+```
+
 ## 高级操作
 
 ### 载入最优参数
@@ -250,7 +268,7 @@ ga.run(problem = problem)
 
 ```python
 X = np.array([...]) # 输入变量，X应为np.1darray格式
-problem.apply_parameter(X, replace = False) # replace为False时，该参数应用于工作文件夹下的Origin文件夹，不直接修改原始项目
+problem.apply_parameter(X, replace = False) # replace为False时，该参数应用于工作文件夹下的origin文件夹，不直接修改原始项目, 例如, WorkFolder/tempForParallel/0505_081713/origin
 problem.apply_parameter(X, replace = True) # replace为True时，直接将参数写入原始SWAT项目
 # replace默认为False
 ```

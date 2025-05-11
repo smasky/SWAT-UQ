@@ -118,9 +118,9 @@ where $TP_{base}$ and $TP_{now}$ denote the total amount of TP flowing out of th
 
 The third objective is the cost of BMPs. **The unit cost of filter strip is 420 Yuan/ha, while the grassed waterways is 200 Yuan/ha.** Therefore, for a sub-basin, the cost is:
 
-$cost_{filter}^i = Area_{AGRI}^i*FILTER_RATIO*FILTER_I*420$
+$cost_{filter}^i = Area_{AGRI}^i*FILTER_{RATIO}*FILTER_I*420$
 
-$cost_{gwat}^i = GWATW* GWATL/10*GWATI*200$
+$cost_{gwat}^i = GWATW * GWATL/10*GWATI*200$
 
 $Obj_3 = \sum{cost_{filter}^i + cost_{gwat}^i}, i\in \left \{ 1,13,14,20,31 \right \}$
 
@@ -150,22 +150,6 @@ RCH_51 : ID of RCH, or SUB, or HRU
 COL_43 : Extract Variable. The 'NUM' is differences with *.rch, *.sub, *.hru.
 FUNC_7 : Func Type ( 1 - NSE, 2 - RMSE, 3 - PCC, 4 - Pbias, 5 - KGE, 6 - Mean, 7 - Sum, 8 - Max, 9 - Min )
 2021.1.1 to 2021.12.31 : Period for data extraction
-```
-
-Then, the `userObjFunc` should be implemented. The `userObjFunc` would accept a python dict named `attr` that contain several built-in keywords, e.g., `x`, `objs`, `cons`, `objSeries`, `conSeries`, `HRUInfos`. 
-
-API:
-```
-attr -> a python dict
-
-keywords:
-
-- x : The input decision, np.1darray
-- objs : The objective values of this input decision, a python dict, use `attr['objs'][objID]` defined by the *.evl file
-- cons : Similar to objs
-- objSeries : A python dict records the series defined by the *.evl file, use `attr['objSeries'][objID][serID]`
-- conSeries : Similar to objSeries
-- HRUInfos : A pandas table that records the information about HRU, columns are ["HRU_ID", "SUB_ID", "HRU_Local_ID", "Slope_Low", "Slope_High", "Luse", "Area"]
 ```
 
 Now, the `userObjFunc` can be implemented by:
