@@ -78,6 +78,25 @@ Specific steps list below:
 
 **Step 5:** Developing and solving problems using the Python-based script environment. 
 
+---
+
+The file structure of Work Folder of SWAT-UQ-DEV would be:
+
+```
+Work Folder/
+├── tempForParallel/  # Temporary directory for parallel processing, please delete after computation to avoid filling up disk space
+│   ├── 0505_081713/  # SWAT-UQ-DEV creates a separate folder for each run based on date, facilitating debugging
+│   │   ├── origin/   # Original SWAT project folder, apply_parameters function can load optimal parameters into this directory
+│   │   ├── validation/  # Used for model validation
+│   │   ├── parallel0/   # SWAT project folder used for parallel processing
+│   │   ├── parallel1/   # SWAT project folder used for parallel processing
+│   │   └── parallel2/   # SWAT project folder used for parallel processing
+│   └── 0504_215113/
+├── paras.par  # Parameter file
+└── eval.evl   # Evaluation file
+```
+
+
 The example of parameter file would be:
 
 **File name:** `paras.par`
@@ -260,23 +279,8 @@ from UQPyL.optimization.single_objective import GA
 ga = GA()
 ga.run(problem = problem)
 ```
-💡 **Noted:** For more detailed usage of UQPyL, please check [UQPyL Documentation](https://uqpyl.readthedocs.io/en/latest/)
 
-The file structure of Work Folder of SWAT-UQ-DEV would be:
-
-```
-Work Folder/
-├── tempForParallel/  # Temporary directory for parallel processing, please delete after computation to avoid filling up disk space
-│   ├── 0505_081713/  # SWAT-UQ-DEV creates a separate folder for each run based on date, facilitating debugging
-│   │   ├── origin/   # Original SWAT project folder, apply_parameters function can load optimal parameters into this directory
-│   │   ├── validation/  # Used for model validation
-│   │   ├── parallel0/   # SWAT project folder used for parallel processing
-│   │   ├── parallel1/   # SWAT project folder used for parallel processing
-│   │   └── parallel2/   # SWAT project folder used for parallel processing
-│   └── 0504_215113/
-├── paras.par  # Parameter file
-└── eval.evl   # Evaluation file
-```
+💡 **Noted:** For more detailed usage of UQPyL, please check [UQPyL Documentation](https://uqpyl.readthedocs.io/en/latest/). And for more advanced operation and practical examples, please refer to [SWAT-UQ Documentation](https://swat-uq.readthedocs.io/en/latest/)
 
 ---
 ## GUI Version of SWAT-UQ 
