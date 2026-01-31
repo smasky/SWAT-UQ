@@ -19,7 +19,7 @@ class OpenProject(FramelessDialog):
         super().__init__(parent)
         
         self.vBoxLayout=QVBoxLayout(self)
-        label=BodyLabel(self.tr("Open Existing SWAT-UQ Project"), self)
+        label=BodyLabel(self.tr("Open Existing Project"), self)
         setFont(label)
         
         self.vBoxLayout.addWidget(label)
@@ -30,7 +30,7 @@ class OpenProject(FramelessDialog):
         self.vBoxLayout.addWidget(self.contentWidget)
  
         hBoxLayout=QHBoxLayout()
-        pathLabel=BodyLabel(self.tr(str("SWAT-UQ Project Path:").rjust(21)), self.contentWidget)
+        pathLabel=BodyLabel(self.tr(str("Project Path:").rjust(21)), self.contentWidget)
         pathEdit=LineEdit(self.contentWidget); pathEdit.setMaximumWidth(400); self.pathEdit=pathEdit
         setFont(pathLabel)
         setFont(pathEdit, weight=Normal)

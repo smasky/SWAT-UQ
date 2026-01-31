@@ -314,7 +314,7 @@ class Project:
     @classmethod
     def findObjFile(cls):
         
-        pro_files=glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.obj"))
+        pro_files=glob.glob(os.path.join(cls.projectInfos['projectPath'], "*.evl"))
         files=[os.path.basename(file_path) for file_path in pro_files]
         
         return files
@@ -581,6 +581,10 @@ class Project:
         initHyper['verboseFreq']=1
         initHyper['verbose']=True
         initHyper['saveFlag']=True
+        
+        
+        #temp
+        initHyper.pop('nInit')
         
         optimizer=eval(opClass)(**initHyper)
         

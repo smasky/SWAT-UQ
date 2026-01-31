@@ -46,7 +46,7 @@ class hyperWidget(QWidget):
             
             if type=="int":
                 line=SpinBox()
-                line.setMaximum(5000)
+                line.setMaximum(50000)
                 line.setValue(int(value))
                 line.setMaximumWidth(160)
                 setFont(line, MediumSize, Normal)

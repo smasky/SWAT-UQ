@@ -1,3 +1,6 @@
+import sys
+sys.path.append(".")
+
 from swatuq import SWAT_UQ
 
 projectPath = "E:\\projectPath"
@@ -9,7 +12,7 @@ evalFileName = "obj_op.evl"
 
 problem = SWAT_UQ(projectPath = projectPath, workPath = workPath, swatExeName = exeName,
                    paraFileName = paraFileName, evalFileName = evalFileName,
-                   verboseFlag = True, numParallel = 20, optType = 'max')
+                   verboseFlag = True, numParallel = 1, optType = 'max')
 
 from UQPyL.optimization import PSO
 

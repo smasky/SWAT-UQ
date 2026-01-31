@@ -45,7 +45,7 @@ class NewProject(FramelessDialog):
         self.pathEdit.LineEdit.textChanged.connect(self.checkNull)
         # setFont(self.pathEdit, MediumSize, Normal)
         
-        label=BodyLabel(self.tr("Project Path:"))
+        label=BodyLabel(self.tr("Work Path:"))
         setFont(label)
         self.contentLayout.addRow(label, self.pathEdit)
         
@@ -53,7 +53,7 @@ class NewProject(FramelessDialog):
         self.swatPathEdit.LineEdit.textChanged.connect(self.checkNull)
         # setFont(self.swatPathEdit, MediumSize, Normal)
         
-        label=BodyLabel(self.tr("SWAT File Path:"))
+        label=BodyLabel(self.tr("SWAT Project Path:"))
         setFont(label)
         self.contentLayout.addRow(label, self.swatPathEdit)
         

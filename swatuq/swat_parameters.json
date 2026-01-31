@@ -1,1856 +1,2791 @@
 [
     {
         "name": "SHALLST",
+        "ext": "gw",
         "type": "float",
-        "file_name": "gw",
-        "position": "default"
+        "linePos": 2,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     },
     {
         "name": "DEEPST",
+        "ext": "gw",
         "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "ALPHA_BF",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "GWQMN",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "GW_REVAP",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "RCHRG_DP",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "GWHT",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "GW_SPYLD",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "SHALLST_N",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "GWSOLP",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "HLIFE_NGW",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "LAT_ORGN",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
-    },
-    {
-        "name": "LAT_ORGP",
-        "type": "float",
-        "file_name": "gw",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     },
     {
         "name": "GW_DELAY",
+        "ext": "gw",
         "type": "float",
-        "file_name": "gw",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "ALPHA_BF",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "GWQMN",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "GW_REVAP",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "RCHRG_DP",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "GWHT",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "GW_SPYLD",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "SHALLST_N",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "GWSOLP",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "HLIFE_NGW",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "LAT_ORGN",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
+    },
+    {
+        "name": "LAT_ORGP",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     },
     {
         "name": "ALPHA_BF_D",
+        "ext": "gw",
         "type": "float",
-        "file_name": "gw",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     },
     {
         "name": "HRU_FR",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 2,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 7
     },
     {
         "name": "SLSUBBSN",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "HRU_SLP",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "OV_N",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "LAT_TTIME",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "LAT_SED",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SLSOIL",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CANMX",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ESCO",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "EPCO",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RSDIN",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ERORGN",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ERORGP",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_FR",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "FLD_FR",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RIP_FR",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_TILE",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_VOLX",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 20,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_VOL",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_NSED",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "POT_NO3L",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DEP_IMP",
+        "ext": "hru",
         "type": "int",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 24,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "EVPOT",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 28,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "DIS_STREAM",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "CF",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 32,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CFH",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 31,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "CFDEC",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 32,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SED_CON",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 33,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "ORGN_CON",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 34,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "ORGP_CON",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 35,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "SOLN_CON",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 36,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "SOLP_CON",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 37,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "POT_SOLP",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 38,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "POT_K",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 39,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "N_REDUC",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 40,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "N_LAG",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 41,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "N_LN",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 43,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "N_LNCO",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 43,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "SURLAG",
+        "ext": "hru",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 44,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
+
     {
         "name": "R2ADJ",
+        "ext": "hru",
         "type": "float",
-        "file_name": "hru",
-        "position": "default"
+        "linePos": 45,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "LAI_INIT",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "BIO_INIT",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "PHU_PLT",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "BIOMIX",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "CN2",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "USLE_P",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "BIO_MIN",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "FILTERW",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "FLOWMIN",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DIVMAX",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "FLOWFR",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DDRAIN",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 25,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TDRAIN",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 26,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "GDRAIN",
+        "ext": "mgt",
         "type": "float",
-        "file_name": "mgt",
-        "position": "default"
+        "linePos": 27,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RE",
+        "ext": "sdr",
         "type": "float",
-        "file_name": "sdr",
-        "position": "default"
+        "linePos": 2,
+        "staPos": 1,
+        "endPos": 10,
+        "precision": 2
     },
     {
         "name": "SDRAIN",
+        "ext": "sdr",
         "type": "float",
-        "file_name": "sdr",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 10,
+        "precision": 2
     },
     {
         "name": "DRAIN_CO",
+        "ext": "sdr",
         "type": "float",
-        "file_name": "sdr",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 10,
+        "precision": 2
     },
     {
         "name": "PC",
+        "ext": "sdr",
         "type": "float",
-        "file_name": "sdr",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 10,
+        "precision": 2
     },
     {
         "name": "LATKSATF",
+        "ext": "sdr",
         "type": "float",
-        "file_name": "sdr",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 10,
+        "precision": 2
     },
     {
         "name": "SEP_CAP",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 1
     },
     {
         "name": "BZ_AREA",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "ISEP_TFAIL",
+        "ext": "sep",
         "type": "int",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 1
     },
     {
         "name": "BZ_Z",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "BZ_THK",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "SEP_STRM_DIST",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "SEP_DEN",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "BIO_BD",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_BOD_DC",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_BOD_CONV",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_FC1",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_FC2",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_FECAL",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 18,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_PLQ",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_MRT",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 20,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_RSP",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_SLG1",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 5
     },
     {
         "name": "COEFF_SLG2",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_NITR",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 24,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_DENITR",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 25,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_COEFF_PDISTRB",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 26,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 5
     },
     {
         "name": "COEFF_PSORPMAX",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 27,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_SOLPSLP",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 28,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "COEFF_SOLPINTC",
+        "ext": "sep",
         "type": "float",
-        "file_name": "sep",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 13,
+        "precision": 3
     },
     {
         "name": "PND_FR",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_PSA",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_PVOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_ESA",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_EVOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_VOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_SED",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_NSED",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_K",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NDTARG",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PSETLP1",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PSETLP2",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NSETLP1",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NSETLP2",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 18,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CHLAP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SECCIP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 20,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_NO3",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_SOLP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_ORGN",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_ORGP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 24,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PND_D50",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 25,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_FR",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_NSA",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 30,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_NVOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 31,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_MXSA",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 32,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_MXVOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 33,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_VOL",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 34,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_SED",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 35,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_NSED",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 36,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_K",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 37,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PSETLW1",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 38,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PSETLW2",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 39,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NSETLW1",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 40,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NSETLW2",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 41,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CHLAW",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 42,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SECCIW",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 43,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_NO3",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 44,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_SOLP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 45,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_ORGN",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 46,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WET_ORGP",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 47,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PNDEVCOEFF",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 48,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WETEVCOEFF",
+        "ext": "pnd",
         "type": "float",
-        "file_name": "pnd",
-        "position": "default"
+        "linePos": 49,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CHW2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 2,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CHD",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_S2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 5
     },
     {
         "name": "CH_L2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_N2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_K2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_COV1",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_COV2",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "CH_WDR",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "ALPHA_BNK",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 3
     },
     {
         "name": "ICANAL",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_ONCO",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_OPCO",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_SIDE",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BNK_BD",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BED_BD",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BNK_KD",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 18,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BED_KD",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BNK_D50",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 20,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BED_D50",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BNK_TC",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "CH_BED_TC",
+        "ext": "rte",
         "type": "float",
-        "file_name": "rte",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 14,
+        "precision": 2
     },
     {
         "name": "SUB_KM",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 2,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 6
     },
     {
         "name": "LATITUDE",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 6
     },
     {
         "name": "ELEV",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "PLAPS",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TLAPS",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SNO_SUB",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_L1",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 25,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_S1",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 26,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_W1",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 27,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_K1",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 28,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_N1",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CO2",
+        "ext": "sub",
         "type": "float",
-        "file_name": "sub",
-        "position": "default"
+        "linePos": 35,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS1",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 3,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS2",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS3",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS4",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS5",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS6",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RS7",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK1",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK2",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK3",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK4",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK5",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RK6",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC1",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC2",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC3",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 18,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC4",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CHPST_REA",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "CHPST_VOL",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "CHPST_KOC",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "CHPST_STL",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 24,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "CHPST_RSP",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 25,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "CHPST_MIX",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 26,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "SEDPST_CONC",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 27,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "SEDPST_REA",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 28,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "SEDPST_BRY",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "SEDPST_ACT",
+        "ext": "swq",
         "type": "float",
-        "file_name": "swq",
-        "position": "default"
+        "linePos": 30,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 8
     },
     {
         "name": "SFTMP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 4,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SMTMP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 5,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SMFMX",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 6,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SMFMN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 7,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TIMP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SNOCOVMX",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SNO50COV",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "EVLAI",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "FFCB",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ADJ_PKR",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PRF_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 22,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SPCON",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 23,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     },
     {
         "name": "SPEXP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 24,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RCN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 94,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CMN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 27,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 5
     },
     {
         "name": "N_UPDIS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 28,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "P_UPDIS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 29,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NPERCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 30,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PPERCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 31,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PHOSKD",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 32,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PSP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 33,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RSDCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 34,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "PERCOP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 36,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDPQ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 40,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGPQ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 41,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDLPQ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 42,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGLPQ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 43,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDPS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 44,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGPS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 45,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDLPS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 46,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGLPS",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 47,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BACTKDQ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 48,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "THBACT",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 49,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WOF_P",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 50,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WOF_LP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 51,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDPF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 52,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGPF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 53,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDLPF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 54,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WGLPF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 55,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "MSK_CO1",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 59,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "MSK_CO2",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 60,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "MSK_X",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 61,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TRNSRCH",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 65,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "EVRCH",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 66,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CNCOEF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 69,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CDN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 70,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SDNCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 71,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BACT_SWF",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 72,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BACTMX",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 73,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BACTMINLP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 74,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BACTMINP",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 75,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDLPRCH",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 76,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDPRCH",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 77,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDLPRES",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 78,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "WDPRES",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 79,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TB_ADJ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 80,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DEPIMP_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 81,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DDRAIN_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 82,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "TDRAIN_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 83,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "GDRAIN_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 84,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CN_FROZ",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 85,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 6
     },
     {
         "name": "DORM_HR",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 86,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SMXCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 87,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "FIXCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 88,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "NFIXMX",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 89,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ANION_EXCL_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 90,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_ONCO_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 91,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_OPCO_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 92,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "HLIFE_NGW_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 93,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RCN_SUB_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 94,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC1_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 95,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC2_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 96,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC3_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 97,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "BC4_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 98,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "DECR_MIN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 99,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "ICFAC",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 100,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RSD_COVCO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 101,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "VCRIT",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 102,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RES_STLR_CO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 104,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
-        "name": "BFLO_DIST 0-1 (1",
+        "name": "BFLO_DIST",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 105,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "UHALPHA",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 107,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "EROS_SPL",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 111,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RILL_MULT",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 112,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "EROS_EXPO",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 113,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "SUBD_CHSED",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 114,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "C_FACTOR",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 115,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "CH_D50",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 116,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 1
     },
     {
         "name": "SIG_G",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 117,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "RE_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 118,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "SDRAIN_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 119,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "DRAIN_CO_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 120,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "PC_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 121,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 3
     },
     {
         "name": "LATKSATF_BSN",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 122,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
         "name": "IABSTR",
+        "ext": "bsn",
         "type": "float",
-        "file_name": "bsn",
-        "position": "default"
+        "linePos": 126,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 2
     },
     {
-        "name": "Ave",
+        "name": "SOL_BD",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 9,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
-        "name": "Ksat",
+        "name": "SOL_AWC",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 10,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
+   
     {
-        "name": "Depth",
+        "name": "SOL_K",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 11,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
-    {
-        "name": "Bulk",
-        "type": "float",
-        "file_name": "sol",
-        "position": "default"
-    },
+   
     {
         "name": "Organic",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 12,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
         "name": "Clay",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 13,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
         "name": "Silt",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 14,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
         "name": "Sand",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 15,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
         "name": "Rock",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 16,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
     {
-        "name": "Albedo",
+        "name": "SOL_ALB",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 17,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
+    
     {
-        "name": "Erosion",
+        "name": "SOL_E",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 18,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
+
     {
         "name": "Sanlinity",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 19,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
+
     {
         "name": "pH",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 20,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
     },
+
     {
         "name": "CACO3",
+        "ext": "sol",
         "type": "float",
-        "file_name": "sol",
-        "position": "default"
+        "linePos": 21,
+        "staPos": 28,
+        "endPos": 39,
+        "precision": 2
+    },
+
+    {
+        "name": "REVAPMN",
+        "ext": "gw",
+        "type": "float",
+        "linePos": 8,
+        "staPos": 1,
+        "endPos": 16,
+        "precision": 4
     }
 ]

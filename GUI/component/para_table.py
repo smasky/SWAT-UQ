@@ -51,7 +51,7 @@ class ParaTable(QFrame):
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
             str('Parameter Name'), str('File Extension'), str('Tuning Mode'),
-            str('Lower Bound'), str('Upper Bound'), str('Position'), str('Operation')])
+            str('Lower Bound'), str('Upper Bound'), str('Source'), str('Operation')])
         
         
         hBoxLayout=QHBoxLayout()

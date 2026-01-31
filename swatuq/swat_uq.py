@@ -10,22 +10,22 @@ import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
 
-from UQPyL.utility.metrics import r_square
-from UQPyL.problems import ProblemABC as Problem
+from UQPyL.util.metric import r_square
+from UQPyL.problem import ProblemABC as Problem
 
-from .utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation
+from .utility import read_value_swat, copy_origin_to_tmp, write_value_to_file, read_simulation, createFileHandler, set_value_FileHandler
 
 def func_NSE(trueValues, simValues):
     return r_square(trueValues.reshape(-1,1), simValues.reshape(-1,1))
 
 def func_RMSE(trueValues, simValues):
-    return np.sqrt(np.mean(np.square(trueValues-simValues)))
+    return np.sqrt(np.mean(np.square(trueValues - simValues)))
 
 def func_PCC(trueValues, simValues):
     return np.corrcoef(trueValues.ravel(), simValues.ravel())[0,1]
 
 def func_Pbias(trueValues, simValues):
-    return np.sum(np.abs(trueValues-simValues)/trueValues)*100
+    return np.sum(np.abs(trueValues - simValues)/trueValues)*100
 
 def func_KGE(trueValues, simValues):
     trueValues = trueValues.ravel()
@@ -93,6 +93,10 @@ class SWAT_UQ(Problem):
         os.makedirs(tempPath)
         self.workTempDir = tempPath
         
+        # output
+        self.outputPath = os.path.join(tempPath, "output")
+        os.makedirs(self.outputPath)
+        
         #copy the original project to the temp directory
         self.workOriginPath = os.path.join(tempPath, "origin")
         copy_origin_to_tmp(projectPath, self.workOriginPath)
@@ -150,9 +154,10 @@ class SWAT_UQ(Problem):
         if nConstraints is not None:
             self.nConstraints = nConstraints
 
-            
+        self.count = 0
         
-        super().__init__(nInput = self.nInput, nOutput = self.nOutput, nConstraints = self.nConstraints,
+        
+        super().__init__(nInput = self.nInput, nOutput = self.nOutput,
                             lb = self.lb, ub = self.ub, xLabels = self.xLabels,
                             varType = self.varType, varSet = self.varSet, optType = optType)
 
@@ -173,12 +178,12 @@ class SWAT_UQ(Problem):
         #         objs[id] = self.userObjFunc(attrs)
                 
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
-            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+            futures = [executor.submit(self._subprocess, X[i-self.count, :], i) for i in range(self.count, self.count + n)]
         
             for _ , future in enumerate(futures):
                 attrs = future.result()
                 
-                id = attrs['id']
+                id = attrs['id'] - self.count
                 
                 if self.userObjFunc is None:
                     #use default
@@ -192,20 +197,23 @@ class SWAT_UQ(Problem):
                         cons[id] = np.array(list(attrs['cons'].values()))
                     else:
                         cons[id] = self.userConFunc(attrs)
-
+        self.count += n
+        
         return {'objs': objs, 'cons': cons}
     
     def objFunc(self, X):
         n = X.shape[0]
         objs = np.zeros((n, self.nOutput))
         
+        # TODO
+        
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
-            futures = [executor.submit(self._subprocess, X[i, :], i) for i in range(n)]
+            futures = [executor.submit(self._subprocess, X[i-self.count, :], i) for i in range(self.count, self.count + n)]
         
             for _ , future in enumerate(futures):
                 attrs = future.result()
                 
-                id = attrs['id']
+                id = attrs['id'] - self.count
                 
                 if self.userObjFunc is None:
                     #use default
@@ -213,7 +221,9 @@ class SWAT_UQ(Problem):
                 else:
                     #use user define
                     objs[id] = self.userObjFunc(attrs)
-            
+        
+        self.count += n
+        
         return objs
     
     def conFunc(self, X):
@@ -383,6 +393,8 @@ class SWAT_UQ(Problem):
                 text = True)
             process.wait()
             
+            print(f"SWAT has been run {id} times!") #TODO
+            
             serInfos = self.modelInfos["serInfos"]
             optInfos = self.modelInfos["optInfos"]
             
@@ -443,7 +455,25 @@ class SWAT_UQ(Problem):
                     combSeries[serID] = {"obs": obSeries, "sim": simSeries}
                         
                 combVal[optID] = val
-                
+            
+            # TODO write simSeries
+            filepath = os.path.join(self.outputPath, f"output_{id}_{combVal[1]:.2f}.txt")
+            headers = []
+            data_cols = []
+            for serID, data in combSeries.items():
+                headers.append(serID)       
+                data_cols.append(data['sim'])
+            matrix = np.column_stack(data_cols)
+            header_str = " ".join([f"{h:>12}" for h in headers])
+            np.savetxt(
+                filepath, 
+                matrix, 
+                fmt='%12.3f',   
+                delimiter=' ',  
+                header=header_str, 
+                comments=''
+            )
+            
             self.workPathQueue.put(workPath)
             
             attrs['id'] = id
@@ -453,7 +483,7 @@ class SWAT_UQ(Problem):
             attrs['objSeries'] = objSeries
             attrs['conSeries'] = conSeries
             attrs['x'] = inputX
-            
+        
         except Exception as e:
             attrs['error'] = e
         
@@ -461,18 +491,13 @@ class SWAT_UQ(Problem):
     
     def _set_values(self, workPath, paras_values):
         
-        with ThreadPoolExecutor(max_workers = self.maxWorkers) as executor:
-            futures = []
-            for fileName, infos in self.varInfos.items():
-                future = executor.submit(write_value_to_file, workPath, fileName, 
-                                         infos["name"], infos["default"], 
-                                         infos["index"], infos["mode"],  infos["position"], infos["type"],
-                                         paras_values.ravel(), infos["solLayer"])
-                futures.append(future)
-            
-            for future in futures:
-                res = future.result()
-    
+        for fileName, infos in self.varInfos.items():
+            future = set_value_FileHandler(infos['handler'], os.path.join(workPath, fileName), infos["index"], paras_values.ravel()[infos["index"]], infos["solLayer"])
+
+        # with ThreadPoolExecutor(max_workers = self.maxWorkers) as executor:
+        #     for fileName, infos in self.varInfos.items():
+        #         future = executor.submit(set_value_FileHandler, infos['handler'], os.path.join(workPath, fileName), infos["index"], paras_values.ravel()[infos["index"]], infos["solLayer"])
+
     def _read_eval(self, fileFolder, fileName):
         
         evalInfos = {}
@@ -721,14 +746,15 @@ class SWAT_UQ(Problem):
                 
                 # handle the sol file
                 match_pos = re.search(r'^(.*?)\((\d+)\)$', name)
+                
                 if match_pos:
                     name = match_pos.group(1)
                     layer = int(match_pos.group(2))
                 else:
-                    layer = 0
-                if name in SPECIAL_ALIAS:
-                        name = SPECIAL_ALIAS[name]
-                ext = self.parasInfos.query('para_name==@name')['file_name'].values[0]    
+                    layer = -1
+                    
+                ext = self.parasInfos.query('name==@name')['ext'].values[0]
+                   
                 if ext == "sol":
                     solLayer.append(layer)
                 else:
@@ -750,19 +776,17 @@ class SWAT_UQ(Problem):
                 if T not in ['f', 'i', 'd']:
                     raise ValueError(f"The {name} type is not valid, please check the type, only `f`, `i`, `d` are supported!")
                 
-                if T == "f": #float
+                if T == "f":
                     LB.append(float(LB_UB[0]))
                     UB.append(float(LB_UB[1]))
                     varType.append(0)
-                    # varSet.append(None)
                     
-                elif T == "i": #integer
+                elif T == "i":
                     LB.append(float(LB_UB[0]))
                     UB.append(float(LB_UB[1]))
                     varType.append(1)
-                    # varSet.append(None)
                     
-                else: #discrete
+                else:
                     LB.append(0)
                     UB.append(1)
                     varType.append(2)
@@ -814,13 +838,16 @@ class SWAT_UQ(Problem):
         
         for i, element in enumerate(self.varName):
             
-            ext = self.parasInfos.query('para_name==@element')['file_name'].values[0]
-            position = self.parasInfos.query('para_name==@element')['position'].values[0]
-            
-            if(self.parasInfos.query('para_name==@element')['type'].values[0] == "int"):
-                varType = 0 #integer
+            ext = self.parasInfos.query('name==@element')['ext'].values[0]
+            linePos = self.parasInfos.query('name==@element')['linePos'].values[0]
+            staPos = self.parasInfos.query('name==@element')['staPos'].values[0]
+            endPos = self.parasInfos.query('name==@element')['endPos'].values[0]
+            precision = self.parasInfos.query('name==@element')['precision'].values[0]
+ 
+            if(self.parasInfos.query('name==@element')['type'].values[0] == "int"):
+                varType = 1 #integer
             else:
-                varType = 1 #float
+                varType = 0 #float
             
             if ext in HRU_EXT:
                 if varScope[i][0] == "all":
@@ -855,34 +882,50 @@ class SWAT_UQ(Problem):
                 self.varInfos[file]["index"].append(i)
                 self.varInfos[file].setdefault("mode", [])
                 if self.varMode[i] == "v":
-                    self.varInfos[file]["mode"].append(0)
-                elif self.varMode[i] == "r":
                     self.varInfos[file]["mode"].append(1)
+                elif self.varMode[i] == "r":
+                    self.varInfos[file]["mode"].append(0)
                 elif self.varMode[i] == "a":
                     self.varInfos[file]["mode"].append(2)
                 
                 self.varInfos[file].setdefault("name", [])
                 self.varInfos[file]["name"].append(element)
-                self.varInfos[file].setdefault("position",[])
-                self.varInfos[file]["position"].append(position)
+                self.varInfos[file].setdefault("linePos",[])
+                self.varInfos[file]["linePos"].append(linePos)
+                self.varInfos[file].setdefault("staPos",[])
+                self.varInfos[file]["staPos"].append(staPos)
+                self.varInfos[file].setdefault("endPos",[])
+                self.varInfos[file]["endPos"].append(endPos)
+                self.varInfos[file].setdefault("precision",[])
+                self.varInfos[file]["precision"].append(precision)
                 self.varInfos[file].setdefault("type", [])
                 self.varInfos[file]["type"].append(varType)
                 self.varInfos[file].setdefault("solLayer", [])
                 self.varInfos[file]["solLayer"].append(solLayer[i])
                 
+                if ext == "sol":
+                    colStep = 12
+                    maxCols = 15
+                else:
+                    colStep = 1
+                    maxCols = 1
+                
+                self.varInfos[file].setdefault("colStep",[])
+                self.varInfos[file]["colStep"].append(colStep)
+                self.varInfos[file].setdefault("maxCols",[])
+                self.varInfos[file]["maxCols"].append(maxCols)
+                
+                self.varInfos[file]['filepath'] = os.path.join(self.projectPath, file)
+                
         with ThreadPoolExecutor(max_workers = self.maxWorkers) as executor:
-            futures = []
-            for fileName, infos in self.varInfos.items():
-                futures.append(executor.submit(read_value_swat, self.projectPath, fileName, infos["name"], infos["position"], 1))
-        
-        for future in futures:
+            futures = {}
+            for filename, infos in self.varInfos.items():
+                futures[filename] = executor.submit(createFileHandler, infos['filepath'], infos["index"], infos["mode"], infos["type"], infos["linePos"], infos["staPos"], infos["endPos"], infos["precision"], infos["colStep"], infos["maxCols"])
+             
+        for filename, future in futures.items():
             res = future.result()
-            for key, items in res.items():
-                values = ' '.join(str(value) for value in items)
-                paraName, fileName = key.split('|')
-                self.varInfos[fileName].setdefault("default", {})
-                self.varInfos[fileName]["default"][paraName] = values
-          
+            self.varInfos[filename]['handler'] = res
+            
     def _initial(self):
         '''
         This function is used to initialize the model information.
@@ -977,7 +1020,7 @@ class SWAT_UQ(Problem):
         self.modelInfos["nRCH"] = len(self.modelInfos["SUBList"])
         
         #read the paras file
-        HEAD = ["para_name",  "type", "file_name", "position"]
+        HEAD = ["name", "ext", "type", "linePos", "staPos", "endPos", "precision"]
         self.parasInfos = pd.DataFrame(self._load_parameters(), columns=HEAD)
         
         #for special paras file
@@ -1082,7 +1125,7 @@ class SWAT_UQ(Problem):
                     lines.append([10 + interval * startInYear + interval * years, 9 + interval * (end + 1) + interval * years])
                     return lines
                 else:
-                    lines.append([10 + interval * startInYear, 9 + interval * (endInYear + 1) + interval * years])
+                    lines.append([10 + interval * startInYear + interval * years, 9 + interval * (endInYear + 1) + interval * years])
             while True:
                 startInYear = endInYear + 1
                 endInYear = startInYear + 11
@@ -1105,7 +1148,7 @@ class SWAT_UQ(Problem):
         
             with open(json_path, 'r', encoding='utf-8') as f:
                 params_dict = json.load(f)
-            return [(p["name"], p["type"], p["file_name"], p["position"]) for p in params_dict]
+            return [(p["name"], p["ext"], p["type"], p["linePos"], p["staPos"], p["endPos"], p["precision"]) for p in params_dict]
 
         except Exception as e:
             raise e
