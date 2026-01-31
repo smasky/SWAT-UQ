@@ -71,10 +71,11 @@ class SWAT_UQ(Problem):
     Importantly, it supports parallel running of SWAT model with multiple instances.
     '''
     
-    def __init__(self, projectPath: str, swatExeName: str,
-                 workPath: str, paraFileName: str, evalFileName: str, specialFileName: list = None,
+    def __init__(self, projectPath: str, swatExeName: str, 
+                 workPath: str, paraFileName: str, evalFileName: str, specialFileName: str = None,
+                 nInput = None, nOutput = None, nConstraints = None,
                  userObjFunc: callable = None, userConFunc: callable = None,
-                 maxThreads: int = 12, numParallel: int = 5, nInput = None, nOutput = None, nConstraints = None,
+                 numParallel: int = 5, 
                  verboseFlag = False, name: str = None, optType = 'min'):
         
         self.modelInfos = {}
@@ -85,12 +86,16 @@ class SWAT_UQ(Problem):
         
         #create the space for running multiple instance of SWAT
         tempPath = os.path.join(workPath, "tempForParallel")
+        
         if not os.path.isdir(tempPath):
             os.makedirs(tempPath)
         
-        nowTime = datetime.now().strftime("%m%d_%H%M%S")
+        nowTime = datetime.now().strftime("%m%d_%H%M")
         tempPath = os.path.join(tempPath, nowTime)
+        if os.path.isdir(tempPath):
+            tempPath += "_1"
         os.makedirs(tempPath)
+        
         self.workTempDir = tempPath
         
         # output
@@ -111,7 +116,6 @@ class SWAT_UQ(Problem):
         self.projectPath = projectPath
         self.swatExe = swatExeName
         
-        self.maxWorkers = maxThreads
         self.numParallel = numParallel
 
         self.userObjFunc = userObjFunc
@@ -141,9 +145,6 @@ class SWAT_UQ(Problem):
                 
         with ThreadPoolExecutor(max_workers = self.numParallel) as executor:
             futures = [executor.submit(copy_origin_to_tmp, self.workOriginPath, workTemp) for workTemp in self.workTempDirs]
-        
-        for future in futures:
-            future.result()
         
         if self.nInput != len(self.varName):
             raise ValueError("The number of input variables is not equal to the number of parameters!")

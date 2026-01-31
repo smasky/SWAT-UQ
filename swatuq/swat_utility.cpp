@@ -676,15 +676,9 @@ std::unordered_map<std::string, std::vector<double>> _read_value_swat(const std:
             row = std::stoi(tmp1);
             col = std::stoi(tmp2);
             
-            // iss = std::istringstream(lines_[row-1]);
             std::string isss=lines_[row-1];
             std::vector<double> numbers;
             readFormattedData(isss, numbers);
-
-            // double num;
-            // while (iss >> num){
-            //     numbers.push_back(num);
-            // }
 
             if(mode==0){
                 results[varname_list[i]].push_back(numbers[col-1]);
